@@ -31,3 +31,11 @@ class SimCLR(pl.LightningModule):
     
     def configure_optimizers(self):
         pass
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
