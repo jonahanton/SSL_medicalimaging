@@ -22,3 +22,7 @@ class BaseModel(pl.LightningModule):
     def validation_step(self, batch):
         pass
 
+
+    def configure_optimizers(self):
+        pass
+

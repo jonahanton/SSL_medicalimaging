@@ -7,23 +7,27 @@ import torch.nn.functional as F
 
 from models.base import BaseModel
 
-class SimCLR(BaseModel):
+class SimCLR(pl.LightningModule):
 
     def __init__(self):
         super().__init__()
 
     
     def forward(self, X):
-        return super().forward(X)
+        pass
 
     
     def training_step(self, batch):
-        return super().training_step(batch)
+        pass
 
 
     def validation_step(self, batch):
-        return super().validation_step(batch)
+        pass
 
     
     def simclr_loss(self):
+        pass
+
+    
+    def configure_optimizers(self):
         pass
