@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # prepare transforms standard to MNIST
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
     # data
-    mnist_train = datasets.MNIST(os.getcwd(), train=True, download=False, transform=transform)
+    mnist_train = datasets.MNIST(os.getcwd(), train=True, download=True, transform=transform)
     mnist_train = DataLoader(mnist_train, batch_size=32, shuffle=True)
 
 
