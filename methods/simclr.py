@@ -7,7 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
 
-from methods.base import BaseModel
 from loss.contrastive_loss import ContrastiveLoss
 from models.simple_net import SimpleNet
 
@@ -37,9 +36,6 @@ class SimCLR(nn.Module):
         self.classifier_lr = classifier_lr
         self.temperature = temperature
 
-        # Have not defined self.features_dim 
-        self.classifier = nn.Linear(self.features_dim, num_classes)
-
         # encoder
         self.encoder = SimpleNet()
 
@@ -49,6 +45,9 @@ class SimCLR(nn.Module):
             nn.ReLU(),
             nn.Linear(proj_hidden_dim, proj_output_dim),
         )
+
+        # classifier
+        self.classifier = nn.Linear(self.features_dim, num_classes)
 
     
     def forward(self, X):
