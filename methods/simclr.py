@@ -7,17 +7,14 @@ import torch.nn.functional as F
 from torchvision import transforms
 import pytorch_lightning as pl
 
-from models.conv_net import ConvNet
+# from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+# from pl_bolts.optimizers.lars import LARS
+
+
 from simclr_datatransform import SimCLREvalDataTransform, SimCLRTrainDataTransform
 from data.mnist_dataloader import MNISTDataModule
 
-class Flatten(nn.Module):
-
-    def __init__(self):
-        super().__unit__()
-
-    def forward(self, x):
-        return x.view(x.size(0), -1)
+from models.conv_net import ConvNet
         
 
 class ProjectionHead(nn.Module):
@@ -29,10 +26,7 @@ class ProjectionHead(nn.Module):
         self.hidden_dim = hidden_dim
 
         self.model = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            Flatten(),
             nn.Linear(self.input_dim, self.hidden_dim, bias=True),
-            nn.BatchNorm1d(self.hidden_dim),
             nn.ReLU(),
             nn.Linear(self.hidden_dim, self.output_dim, bias=False))
 
@@ -49,8 +43,7 @@ class SimCLR(pl.LightningModule):
         loss_temperature=0.5, 
         warmup_epochs=10, 
         max_epochs=100,
-        lars_lr=0.1,
-        lars_eta=1e-3,
+        lr=0.1,
         opt_weight_decay=1e-6,
         **kwargs,
         ):
@@ -58,6 +51,56 @@ class SimCLR(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         # e.g. self.hparams.batch_size
+
+        # encoder f()
+        self.encoder = ConvNet()
+
+        # projection head g()
+        self.projection_head = ProjectionHead()
+
+    
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(
+                                     self.parameters(),
+                                     lr=self.hparams.lr,
+                                     weight_decay=self.hparams.opt_weight_decay
+                                    )
+
+        # not implemented - SimCLR paper uses LARS wrapper
+        # optimzer = LARS()
+        # linear_warmup_cosine_decay = LinearWarmupCosineAnnealingLR()
+        return optimizer
+
+    
+    def training_step(self, batch, batch_idx):
+        
+        loss = self.shared_step(batch, batch_idx)
+        result = pl.TrainResult(minimize=loss)
+        result.log('train_loss', loss, on_epoch=True)
+        return result
+
+    
+    def validation_step(self, batch, batch_idx):
+        loss = self.shared_step(batch, batch_idx)
+
+        result = pl.EvalResult(chekpoint_on=loss)
+        result.log('avg_val_loss', loss)
+        return result
+
+    
+    def shared_step(self, batch, batch_idx):
+        (x1, x2), y = batch
+
+        # encode: x --> h
+        h1 = self.encoder(x1)
+        h2 = self.encoder(x2)
+
+        # project: h --> z
+        z1 = self.projection_head(h1)
+        z2 = self.projection_head(h2)
+
+        loss = self.NT_Xent_loss(z1, z2, self.hparams.loss_temperature)
+        return loss
 
     
     def NT_Xent_loss(self, out_1, out_2, temperature):
@@ -97,25 +140,29 @@ class SimCLR(pl.LightningModule):
         pos = torch.cat([pos, pos], dim=0)
 
         loss = -torch.log(pos / neg).mean()
-        return loss
-    
-    def forward(self, X):
-        """
-        Args:
-            X (torch.Tensor): a batch of images in the tensor format, size [N, C, H, W]
-            
-        """
-        pass
-    
-    
-    
+        return loss    
 
 
 def main():
-    pass
 
-    
+    # Initial parameters 
+    batch_size = 32 
+    mnist_height = 28 # default 
 
+    # init data
+    dm = MNISTDataModule(batch_size=batch_size) 
+    dm.train_transforms = SimCLRTrainDataTransform(mnist_height)
+    dm.val_transforms = SimCLREvalDataTransform(mnist_height)
+
+    # realize the data
+    dm.prepare_data()
+    dm.setup()
+
+    train_samples = len(dm.train_dataloader())
+
+    model = SimCLR(batch_size=batch_size, num_samples=train_samples)
+    trainer = pl.Trainer(progress_bar_refresh_rate=10, gpus=0) 
+    trainer.fit(model, dm)
 
 if __name__ == "__main__":
     main()
