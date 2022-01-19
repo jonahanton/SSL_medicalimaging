@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class SimpleNet(nn.Module):
+class ConvNet(nn.Module):
     
     def __init__(self):
         super().__init__()

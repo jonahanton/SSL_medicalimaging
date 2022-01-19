@@ -1,54 +1,103 @@
 import argparse
 import random
 
-import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
+import pytorch_lightning as pl
 
-from loss.contrastive_loss import ContrastiveLoss
-from models.simple_net import SimpleNet
+from models.conv_net import ConvNet
+from simclr_datatransform import SimCLREvalDataTransform, SimCLRTrainDataTransform
+from data.mnist_dataloader import MNISTDataModule
 
-class SimCLR(nn.Module):
+class Flatten(nn.Module):
 
-    def __init__(
-        self,
-        num_classes: int,
-        max_epochs: int,
-        batch_size: int,
-        optimizer: str,
-        lr: float,
-        classifier_lr: float,
-        temperature: float, 
-        proj_output_dim: int, 
-        proj_hidden_dim: int, 
-    ):
+    def __init__(self):
+        super().__unit__()
+
+    def forward(self, x):
+        return x.view(x.size(0), -1)
+        
+
+class ProjectionHead(nn.Module):
+    """h --> z"""
+    def __init__(self, input_dim=2048, hidden_dim=2048, output_dim=128):
+        super().__init__()
+        self.output_dim = output_dim
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+
+        self.model = nn.Sequential(
+            nn.AdaptiveAvgPool2d((1, 1)),
+            Flatten(),
+            nn.Linear(self.input_dim, self.hidden_dim, bias=True),
+            nn.BatchNorm1d(self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.output_dim, bias=False))
+
+    def forward(self, x):
+        x = self.model(x)
+        return F.normalize(x, dim=1)
+
+
+class SimCLR(pl.LightningModule):
+
+    def __init__(self,
+        batch_size,
+        num_samples,
+        loss_temperature=0.5, 
+        warmup_epochs=10, 
+        max_epochs=100,
+        lars_lr=0.1,
+        lars_eta=1e-3,
+        opt_weight_decay=1e-6,
+        **kwargs,
+        ):
 
         super().__init__()
+        self.save_hyperparameters()
+        # e.g. self.hparams.batch_size
 
+    
+    def NT_Xent_loss(self, out_1, out_2, temperature):
+        """
+        Args:
+            out_1: [batch_size, dim]
+                Contains outputs through projection head of augment_1 inputs for the batch
+            out_2: [batch_size, dim]
+                Contains outputs through projection head of augment_2 inputs for the batch 
+            
+            e.g. out_1[0] and out_2[0] contain two different augmentations of the same input image
 
-        # training related
-        self.max_epochs = max_epochs
-        self.batch_size = batch_size
-        self.optimizer = optimizer
-        self.lr = lr
-        self.classifier_lr = classifier_lr
-        self.temperature = temperature
+        Returns:
+            loss : single-element torch.Tensor  
 
-        # encoder
-        self.encoder = SimpleNet()
+        """
+        # concatenate 
+        # e.g. out_1 = [x1, x2], out_2 = [y1, y2] --> [x1, x2, y1, y2]
+        out = torch.cat([out_1, out_2], dim=0)
+    
+        n_samples = len(out)  # n_samples = 2N in SimCLR paper
 
-        # projector
-        self.projector = nn.Sequential(
-            nn.Linear(self.features_dim, proj_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(proj_hidden_dim, proj_output_dim),
-        )
+        # similarity matrix
+        cov = torch.mm(out, out.t())  # e.g. cov[0] = [x1.x1, x1.x2, x1.y1, x1.y2]
+        sim = torch.exp(cov/temperature)
 
-        # classifier
-        self.classifier = nn.Linear(self.features_dim, num_classes)
+        # create mask to remove diagonal elements from sim matrix
+        # mask has False in diagonals, True in off-diagonals
+        mask = ~torch.eye(n_samples, device=sim.device).bool()  # e.g. diag(False, False, ..., False)
 
+        # calculate denom in loss (SimCLR paper eq. (1)) for each z_i
+        neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
+
+        # positive similarity
+        pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
+        # loss computed across all positive pairs, both (i, j) and (j, i) in a mini-batch
+        pos = torch.cat([pos, pos], dim=0)
+
+        loss = -torch.log(pos / neg).mean()
+        return loss
     
     def forward(self, X):
         """
@@ -56,43 +105,16 @@ class SimCLR(nn.Module):
             X (torch.Tensor): a batch of images in the tensor format, size [N, C, H, W]
             
         """
-        # batch size
-
-        N = X.size(0)
-        for k in range(N):
-            x = X[k]
-            x_1 = self._augment_image(x)
-            h_1 = self.encoder(x_1)
-            z_1 = self.projector(h_1)
-
-            x_2 = self._augment_image(x)
-            h_2 = self.encoder(x_2)
-            z_2 = self.encoder(h_2)
-
+        pass
     
     
-    def _augment_image(self, x):
-
-        # randoming cropping --> resize back to the original size
-        x_area = x.size(-2)*x.size(-1)
-        random_crop_area = random.uniform(0.08, 1.0)
-        crop_size = int(random_crop_area*x_area)
-        x_aug = x.transforms.RandomResizedCrop(size=crop_size)
-
-        # random colour distortions
-        color_jitter = transforms.ColorJitter() # add in color dropping and increase strength later
-        # random Gaussian blur
-        kernel_size = int(min(x.size(-2), x.size(-1)) * 0.1)
-        sigma = random.uniform(0.1, 2.0)
-        gaussian_blur = transforms.GaussianBlur(kernel_size = kernel_size, sigma = sigma)
-        
-        x_aug = transforms.RandomApply([color_jitter, gaussian_blur], p=0.5)
-        
-        return x_aug
+    
 
 
 def main():
     pass
+
+    
 
 
 if __name__ == "__main__":
