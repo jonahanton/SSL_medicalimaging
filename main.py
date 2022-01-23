@@ -20,6 +20,7 @@ parser.add_argument('--weight-decay', default=1e-6)
 parser.add_argument('--output-dim', default=10)
 parser.add_argument('--temperature', default=0.5)
 parser.add_argument('--n-views', default=2)
+# To do: parse in argument for architecture
 
 def main():
 

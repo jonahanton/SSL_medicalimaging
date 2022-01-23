@@ -1,2 +1,4 @@
 datasets/*
 pl_implementation/*
+runs/*
+__pycache__/
