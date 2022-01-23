@@ -2,12 +2,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 from tqdm import tqdm
 import logging
 import os
 import sys
+from utils import save_config_file, accuracy, save_checkpoint
 
 class SimCLRTrainer:
 
@@ -16,6 +17,7 @@ class SimCLRTrainer:
         self.model = kwargs['model']
         self.optimizer = kwargs['optimizer']
         self.scheduler = kwargs['scheduler']
+        self.writer = SummaryWriter()
 
         logging.basicConfig(level=logging.DEBUG)
 
@@ -65,6 +67,9 @@ class SimCLRTrainer:
         logging.info(f"Starting SimCLR training for {self.args.epochs} epochs.")
 
         for epoch in range(self.args.epochs):
+            print("Epoch:", epoch)
+            running_loss = 0 # keep track of loss per epoch
+
             for batch in tqdm(train_loader):
                 
                 (x1, x2), y = batch
@@ -80,10 +85,26 @@ class SimCLRTrainer:
                 self.optimizer.step()
 
                 n_iterations += 1
+                running_loss += loss.item()
 
-            if epoch >= 10:
-                self.scheduler.step()
+            # Scheduler for optimiser - e.g. cosine annealing
+            # if epoch >= 10:
+            #     self.scheduler.step() # warm up for first 10 steps
+
+            training_loss = running_loss/len(train_loader)
+            print("Train Loss:", training_loss)
+            logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
 
         logging.info("Finished training.")       
 
+        # Save model checkpoints
+        checkpoint_name = 'checkpoint_{:04d}.pth.tar'.format(self.args.epochs)
+        save_checkpoint({
+            'epoch': self.args.epochs,
+            # 'arch': self.args.arch, # not yet defined
+            'state_dict': self.model.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+        }, is_best=False, filename=os.path.join(self.writer.log_dir, checkpoint_name))
+
+        logging.info(f"Model checkpoint and metadata has been saved at {self.writer.log_dir}.")
 

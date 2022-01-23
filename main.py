@@ -20,6 +20,7 @@ parser.add_argument('--weight-decay', default=1e-6)
 parser.add_argument('--output-dim', default=10)
 parser.add_argument('--temperature', default=0.5)
 parser.add_argument('--n-views', default=2)
+# To do: parse in argument for architecture
 
 def main():
 
@@ -42,10 +43,6 @@ def main():
 
     simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
     simclr.train(train_loader)
-
-
-    
-
 
 if __name__ == "__main__":
     main()
