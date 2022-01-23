@@ -13,7 +13,7 @@ from methods.simclr import SimCLRTrainer
 parser = argparse.ArgumentParser()
 parser.add_argument('-data-path', default='./datasets', help='path to dataset')
 parser.add_argument('-dataset-name', default='MNIST', help='dataset name')
-parser.add_argument('--epochs', default=1, help='total number of epochs to train for')
+parser.add_argument('--epochs', default=100, help='total number of epochs to train for')
 parser.add_argument('--batch-size', default=256)
 parser.add_argument('--lr', default=1e-3)
 parser.add_argument('--weight-decay', default=1e-6)
