@@ -44,9 +44,5 @@ def main():
     simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
     simclr.train(train_loader)
 
-
-    
-
-
 if __name__ == "__main__":
     main()
