@@ -9,30 +9,8 @@ from tqdm import tqdm
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # print("Using device:", device)
 
-### Load in encoder
+### Load in neural net
 model = ConvNet()
-checkpoint = torch.load('trained_model_parameters/selfsupervised_mnist_model.pth.tar', map_location=device) # change to checkpoint
-state_dict = checkpoint['state_dict']
-
-# Removed projection head - change this implementation later on for simCLRv2
-for k in list(state_dict.keys()):
-  if k.startswith('encoder.'):
-    if k.startswith('encoder') and not k.startswith('encoder.fc'):
-      # remove prefix
-      state_dict[k[len("encoder."):]] = state_dict[k]
-  del state_dict[k]
-
-log = model.load_state_dict(state_dict, strict=False) # load in model weights
-# print(log)
-assert log.missing_keys == ['fc.weight', 'fc.bias']
-
-# freeze all layers but the last fc
-# for name, param in model.named_parameters():
-#     if name not in ['fc.weight', 'fc.bias']:
-#         param.requires_grad = False
-
-# parameters = list(filter(lambda p: p.requires_grad, model.parameters()))
-# assert len(parameters) == 2  # fc.weight, fc.bias
 
 ### Load in data
 output_dim = 10
@@ -51,7 +29,7 @@ test_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
 optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0.0008)
 criterion = torch.nn.CrossEntropyLoss().to(device)
 
-def fine_tune_classification(epochs):
+def train_classification(epochs):
     for epoch in range(epochs):
         top1_train_accuracy = 0
         for counter, (x_batch, y_batch) in enumerate(tqdm(train_loader)):
@@ -90,4 +68,4 @@ def fine_tune_classification(epochs):
 
 if __name__ == "__main__":
     epochs = 5
-    fine_tune_classification(epochs)
+    train_classification(epochs)
