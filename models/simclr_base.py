@@ -7,11 +7,12 @@ from models.conv_net import ConvNet
 
 class SimCLRBase(nn.Module):
 
-    def __init__(self, output_dim):
+    def __init__(self, output_dim, arch='simple'):
         super().__init__()
 
         # encoder f()
-        self.encoder = ConvNet()
+        if arch == 'simple':
+            self.encoder = ConvNet()
 
         # projection head
         dim_proj_head = self.encoder.fc.out_features
@@ -26,7 +27,7 @@ class SimCLRBase(nn.Module):
 
 
 class ProjectionHead(nn.Module):
-    """h --> z"""
+    
     def __init__(self, input_dim, output_dim, hidden_dim=128):
         super().__init__()
         self.output_dim = output_dim
@@ -41,3 +42,12 @@ class ProjectionHead(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return F.normalize(x, dim=1)
+
+
+if __name__ == "__main__":
+    model = SimCLRBase(output_dim=10)
+    state_dict = model.state_dict()
+    torch.save({'state_dict': state_dict}, 'test.pth.tar')
+    checkpoint = torch.load('test.pth.tar')
+    new_model = SimCLRBase(output_dim=10)
+    new_model.load_state_dict(checkpoint['state_dict'])

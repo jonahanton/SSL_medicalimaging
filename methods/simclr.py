@@ -7,8 +7,6 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import logging
 import os
-import sys
-from utils import save_config_file, accuracy, save_checkpoint
 
 class SimCLRTrainer:
 
@@ -19,7 +17,8 @@ class SimCLRTrainer:
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
 
-        logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
 
 
     def NT_Xent_loss(self, out_1, out_2, temperature):
@@ -74,13 +73,13 @@ class SimCLRTrainer:
                 
                 (x1, x2), y = batch
 
-                self.optimizer.zero_grad()
                 # forward pass
                 out_1 = self.model(x1)
                 out_2 = self.model(x2)
                 # loss
                 loss = self.NT_Xent_loss(out_1, out_2, temperature=self.args.temperature)
                 # backprop
+                self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
@@ -88,8 +87,8 @@ class SimCLRTrainer:
                 running_loss += loss.item()
 
             # Scheduler for optimiser - e.g. cosine annealing
-            # if epoch >= 10:
-            #     self.scheduler.step() # warm up for first 10 steps
+            if epoch >= 10:
+                self.scheduler.step() 
 
             training_loss = running_loss/len(train_loader)
             print("Train Loss:", training_loss)
@@ -97,14 +96,16 @@ class SimCLRTrainer:
 
         logging.info("Finished training.")       
 
-        # Save model checkpoints
-        checkpoint_name = 'checkpoint_{:04d}.pth.tar'.format(self.args.epochs)
-        save_checkpoint({
-            'epoch': self.args.epochs,
-            # 'arch': self.args.arch, # not yet defined
-            'state_dict': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-        }, is_best=False, filename=os.path.join(self.writer.log_dir, checkpoint_name))
+        # Save model
+        checkpoint_name = 'ssl_{self.args.dataset_name}_trained_model.pth.tar'
+        checkpoint_filepath = os.path.join(self.args.outpath, checkpoint_name)
+        torch.save( 
+                {
+                'epoch': self.args.epochs,
+                'arch': self.args.arch, 
+                'model_state_dict': self.model.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict()
+                }, checkpoint_filepath)
 
-        logging.info(f"Model checkpoint and metadata has been saved at {self.writer.log_dir}.")
+        logging.info(f"Model has been saved at {self.args.outpath}.")
 

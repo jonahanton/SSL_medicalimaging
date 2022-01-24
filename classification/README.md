@@ -2,6 +2,7 @@
 # Comments on fine tuning
 
 To run mnist_classification.py, we need to load in encoder parameters from self-supervised learning. However, this is not uploaded in the repo. 
+This is implemented in ds_linear_classifier.py (but not yet fully refactored)
 
 ## Details of Current Implementation 
 - Basic pipeline: load in model parameters from encoder network of SSL, load in DataLoader, add in transformations to DataLoader, train model 
@@ -22,7 +23,7 @@ Try to resemble SimCLR paper more closely.
 ## Refactoring to be done 
 - Changes in script names
 - Use arg parser to add in argument details like main.py instead of specifying them by hand 
-  - Possibly import the same arguments from main.py
+  - Import the same arguments from main.py
 - Automatically load in the current checkpoint 
 
 

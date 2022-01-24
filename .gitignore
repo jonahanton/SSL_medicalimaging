@@ -1,4 +1,5 @@
-datasets/*
-pl_implementation/*
-runs/*
+datasets/
+pl_implementation/
+runs/
+saved_models/
 __pycache__/
