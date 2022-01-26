@@ -48,17 +48,17 @@ def main():
     if not os.path.isdir(args.outpath):
         os.makedirs(args.outpath)
 
-    # check if gpu training is available
-    if not args.disable_cuda and torch.cuda.is_available():
-        args.device = torch.device('cuda')
-        cudnn.deterministic = True
-        cudnn.benchmark = True
-    else:
-        args.device = torch.device('cpu')
-        args.gpu_index = -1
+    # # check if gpu training is available
+    # if not args.disable_cuda and torch.cuda.is_available():
+    #     args.device = torch.device('cuda')
+    #     cudnn.deterministic = True
+    #     cudnn.benchmark = True
+    # else:
+    #     args.device = torch.device('cpu')
+    #     args.gpu_index = -1
 
-    # load data
-    train_dataset = DatasetGetter(args).load()
+    # # load data
+    # train_dataset = DatasetGetter(args).load()
 
     # Transformations for BYOL and SimCLR - add parser to this
     if args.dataset_name == 'MNIST':
@@ -78,11 +78,13 @@ def main():
     model = BYOLOnlineBase(arch=args.arch, output_dim=args.output_dim)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1)
-    with torch.cuda.device(args.gpu_index):
-        #simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        #simclr.train(train_loader)
-        byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        byol.train(train_loader)
+    # with torch.cuda.device(args.gpu_index):
+    #     #simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+    #     #simclr.train(train_loader)
+    #     byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+    #     byol.train(train_loader)
+    byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+    byol.train(train_loader)
 
 
     # # use pretrained model for linear classification downstream task
