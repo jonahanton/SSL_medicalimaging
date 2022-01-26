@@ -11,7 +11,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 ### Load in encoder
 model = ConvNet()
-checkpoint = torch.load('trained_model_parameters/selfsupervised_mnist_model.pth.tar', map_location=device) # change to checkpoint
+checkpoint = torch.load('runs/Jan24_20-58-58_Chans-MBP/checkpoint_0030.pth.tar', map_location=device) # change to checkpoint
 state_dict = checkpoint['state_dict']
 
 # Removed projection head - change this implementation later on for simCLRv2
@@ -27,12 +27,12 @@ log = model.load_state_dict(state_dict, strict=False) # load in model weights
 assert log.missing_keys == ['fc.weight', 'fc.bias']
 
 # freeze all layers but the last fc
-# for name, param in model.named_parameters():
-#     if name not in ['fc.weight', 'fc.bias']:
-#         param.requires_grad = False
+for name, param in model.named_parameters():
+    if name not in ['fc.weight', 'fc.bias']:
+        param.requires_grad = False
 
-# parameters = list(filter(lambda p: p.requires_grad, model.parameters()))
-# assert len(parameters) == 2  # fc.weight, fc.bias
+parameters = list(filter(lambda p: p.requires_grad, model.parameters()))
+assert len(parameters) == 2  # fc.weight, fc.bias
 
 ### Load in data
 output_dim = 10
