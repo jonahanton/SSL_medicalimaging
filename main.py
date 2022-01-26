@@ -1,6 +1,7 @@
 import argparse
 
 import torch
+from methods.byol import BYOLTrainer
 from torchvision import transforms, datasets, models
 from torch.utils.data import DataLoader, random_split
 import torch.backends.cudnn as cudnn
@@ -9,6 +10,7 @@ import numpy as np
 import os
 
 from models.simclr_base import SimCLRBase
+from models.byol_base import BYOLOnlineBase
 from data.generate_views import GenerateViews
 from methods.simclr import SimCLRTrainer
 from data.get_data import DatasetGetter
@@ -72,12 +74,15 @@ def main():
 
 
     # apply ssl pretraining
-    model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
+    #model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
+    model = BYOLOnlineBase(arch=args.arch, output_dim=args.output_dim)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1)
     with torch.cuda.device(args.gpu_index):
-        simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        simclr.train(train_loader)
+        #simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+        #simclr.train(train_loader)
+        byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+        byol.train(train_loader)
 
 
     # # use pretrained model for linear classification downstream task
