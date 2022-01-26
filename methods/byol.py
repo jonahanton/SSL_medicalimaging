@@ -87,6 +87,9 @@ class BYOLTrainer:
                 n_iterations += 1
                 running_loss += byol_loss.sum().item()
 
+                # Update weights for target net
+                # self.update_moving_average(ema_updater, self.target_net, self.model)
+
             # Scheduler for optimiser - e.g. cosine annealing
             if epoch >= 10:
                 self.scheduler.step()
@@ -94,6 +97,8 @@ class BYOLTrainer:
             training_loss = running_loss/len(train_loader)
             print("Train Loss:", training_loss)
             logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
+
+
 
         logging.info("Finished training.")
 
@@ -110,5 +115,6 @@ class BYOLTrainer:
 
         logging.info(f"Model has been saved at {self.args.outpath}.")
 
-
-
+if __name__ == "__main__":
+    pass
+    # Create some testing function
