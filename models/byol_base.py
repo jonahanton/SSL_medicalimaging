@@ -56,7 +56,9 @@ class BYOLOnlineBase(BYOLBase):
 
 if __name__ == "__main__":
     target = BYOLBase(output_dim=10)
-    print(target)
+    # print(target)
+    # print(target.encoder)
 
     online = BYOLOnlineBase(output_dim=10)
-    print(online)
+    print(online.encoder)
+    # print(online)

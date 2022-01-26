@@ -26,8 +26,8 @@ arch_choices.append('simple')
 parser = argparse.ArgumentParser()
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
 parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
-parser.add_argument('-a', '--arch', default='resnet18', choices=arch_choices)
-parser.add_argument('--epochs', default=200, type=int, help='total number of epochs to train for')
+parser.add_argument('-a', '--arch', default='simple', choices=arch_choices)
+parser.add_argument('--epochs', default=2, type=int, help='total number of epochs to train for')
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
@@ -58,7 +58,7 @@ def main():
         args.gpu_index = -1
 
     # load data
-    train_dataset = DatasetGetter(args).load()
+    # train_dataset = DatasetGetter(args).load()
 
     # Transformations for BYOL and SimCLR - add parser to this
     if args.dataset_name == 'MNIST':

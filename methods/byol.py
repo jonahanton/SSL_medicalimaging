@@ -52,7 +52,7 @@ class BYOLTrainer:
             old_weight, up_weight = ma_params.data, current_params.data
             ma_params.data = ema_updater.update_average(old_weight, up_weight)
 
-    
+
     def train(self, train_loader):
 
         n_iterations = 0
@@ -63,7 +63,7 @@ class BYOLTrainer:
             running_loss = 0 # keep track of loss per epoch
 
             for batch in tqdm(train_loader):
-                
+
                 (v1, v2), y = batch
 
                 # forward pass
@@ -81,31 +81,29 @@ class BYOLTrainer:
 
                 # backprop
                 self.optimizer.zero_grad()
-                byol_loss.backward()
+                byol_loss.sum().backward()
                 self.optimizer.step()
 
-                print(self.target_net.parameters())
-
                 n_iterations += 1
-                running_loss += loss.item()
+                running_loss += byol_loss.sum().item()
 
             # Scheduler for optimiser - e.g. cosine annealing
             if epoch >= 10:
-                self.scheduler.step() 
+                self.scheduler.step()
 
             training_loss = running_loss/len(train_loader)
             print("Train Loss:", training_loss)
             logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
 
-        logging.info("Finished training.")       
+        logging.info("Finished training.")
 
         # Save model
         checkpoint_name = 'ssl_{self.args.dataset_name}_trained_model.pth.tar'
         checkpoint_filepath = os.path.join(self.args.outpath, checkpoint_name)
-        torch.save( 
+        torch.save(
                 {
                 'epoch': self.args.epochs,
-                'arch': self.args.arch, 
+                'arch': self.args.arch,
                 'model_state_dict': self.model.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict()
                 }, checkpoint_filepath)
