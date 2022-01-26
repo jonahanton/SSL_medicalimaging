@@ -1,8 +1,8 @@
 class GenerateViews:
 
-    def __init__(self, transform):
+    def __init__(self, transform, n_views):
         self.transform = transform
-        self.n_views = 2
+        self.n_views = n_views
 
     
     def __call__(self, x):
