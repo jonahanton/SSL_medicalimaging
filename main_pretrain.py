@@ -51,27 +51,13 @@ def main():
     # check if gpu training is available
     if not args.disable_cuda and torch.cuda.is_available():
         args.device = torch.device('cuda')
-        cudnn.deterministic = True
-        cudnn.benchmark = True
     else:
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
     # load data
-    # train_dataset = DatasetGetter(args).load()
-
-    # Transformations for BYOL and SimCLR - add parser to this
-    if args.dataset_name == 'MNIST':
-        args.output_dim = 10
-        args.num_classes = 10
-        transform_pipeline = transforms.Compose([transforms.RandomResizedCrop(size=28),
-                                              transforms.RandomHorizontalFlip(),
-                                              transforms.ToTensor(),
-                                              transforms.Normalize((0.1307,), (0.3081,))])
-        data_transforms = GenerateViews(transform_pipeline, args.n_views)
-        train_dataset = datasets.MNIST(args.data_path, train=True, transform=data_transforms, download=True)
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-
+    train_dataset = DatasetGetter(args).load()
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 
     # apply ssl pretraining
     #model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
