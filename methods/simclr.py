@@ -12,7 +12,7 @@ class SimCLRTrainer:
 
     def __init__(self, *args, **kwargs):
         self.args = kwargs['args']
-        self.model = kwargs['model']
+        self.model = kwargs['model'].to(self.args.device)
         self.optimizer = kwargs['optimizer']
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
@@ -71,7 +71,9 @@ class SimCLRTrainer:
 
             for batch in tqdm(train_loader):
                 
-                (x1, x2), y = batch
+                (x1, x2), _ = batch
+                x1 = x1.to(self.args.device)
+                x2 = x2.to(self.args.device)
 
                 # forward pass
                 out_1 = self.model(x1)

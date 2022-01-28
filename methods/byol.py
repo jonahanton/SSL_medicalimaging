@@ -26,14 +26,14 @@ class BYOLTrainer:
 
     def __init__(self, *args, **kwargs):
         self.args = kwargs['args']
-        #self.model = kwargs['model']                # we want the model to be the online network
+        #self.model = kwargs['model'].to(self.args.device)          # we want the model to be the online network
         self.optimizer = kwargs['optimizer']
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
 
         # the output_dim should be a hyperparameter (change parser)
-        self.target_net = BYOLBase(output_dim=256)
-        self.model = BYOLOnlineBase(output_dim=256)
+        self.target_net = BYOLBase(output_dim=256).to(self.args.device)  
+        self.model = BYOLOnlineBase(output_dim=256).to(self.args.device)  
 
         # logging.basicConfig(level=logging.DEBUG)
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
@@ -64,19 +64,21 @@ class BYOLTrainer:
 
             for batch in tqdm(train_loader):
 
-                (v1, v2), y = batch
+                (x1, x2), _ = batch
+                x1 = x1.to(self.args.device)  
+                x2 = x2.to(self.args.device)  
 
+                
                 # forward pass
-                q_online = self.model(v1)
-                z_target = self.target_net(v2)
+                q_online = self.model(x1)
+                z_target = self.target_net(x2)
 
-                symmetric_q_online = self.model(v2)
-                symmetric_z_target = self.target_net(v1)
+                symmetric_q_online = self.model(x2)
+                symmetric_z_target = self.target_net(x1)
 
                 # loss
                 loss = self.loss_fn(q_online, z_target)
                 symmetric_loss = self.loss_fn(symmetric_q_online, symmetric_z_target)
-
                 byol_loss = loss + symmetric_loss
 
                 # backprop
