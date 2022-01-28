@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision
 
-from models.conv_net import ConvNet
-
-# MLP class for projector and predictor
 
 class MLP(nn.Module):
     def __init__(self, dim, projection_size, hidden_size = 4096):
@@ -19,46 +17,45 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-# BYOL class
+
 class BYOLBase(nn.Module):
 
-    def __init__(self, output_dim, arch='simple'):
+    def __init__(self, output_dim, arch='resnet18'):
         super().__init__()
 
-        # encoder f()
-        if arch == 'simple':
-            self.encoder = ConvNet()
+        self.backbones_dict = {
+            "resnet18": torchvision.models.resnet18(pretrained=False, num_classes=output_dim),
+            "resnet50": torchvision.models.resnet50(pretrained=False, num_classes=output_dim),
+        }
+        
+        try:
+            self.backbone = self.backbones_dict[arch]
+        except KeyError:
+            print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
+            raise KeyError
 
-        # projector
-        dim_projector= self.encoder.fc.out_features
-        self.projector = MLP(dim = dim_projector, projection_size = output_dim)
+        # add projection head
+        dim_proj = self.backbone.fc.in_features
+        self.projector = MLP(dim=dim_proj, projection_size=dim_proj)
+        self.backbone.fc = nn.Sequential(self.projector, self.backbone.fc)
 
-    def forward(self, v):
+    def forward(self, x):
 
-        y = self.encoder(v)
-        z = self.projector(y)
-        return z
+        return self.backbone(x)
+
 
 class BYOLOnlineBase(BYOLBase):
-    def __init__(self, output_dim, arch='simple'):
+    def __init__(self, output_dim, arch='resnet18'):
         super().__init__(output_dim, arch)
 
         # predictor
-        dim_predictor = output_dim
-        self.predictor = MLP(dim = output_dim, projection_size = output_dim)
+        self.predictor = MLP(dim=output_dim, projection_size=output_dim)
 
-    def forward(self, v):
-        y = self.encoder(v)
-        z = self.projector(y)
-        q = self.predictor(z)
+    def forward(self, x):
 
-        return q
+        out = self.backbone(x)
+        out = self.predictor(x)
+        return out
 
 if __name__ == "__main__":
-    target = BYOLBase(output_dim=10)
-    # print(target)
-    # print(target.encoder)
-
-    online = BYOLOnlineBase(output_dim=10)
-    print(online.encoder)
-    # print(online)
+    pass

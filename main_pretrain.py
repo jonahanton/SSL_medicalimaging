@@ -11,19 +11,17 @@ import os
 
 from models.simclr_base import SimCLRBase
 from models.byol_base import BYOLOnlineBase
-from data.generate_views import GenerateViews
 from methods.simclr import SimCLRTrainer
 from data.get_data import DatasetGetter
 
-# from classification.ds_linear_classifier import DSLinearClassifier
 
 
 arch_choices = [name for name in models.__dict__
                       if name.islower() and not name.startswith("__")
                       and callable(models.__dict__[name])]
-arch_choices.append('simple')
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--method', '-m', default='simclr', help='type of ssl pretraining technique')
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
 parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
 parser.add_argument('-a', '--arch', default='simple', choices=arch_choices)
@@ -38,7 +36,6 @@ parser.add_argument('--outpath', default='saved_models')
 parser.add_argument('--num-classes', type=int, default=10)
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
-# parser.add_argument('-ds', '--downstream', action="store_false")
 
 def main():
 
@@ -56,32 +53,31 @@ def main():
         args.gpu_index = -1
 
     # load data
-    train_dataset = DatasetGetter(args).load()
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    pretrain_dataset = DatasetGetter(args).load()
+    pretrain_loader = DataLoader(pretrain_dataset, batch_size=args.batch_size, shuffle=True)
 
     # apply ssl pretraining
-    #model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
-    model = BYOLOnlineBase(arch=args.arch, output_dim=args.output_dim)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1)
-    with torch.cuda.device(args.gpu_index):
-        #simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        #simclr.train(train_loader)
-        byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        byol.train(train_loader)
 
+    if args.model == "simclr":
 
-    # # use pretrained model for linear classification downstream task
-    # base_transforms = transforms.Compose([transforms.ToTensor(),
-    #                                       transforms.Normalize((0.1307,), (0.3081,))])
-    # ds_dataset = datasets.MNIST(args.data_path, train=False, transform=base_transforms, download=True)
-    # split = int(np.floor(0.2 * len(ds_dataset)))
-    # ds_train_dataset, ds_test_dataset = random_split(ds_dataset, [len(ds_dataset) - split, split])
-    # ds_train_loader = DataLoader(ds_train_dataset, batch_size=32, drop_last=True)
-    # ds_test_loader = DataLoader(ds_test_dataset, batch_size=32, drop_last=True)
-    # ds_linear_classifier = DSLinearClassifier(args=args)
-    # ds_linear_classifier.train(ds_train_loader)
-    # ds_linear_classifier.test(ds_test_loader)
+        model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
+
+        with torch.cuda.device(args.gpu_index):
+            simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            simclr.train(pretrain_loader)
+
+    elif args.model == "byol":
+
+        model = BYOLOnlineBase(arch=args.arch, output_dim=args.output_dim)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
+
+        with torch.cuda.device(args.gpu_index):
+            byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            byol.train(pretrain_loader)
+
 
 if __name__ == "__main__":
     main()

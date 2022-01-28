@@ -3,51 +3,32 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision 
 
-from models.conv_net import ConvNet
 
 class SimCLRBase(nn.Module):
 
-    def __init__(self, output_dim, arch='simple'):
+    def __init__(self, output_dim, arch="resnet18"):
         super().__init__()
 
-        # encoder f()
-        if arch == 'simple':
-            self.encoder = ConvNet()
-
-        # projection head
-        dim_proj_head = self.encoder.fc.out_features
-        self.projection_head = ProjectionHead(dim_proj_head, output_dim)
-    
-
-    def forward(self, x):
+        self.backbones_dict = {
+            "resnet18": torchvision.models.resnet18(pretrained=False, num_classes=output_dim),
+            "resnet50": torchvision.models.resnet50(pretrained=False, num_classes=output_dim),
+        }
         
-        h = self.encoder(x)
-        z = self.projection_head(h)
-        return z
+        try:
+            self.backbone = self.backbones_dict[arch]
+        except KeyError:
+            print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
+            raise KeyError
 
+        
+        # add projection head
+        dim_proj = self.backbone.fc.in_features
+        self.backbone.fc = nn.Sequential(nn.Linear(dim_proj, dim_proj), nn.ReLU(), self.backbone.fc)
 
-class ProjectionHead(nn.Module):
-    
-    def __init__(self, input_dim, output_dim, hidden_dim=128):
-        super().__init__()
-        self.output_dim = output_dim
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-
-        self.model = nn.Sequential(
-            nn.Linear(self.input_dim, self.hidden_dim),
-            nn.ReLU(),
-            nn.Linear(self.hidden_dim, self.output_dim))
 
     def forward(self, x):
-        x = self.model(x)
-        return F.normalize(x, dim=1)
+        return self.backbone(x)
 
 
 if __name__ == "__main__":
-    model = SimCLRBase(output_dim=10)
-    state_dict = model.state_dict()
-    torch.save({'state_dict': state_dict}, 'test.pth.tar')
-    checkpoint = torch.load('test.pth.tar')
-    new_model = SimCLRBase(output_dim=10)
-    new_model.load_state_dict(checkpoint['state_dict'])
+    pass
