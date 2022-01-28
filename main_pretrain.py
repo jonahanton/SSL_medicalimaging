@@ -33,7 +33,7 @@ parser.add_argument('--output-dim', type=int, default=128)
 parser.add_argument('--temperature', type=float, default=0.5)
 parser.add_argument('--n-views', type=int, default=2)
 parser.add_argument('--outpath', default='saved_models')
-parser.add_argument('--num-classes', type=int, default=10)
+# parser.add_argument('--num-classes', type=int, default=10)
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
 
