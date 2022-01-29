@@ -22,3 +22,4 @@ Roadmap:
 - [ ] Apply to CheXpert Chest X-ray dataset
 
 
+Authors: Venus Cheung, Liam Castelli, Jonah Anton, Mathilde Outters, Mun Fai Chan, Wan Hee Tang
