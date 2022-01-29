@@ -5,9 +5,14 @@ from data.generate_views import GenerateViews
 
 class DatasetGetter:
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, pretrain=True, train=True, **kwargs):
         self.args = kwargs['args']
         self.dataset_name = self.args.dataset_name
+
+        # Is this dataset being loading in for ssl pre training?
+        self.pretrain = pretrain
+        # Do we want to load the train or the test dataset?
+        self.train = train
 
         self.transforms_database = {
             "MNIST" : GenerateViews(self._return_transforms(28), self.args.n_views),
@@ -15,25 +20,30 @@ class DatasetGetter:
             }
 
         self.datasets_database = {
-            "MNIST": lambda : datasets.MNIST(self.args.data_path, train=True, download=True,
+            "MNIST": lambda : datasets.MNIST(self.args.data_path, train=self.train, download=True,
                                             transform=self.transforms_database["MNIST"]),
-            "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=True, download=True,
+            "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                             transform=self.transforms_database["cifar10"]),
         }
 
     
     def _return_transforms(self, size):
         
-        color_jitter = transforms.ColorJitter(0.8, 0.8, 0.8, 0.2)
-        data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=size),
+        if self.pretrain:
+            # Data augmentations to apply for pretraining
+            color_jitter = transforms.ColorJitter(0.8, 0.8, 0.8, 0.2)
+            data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=size),
                                               transforms.RandomHorizontalFlip(),
                                               transforms.RandomApply([color_jitter], p=0.8),
                                               transforms.RandomGrayscale(p=0.2),
                                               transforms.ToTensor()])
-        
+        else:
+            # Data augmentations to apply to dataset when loading in for fine-tuning/linear classifier
+            # Not sure which to apply here? - Just transforms.ToTensor()? What about .Normalize()? Also assume this is dataset specific...?
+            data_transforms = transforms.Compose([transforms.ToTensor()])
+                                            
         return data_transforms
         
-
 
     def load(self):
 

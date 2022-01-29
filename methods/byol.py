@@ -9,7 +9,7 @@ from tqdm import tqdm
 import logging
 import os
 
-# Exponential Moving Average
+
 class EMA():
     def __init__(self, tau):
         super().__init__()
@@ -21,24 +21,22 @@ class EMA():
         return old * self.tau + (1 - self.tau) * new
 
 
-
 class BYOLTrainer:
 
     def __init__(self, *args, **kwargs):
         self.args = kwargs['args']
-        #self.model = kwargs['model'].to(self.args.device)          # we want the model to be the online network
         self.optimizer = kwargs['optimizer']
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
 
         # the output_dim should be a hyperparameter (change parser)
-        self.target_net = BYOLBase(output_dim=256).to(self.args.device)  
-        self.model = BYOLOnlineBase(output_dim=256).to(self.args.device)  
+        self.target_net = BYOLBase().to(self.args.device)  
+        self.model = BYOLOnlineBase().to(self.args.device)  
 
-        # logging.basicConfig(level=logging.DEBUG)
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
 
-    def loss_fn(self, q_online, z_target):
+
+    def criterion(self, q_online, z_target):
         """
         Add in doc strings
         Equation  (2) in BYOL paper
@@ -47,7 +45,9 @@ class BYOLTrainer:
         z_target = F.normalize(z_target, dim=-1, p=2)
         return 2 - 2 * (q_online * z_target).sum(dim=-1)
 
+
     def update_moving_average(self, ema_updater, ma_model, current_model):
+
         for current_params, ma_params in zip(current_model.parameters(), ma_model.parameters()):
             old_weight, up_weight = ma_params.data, current_params.data
             ma_params.data = ema_updater.update_average(old_weight, up_weight)
@@ -68,7 +68,6 @@ class BYOLTrainer:
                 x1 = x1.to(self.args.device)  
                 x2 = x2.to(self.args.device)  
 
-                
                 # forward pass
                 q_online = self.model(x1)
                 z_target = self.target_net(x2)
@@ -77,8 +76,8 @@ class BYOLTrainer:
                 symmetric_z_target = self.target_net(x1)
 
                 # loss
-                loss = self.loss_fn(q_online, z_target)
-                symmetric_loss = self.loss_fn(symmetric_q_online, symmetric_z_target)
+                loss = self.criterion(q_online, z_target)
+                symmetric_loss = self.criterion(symmetric_q_online, symmetric_z_target)
                 byol_loss = loss + symmetric_loss
 
                 # backprop
@@ -119,4 +118,3 @@ class BYOLTrainer:
 
 if __name__ == "__main__":
     pass
-    # Create some testing function

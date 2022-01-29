@@ -4,7 +4,6 @@ import torch
 from methods.byol import BYOLTrainer
 from torchvision import transforms, datasets, models
 from torch.utils.data import DataLoader, random_split
-import torch.backends.cudnn as cudnn
 
 import numpy as np
 import os
@@ -23,9 +22,9 @@ arch_choices = [name for name in models.__dict__
 parser = argparse.ArgumentParser()
 parser.add_argument('--method', '-m', default='simclr', help='type of ssl pretraining technique')
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
-parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
-parser.add_argument('-a', '--arch', default='simple', choices=arch_choices)
-parser.add_argument('--epochs', default=2, type=int, help='total number of epochs to train for')
+parser.add_argument('--dataset-name', default='cifar10', help='dataset name')
+parser.add_argument('-a', '--arch', default='resnet18', choices=arch_choices)
+parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
@@ -33,7 +32,6 @@ parser.add_argument('--output-dim', type=int, default=128)
 parser.add_argument('--temperature', type=float, default=0.5)
 parser.add_argument('--n-views', type=int, default=2)
 parser.add_argument('--outpath', default='saved_models')
-# parser.add_argument('--num-classes', type=int, default=10)
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
 
@@ -53,14 +51,13 @@ def main():
         args.gpu_index = -1
 
     # load data
-    pretrain_dataset = DatasetGetter(args).load()
-    pretrain_loader = DataLoader(pretrain_dataset, batch_size=args.batch_size, shuffle=True)
+    pretrain_dataset = DatasetGetter(pretrain=True, train=True, args=args).load()
+    pretrain_loader = DataLoader(pretrain_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
     # apply ssl pretraining
+    if args.method == "simclr":
 
-    if args.model == "simclr":
-
-        model = SimCLRBase(arch=args.arch, output_dim=args.output_dim)
+        model = SimCLRBase(arch=args.arch)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
 
@@ -68,9 +65,9 @@ def main():
             simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
             simclr.train(pretrain_loader)
 
-    elif args.model == "byol":
+    elif args.method == "byol":
 
-        model = BYOLOnlineBase(arch=args.arch, output_dim=args.output_dim)
+        model = BYOLOnlineBase(arch=args.arch)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
 

@@ -20,12 +20,12 @@ class MLP(nn.Module):
 
 class BYOLBase(nn.Module):
 
-    def __init__(self, output_dim, arch='resnet18'):
+    def __init__(self, arch='resnet18'):
         super().__init__()
 
         self.backbones_dict = {
-            "resnet18": torchvision.models.resnet18(pretrained=False, num_classes=output_dim),
-            "resnet50": torchvision.models.resnet50(pretrained=False, num_classes=output_dim),
+            "resnet18": torchvision.models.resnet18(pretrained=True),
+            "resnet50": torchvision.models.resnet50(pretrained=True),
         }
         
         try:
@@ -45,11 +45,12 @@ class BYOLBase(nn.Module):
 
 
 class BYOLOnlineBase(BYOLBase):
-    def __init__(self, output_dim, arch='resnet18'):
-        super().__init__(output_dim, arch)
+    def __init__(self, arch='resnet18'):
+        super().__init__(arch)
 
         # predictor
-        self.predictor = MLP(dim=output_dim, projection_size=output_dim)
+        dim_pred = self.backbone.fc.out_features
+        self.predictor = MLP(dim=dim_pred, projection_size=dim_pred)
 
     def forward(self, x):
 

@@ -15,49 +15,39 @@ class SimCLRTrainer:
         self.model = kwargs['model'].to(self.args.device)
         self.optimizer = kwargs['optimizer']
         self.scheduler = kwargs['scheduler']
+        self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
         self.writer = SummaryWriter()
 
         # logging.basicConfig(level=logging.DEBUG)
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
 
 
-    def NT_Xent_loss(self, out_1, out_2, temperature):
-        """
-        Args:
-            out_1: [batch_size, dim]
-                Contains outputs through projection head of augment_1 inputs for the batch
-            out_2: [batch_size, dim]
-                Contains outputs through projection head of augment_2 inputs for the batch 
-            
-            e.g. out_1[0] and out_2[0] contain two different augmentations of the same input image
+    def info_nce_loss(self, features, temperature):
 
-        Returns:
-            loss : single-element torch.Tensor  
+        labels = torch.cat([torch.arange(self.args.batch_size) for i in range(self.args.n_views)], dim=0)
+        labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
+        labels = labels.to(self.args.device)
 
-        """
-        # concatenate 
-        out = torch.cat([out_1, out_2], dim=0)
-    
-        n_samples = len(out)  # n_samples = 2N in SimCLR paper
+        features = F.normalize(features, dim=1)
 
-        # similarity matrix
-        cov = torch.mm(out, out.t())  # e.g. cov[0] = [x1.x1, x1.x2, x1.y1, x1.y2]
-        sim = torch.exp(cov/temperature)
+        similarity_matrix = torch.matmul(features, features.T)
 
-        # create mask to remove diagonal elements from sim matrix
-        # mask has False in diagonals, True in off-diagonals
-        mask = ~torch.eye(n_samples, device=sim.device).bool() 
+        # discard the main diagonal from both: labels and similarities matrix
+        mask = torch.eye(labels.shape[0], dtype=torch.bool).to(self.args.device)
+        labels = labels[~mask].view(labels.shape[0], -1)
+        similarity_matrix = similarity_matrix[~mask].view(similarity_matrix.shape[0], -1)
 
-        # calculate denom in loss (SimCLR paper eq. (1)) for each z_i
-        neg = sim.masked_select(mask).view(n_samples, -1).sum(dim=-1)
+        # select and combine multiple positives
+        positives = similarity_matrix[labels.bool()].view(labels.shape[0], -1)
 
-        # positive similarity
-        pos = torch.exp(torch.sum(out_1 * out_2, dim=-1) / temperature)
-        # loss computed across all positive pairs, both (i, j) and (j, i) in a mini-batch
-        pos = torch.cat([pos, pos], dim=0)
+        # select only the negatives the negatives
+        negatives = similarity_matrix[~labels.bool()].view(similarity_matrix.shape[0], -1)
 
-        loss = -torch.log(pos / neg).mean()
-        return loss   
+        logits = torch.cat([positives, negatives], dim=1)
+        labels = torch.zeros(logits.shape[0], dtype=torch.long).to(self.args.device)
+
+        logits = logits / temperature
+        return logits, labels
 
     
     def train(self, train_loader):
@@ -69,17 +59,18 @@ class SimCLRTrainer:
             print("Epoch:", epoch)
             running_loss = 0 # keep track of loss per epoch
 
-            for batch in tqdm(train_loader):
+            for images, _ in tqdm(train_loader):
                 
-                (x1, x2), _ = batch
-                x1 = x1.to(self.args.device)
-                x2 = x2.to(self.args.device)
+                images = torch.cat(images, dim=0)
+                images = images.to(self.args.device)
 
                 # forward pass
-                out_1 = self.model(x1)
-                out_2 = self.model(x2)
-                # loss
-                loss = self.NT_Xent_loss(out_1, out_2, temperature=self.args.temperature)
+                features = self.model(images)
+                logits, labels = self.info_nce_loss(features, self.args.temperature)
+                loss = self.criterion(logits, labels)
+
+                print(f"Loss: {loss}")
+
                 # backprop
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -94,12 +85,12 @@ class SimCLRTrainer:
 
             training_loss = running_loss/len(train_loader)
             print("Train Loss:", training_loss)
-            logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
+            logging.info(f"Epoch: {epoch}\tLoss: {training_loss}")
 
         logging.info("Finished training.")       
 
         # Save model
-        checkpoint_name = 'ssl_{self.args.dataset_name}_trained_model.pth.tar'
+        checkpoint_name = f'ssl_{self.args.dataset_name}_trained_model.pth.tar'
         checkpoint_filepath = os.path.join(self.args.outpath, checkpoint_name)
         torch.save( 
                 {

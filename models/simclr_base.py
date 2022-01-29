@@ -6,12 +6,12 @@ import torchvision
 
 class SimCLRBase(nn.Module):
 
-    def __init__(self, output_dim, arch="resnet18"):
+    def __init__(self, arch="resnet18"):
         super().__init__()
 
         self.backbones_dict = {
-            "resnet18": torchvision.models.resnet18(pretrained=False, num_classes=output_dim),
-            "resnet50": torchvision.models.resnet50(pretrained=False, num_classes=output_dim),
+            "resnet18": torchvision.models.resnet18(pretrained=True),
+            "resnet50": torchvision.models.resnet50(pretrained=True),
         }
         
         try:
