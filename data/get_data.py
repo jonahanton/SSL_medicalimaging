@@ -10,14 +10,14 @@ class DatasetGetter:
         self.dataset_name = self.args.dataset_name
 
         self.transforms_database = {
-            "MNIST" : GenerateViews(self._return_transforms(28), args.n_views),
-            "cifar10": GenerateViews(self._return_transforms(32), args.n_views),
+            "MNIST" : GenerateViews(self._return_transforms(28), self.args.n_views),
+            "cifar10": GenerateViews(self._return_transforms(32), self.args.n_views),
             }
 
         self.datasets_database = {
-            "MNIST": lambda : datasets.MNIST(args.data_path, train=True, download=True,
+            "MNIST": lambda : datasets.MNIST(self.args.data_path, train=True, download=True,
                                             transform=self.transforms_database["MNIST"]),
-            "cifar10": lambda : datasets.CIFAR10(args.data_path, train=True, download=True,
+            "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=True, download=True,
                                             transform=self.transforms_database["cifar10"]),
         }
 
