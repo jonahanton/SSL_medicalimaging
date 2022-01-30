@@ -19,12 +19,20 @@ class DatasetGetter:
             "cifar10": GenerateViews(self._return_transforms(32), self.args.n_views),
             }
 
-        self.datasets_database = {
-            "MNIST": lambda : datasets.MNIST(self.args.data_path, train=self.train, download=True,
-                                            transform=self.transforms_database["MNIST"]),
-            "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
-                                            transform=self.transforms_database["cifar10"]),
-        }
+        if self.pretrain:
+                self.datasets_database = {
+                "MNIST": lambda : datasets.MNIST(self.args.data_path, train=self.train, download=True,
+                                                transform=self.transforms_database["MNIST"]),
+                "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
+                                                transform=self.transforms_database["cifar10"]),
+            }
+        else:
+            self.datasets_database = {
+                "MNIST": lambda : datasets.MNIST(self.args.data_path, train=self.train, download=True,
+                                                transform=self._return_transforms(28)),
+                "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
+                                                transform=self._return_transforms(32)),
+            }
 
     
     def _return_transforms(self, size):

@@ -100,5 +100,5 @@ class SimCLRTrainer:
                 'optimizer_state_dict': self.optimizer.state_dict()
                 }, checkpoint_filepath)
 
-        logging.info(f"Model has been saved at {self.args.outpath}.")
+        logging.info(f"Model has been saved in directory {self.args.outpath}.")
 

@@ -23,11 +23,19 @@ class SimCLRBase(nn.Module):
         
         # add projection head
         dim_proj = self.backbone.fc.in_features
-        self.backbone.fc = nn.Sequential(nn.Linear(dim_proj, dim_proj), nn.ReLU(), self.backbone.fc)
+        # SimCLR projects the representation to a 128-dimensional latent space
+        projector = nn.Sequential(
+            nn.Linear(dim_proj, dim_proj),
+            nn.ReLU(),
+            nn.Linear(dim_proj, 128),
+            )
+        self.backbone.fc = projector
 
 
     def forward(self, x):
-        return self.backbone(x)
+
+        out = self.backbone(x)
+        return out
 
 
 if __name__ == "__main__":

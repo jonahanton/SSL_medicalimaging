@@ -26,12 +26,12 @@ parser.add_argument('--method', '-m', default='byol', help='type of ssl pretrain
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
 parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
 parser.add_argument('-a', '--arch', default='ConvNet', choices=arch_choices)
-parser.add_argument('--epochs', default=3, type=int)
+parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
 parser.add_argument('--output-dim', type=int, default=128)
-parser.add_argument('--temperature', type=float, default=0.5)
+parser.add_argument('--temperature', type=float, default=0.1)
 parser.add_argument('--n-views', type=int, default=2)
 parser.add_argument('--outpath', default='saved_models')
 parser.add_argument('--disable-cuda', action='store_true')
@@ -65,6 +65,7 @@ def main():
 
         with torch.cuda.device(args.gpu_index):
             simclr = SimCLRTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            print("SimCLR training beginning.")
             simclr.train(pretrain_loader)
 
     elif args.method == "byol":
@@ -75,7 +76,7 @@ def main():
 
         with torch.cuda.device(args.gpu_index):
             byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-            print("BYOL is training")
+            print("BYOL training beginning.")
             byol.train(pretrain_loader)
 
 
