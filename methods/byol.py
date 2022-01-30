@@ -8,18 +8,22 @@ from models.byol_base import BYOLBase
 from tqdm import tqdm
 import logging
 import os
+import math
 
 
 class EMA():
     def __init__(self, tau):
         super().__init__()
         self.tau = tau
+        self.tau_base = 0.996
 
     def update_average(self, old, new):
         if old is None:
             return new
         return old * self.tau + (1 - self.tau) * new
 
+    def tau_decay(self, k, K):
+        self.tau = 1 - (1-self.tau_base) * (math.cos(math.pi * k/K) + 1)/2
 
 class BYOLTrainer:
 
@@ -32,20 +36,14 @@ class BYOLTrainer:
         # the output_dim should be a hyperparameter (change parser)
         self.model = BYOLBase(self.args.arch).to(self.args.device) # online net
 
-        # print("Parameters of online net")
-        # for param in self.model.parameters():
-        #     print(param.data)
-
         self.target_net = BYOLBase(self.args.arch, is_target= True).to(self.args.device) # target net
 
-        # print("Parameters of target net")
-        # for param in self.target_net.parameters():
-        #     print(param.data)
+        self.ema_updater = EMA(tau = 0)
 
-        ema_updater = EMA(tau = 0)
-
-        self.update_moving_average(ema_updater, ma_model = self.target_net, current_model = self.model)
+        self.update_moving_average(self.ema_updater, ma_model = self.target_net, current_model = self.model)
         # self.target_net.load_state_dict(self.model.state_dict())
+
+        self.ema_updater.tau = 0.996 # Implement decay
 
         # Stop forward and back propagation
         for p in self.target_net.parameters():
@@ -80,7 +78,7 @@ class BYOLTrainer:
             print("Epoch:", epoch)
             running_loss = 0 # keep track of loss per epoch
 
-            for batch in tqdm(train_loader):
+            for batch_idx, batch in enumerate(tqdm(train_loader)):
 
                 (x1, x2), _ = batch
                 x1 = x1.to(self.args.device)
@@ -100,14 +98,17 @@ class BYOLTrainer:
 
                 # backprop
                 self.optimizer.zero_grad()
-                byol_loss.sum().backward()
+                byol_loss.mean().backward()
                 self.optimizer.step()
 
                 n_iterations += 1
-                running_loss += byol_loss.sum().item()
+                running_loss += byol_loss.mean().item()
 
                 # Update weights for target net
-                # self.update_moving_average(ema_updater, self.target_net, self.model)
+                num_batches = len(train_loader)
+                print("k is:", epoch * num_batches + batch_idx)
+                self.ema_updater.tau_decay(k = epoch * num_batches + batch_idx, K = num_batches * self.args.epochs)
+                self.update_moving_average(self.ema_updater, self.target_net, self.model)
 
             # Scheduler for optimiser - e.g. cosine annealing
             if epoch >= 10:

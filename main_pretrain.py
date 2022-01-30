@@ -26,7 +26,7 @@ parser.add_argument('--method', '-m', default='byol', help='type of ssl pretrain
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
 parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
 parser.add_argument('-a', '--arch', default='ConvNet', choices=arch_choices)
-parser.add_argument('--epochs', default=1, type=int)
+parser.add_argument('--epochs', default=3, type=int)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
@@ -77,7 +77,7 @@ def main():
             byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
             print("BYOL is training")
             byol.train(pretrain_loader)
-            
+
 
 
 if __name__ == "__main__":

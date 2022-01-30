@@ -55,7 +55,7 @@ class BYOLBase(nn.Module):
         out = self.projector(out)
 
         if not self.is_target:
-            out = self.predictor(x)
+            out = self.predictor(out)
 
         return out
 
