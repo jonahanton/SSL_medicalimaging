@@ -21,7 +21,7 @@ class MLP(nn.Module):
 
 class BYOLBase(nn.Module):
 
-    def __init__(self, is_target=False, **kwargs):
+    def __init__(self, arch, is_target=False):
         super().__init__()
 
         self.backbones_dict = {
@@ -30,21 +30,16 @@ class BYOLBase(nn.Module):
             "ConvNet": ConvNet()
         }
 
-        #print(arch)
-        
         try:
             self.backbone = self.backbones_dict[arch]
         except KeyError:
             print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
             raise KeyError
 
-        #print(self.backbone)
-        #print(arch)
-
         # add projection head
         dim_proj = self.backbone.fc.out_features
         self.projector = MLP(dim=dim_proj, projection_size=dim_proj)
-        self.backbone = nn.Sequential(self.backbone, self.projector)
+        # self.backbone = nn.Sequential(self.backbone, self.projector)
         self.is_target = is_target
 
         # predictor, only used in the forward pass of the ONLINE model
@@ -52,13 +47,16 @@ class BYOLBase(nn.Module):
             dim_pred = dim_proj
             self.predictor = MLP(dim=dim_pred, projection_size=dim_pred)
 
+        # print(self.parameters)
+
     def forward(self, x):
 
         out = self.backbone(x)
+        out = self.projector(out)
 
         if not self.is_target:
             out = self.predictor(x)
-        
+
         return out
 
 
