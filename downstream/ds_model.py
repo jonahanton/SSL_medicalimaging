@@ -102,7 +102,7 @@ class DownstreamModel(nn.Module):
                 running_loss += loss.item()
 
             # Track accuracy on test set after every epoch
-            for x, y in enumerate(test_loader):
+            for x, y in test_loader:
 
                 x = x.to(self.args.device)
                 y = y.to(self.args.device)
