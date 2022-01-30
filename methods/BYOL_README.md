@@ -14,7 +14,7 @@
   - Perhaps increase LR 
   - Perhaps work with a pretrained model (e.g. pretrained ResNet 18) 
 3. Extend to RGB datasets (e.g. CIFAR 10) (anyone) 
-  - - Color augmentations for data transformations 
+  - Color augmentations for data transformations - JONAH: I think this is inplace.  
 4. Closer resemblance to paper 
   - LARS optimiser 
     - check if tau(hyperparameter for Moving Average) is indeed going down 
