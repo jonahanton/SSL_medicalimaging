@@ -10,6 +10,9 @@ Codebase for SSL for medical imaging research project.
 - Added cifar10 dataset and GPU compatibility
 - Added linear classifier + fine tuning downstream tasks
 
+30/01/22
+- BYOL implemented
+
 References: 
 - https://github.com/sthalles/SimCLR
 - https://github.com/facebookresearch/vissl
