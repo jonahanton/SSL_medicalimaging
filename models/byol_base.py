@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
+from models.cnn_base import ConvNet
 
 
 class MLP(nn.Module):
@@ -20,13 +21,16 @@ class MLP(nn.Module):
 
 class BYOLBase(nn.Module):
 
-    def __init__(self, arch='resnet18'):
+    def __init__(self, is_target=False, **kwargs):
         super().__init__()
 
         self.backbones_dict = {
             "resnet18": torchvision.models.resnet18(pretrained=True),
             "resnet50": torchvision.models.resnet50(pretrained=True),
+            "ConvNet": ConvNet()
         }
+
+        #print(arch)
         
         try:
             self.backbone = self.backbones_dict[arch]
@@ -34,29 +38,29 @@ class BYOLBase(nn.Module):
             print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
             raise KeyError
 
+        #print(self.backbone)
+        #print(arch)
+
         # add projection head
-        dim_proj = self.backbone.fc.in_features
+        dim_proj = self.backbone.fc.out_features
         self.projector = MLP(dim=dim_proj, projection_size=dim_proj)
-        self.backbone.fc = nn.Sequential(self.projector, self.backbone.fc)
+        self.backbone = nn.Sequential(self.backbone, self.projector)
+        self.is_target = is_target
 
-    def forward(self, x):
-
-        return self.backbone(x)
-
-
-class BYOLOnlineBase(BYOLBase):
-    def __init__(self, arch='resnet18'):
-        super().__init__(arch)
-
-        # predictor
-        dim_pred = self.backbone.fc.out_features
-        self.predictor = MLP(dim=dim_pred, projection_size=dim_pred)
+        # predictor, only used in the forward pass of the ONLINE model
+        if not self.is_target:
+            dim_pred = dim_proj
+            self.predictor = MLP(dim=dim_pred, projection_size=dim_pred)
 
     def forward(self, x):
 
         out = self.backbone(x)
-        out = self.predictor(x)
+
+        if not self.is_target:
+            out = self.predictor(x)
+        
         return out
+
 
 if __name__ == "__main__":
     pass

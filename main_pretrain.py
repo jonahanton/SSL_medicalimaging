@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 from models.simclr_base import SimCLRBase
-from models.byol_base import BYOLOnlineBase
+from models.byol_base import BYOLBase
 from methods.simclr import SimCLRTrainer
 from data.get_data import DatasetGetter
 
@@ -19,12 +19,14 @@ arch_choices = [name for name in models.__dict__
                       if name.islower() and not name.startswith("__")
                       and callable(models.__dict__[name])]
 
+arch_choices.append("ConvNet")
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--method', '-m', default='simclr', help='type of ssl pretraining technique')
+parser.add_argument('--method', '-m', default='byol', help='type of ssl pretraining technique')
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
-parser.add_argument('--dataset-name', default='cifar10', help='dataset name')
-parser.add_argument('-a', '--arch', default='resnet18', choices=arch_choices)
-parser.add_argument('--epochs', default=100, type=int)
+parser.add_argument('--dataset-name', default='MNIST', help='dataset name')
+parser.add_argument('-a', '--arch', default='ConvNet', choices=arch_choices)
+parser.add_argument('--epochs', default=1, type=int)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
@@ -67,13 +69,15 @@ def main():
 
     elif args.method == "byol":
 
-        model = BYOLOnlineBase(arch=args.arch)
+        model = BYOLBase(arch=args.arch)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
 
         with torch.cuda.device(args.gpu_index):
             byol = BYOLTrainer(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            print("BYOL is training")
             byol.train(pretrain_loader)
+            
 
 
 if __name__ == "__main__":

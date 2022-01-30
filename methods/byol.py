@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.utils.tensorboard import SummaryWriter
-from models.byol_base import BYOLBase, BYOLOnlineBase
+from models.byol_base import BYOLBase
 
 from tqdm import tqdm
 import logging
@@ -29,9 +29,13 @@ class BYOLTrainer:
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
 
-        # the output_dim should be a hyperparameter (change parser)
-        self.target_net = BYOLBase().to(self.args.device)  
-        self.model = BYOLOnlineBase().to(self.args.device)  
+        # the output_dim should be a hyperparameter (change parser)  
+        self.model = BYOLBase().to(self.args.device)  
+
+        self.target_net = BYOLBase().to(self.args.device)
+        self.target_net.load_state_dict(self.model.state_dict())
+        for p in self.target_net.parameters():
+            p.requires_grad = False
 
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
 
