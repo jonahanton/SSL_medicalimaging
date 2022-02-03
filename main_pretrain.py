@@ -2,10 +2,9 @@ import argparse
 
 import torch
 from methods.byol import BYOLTrainer
-from torchvision import transforms, datasets, models
-from torch.utils.data import DataLoader, random_split
+from torchvision import models
+from torch.utils.data import DataLoader
 
-import numpy as np
 import os
 
 from models.simclr_base import SimCLRBase
@@ -40,6 +39,15 @@ parser.add_argument('--gpu-index', type=int, default=0)
 def main():
 
     args = parser.parse_args()
+
+    # From SimCLR paper:
+    # BatchSize = 4096
+    # Epochs = 100
+    # LR = 0.3 x BatchSize/256
+    # weight decay = 1e-6
+    # Linear warmup for first 10 epochs, followed by cosine annealing LR without restarts
+    args.lr = 0.3 * (args.batch_size / 256)
+    args.weight_decay = 1e-6
 
     # create output directory for pretrained model
     if not os.path.isdir(args.outpath):

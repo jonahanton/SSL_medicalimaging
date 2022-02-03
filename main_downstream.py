@@ -1,7 +1,6 @@
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from utils import accuracy
 
 from downstream.ds_model import DownstreamModel
 from data.get_data import DatasetGetter
@@ -52,7 +51,7 @@ def main():
     # Training
     optimizer = torch.optim.Adam(ds_model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     with torch.cuda.device(args.gpu_index):
-            print("Downstream training beginning!")
+            print("Downstream training beginning.")
             ds_model.train(optimizer, train_loader, test_loader)
 
 

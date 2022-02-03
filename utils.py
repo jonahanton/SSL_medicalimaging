@@ -1,18 +1,15 @@
-import torch
-
 def accuracy(output, target):
-
+    """ Computed the accuracy for a batch of output data"""
     num_correct = 0
     num_samples = 0
 
-    with torch.no_grad():
-
-        _, preds = output.max(1)
-        num_correct += (preds == target).sum()
-        num_samples += preds.size(0)
-        
-        acc = float(num_correct) / num_samples
-        return acc
+    _, preds = output.max(1)
+    num_correct += (preds == target).sum()
+    num_samples += preds.size(0)
+    
+    acc = float(num_correct) / num_samples
+    
+    return acc
 
 
 

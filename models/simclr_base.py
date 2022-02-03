@@ -5,6 +5,7 @@ import torchvision
 
 
 class SimCLRBase(nn.Module):
+    """SimCLR base class."""
 
     def __init__(self, arch="resnet18"):
         super().__init__()

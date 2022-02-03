@@ -57,6 +57,25 @@ class DownstreamModel(nn.Module):
                 if name not in ['fc.weight', 'fc.bias']:
                     param.requires_grad = False
 
+        
+        # BYOL 
+        elif self.args.pre_train_method == "byol":
+
+            formated_state_dict = {}
+            for k, v in state_dict.items():
+                if k.startswith("backbone.") and not k.startswith("backbone.fc"):
+                    k = k.replace("backbone.", "")
+                    formated_state_dict[k] = v
+        
+            self.model.load_state_dict(formated_state_dict, strict=False)
+            print("Succesfully loaded saved model!")
+
+        # If not finetuning (only adding a linear layer), freeze weights not in fc layer
+        if not self.args.finetune:
+            for name, param in self.model.named_parameters():
+                if name not in ['fc.weight', 'fc.bias']:
+                    param.requires_grad = False
+
 
     def forward(self, x):
 

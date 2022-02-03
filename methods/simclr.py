@@ -9,6 +9,11 @@ import logging
 import os
 
 class SimCLRTrainer:
+    """
+    
+    This class implements the SimCLR pretraining method.
+    
+    """
 
     def __init__(self, *args, **kwargs):
         self.args = kwargs['args']
