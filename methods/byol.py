@@ -33,6 +33,11 @@ class BYOLTrainer:
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter()
 
+        # used for testing
+        self.losses = []
+        self.moving_average = []
+        self.taus = []
+
         # the output_dim should be a hyperparameter (change parser)
         self.model = BYOLBase(self.args.arch).to(self.args.device) # online net
 
@@ -54,7 +59,7 @@ class BYOLTrainer:
     def criterion(self, q_online, z_target):
         """
         Add in doc strings
-        Equation  (2) in BYOL paper
+        Equation (2) in BYOL paper
         """
         q_online = F.normalize(q_online, dim=-1, p=2)
         z_target = F.normalize(z_target, dim=-1, p=2)
@@ -73,6 +78,8 @@ class BYOLTrainer:
 
         n_iterations = 0
         logging.info(f"Starting BYOL training for {self.args.epochs} epochs.")
+
+        self.taus.append(self.ema_updater.tau)
 
         for epoch in range(self.args.epochs):
             print("Epoch:", epoch)
@@ -109,12 +116,15 @@ class BYOLTrainer:
                 print("k is:", epoch * num_batches + batch_idx)
                 self.ema_updater.tau_decay(k = epoch * num_batches + batch_idx, K = num_batches * self.args.epochs)
                 self.update_moving_average(self.ema_updater, self.target_net, self.model)
+                self.taus.append(self.ema_updater.tau)
 
             # Scheduler for optimiser - e.g. cosine annealing
             if epoch >= 10:
                 self.scheduler.step()
 
             training_loss = running_loss/len(train_loader)
+            self.losses.append(training_loss)
+
             print("Train Loss:", training_loss)
             logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
 
