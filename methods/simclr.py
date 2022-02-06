@@ -95,7 +95,7 @@ class SimCLRTrainer:
         logging.info("Finished training.")       
 
         # Save model
-        checkpoint_name = f'ssl_{self.args.dataset_name}_trained_model.pth.tar'
+        checkpoint_name = f'ssl_{self.args.method}_{self.args.arch}_{self.args.dataset_name}_trained_model.pth.tar'
         checkpoint_filepath = os.path.join(self.args.outpath, checkpoint_name)
         torch.save( 
                 {
@@ -105,5 +105,5 @@ class SimCLRTrainer:
                 'optimizer_state_dict': self.optimizer.state_dict()
                 }, checkpoint_filepath)
 
-        logging.info(f"Model has been saved in directory {self.args.outpath}.")
+        logging.info(f"SimCLR Model has been saved in directory {self.args.outpath}.")
 

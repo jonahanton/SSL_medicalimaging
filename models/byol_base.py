@@ -33,7 +33,7 @@ class BYOLBase(nn.Module):
         try:
             self.backbone = self.backbones_dict[arch]
         except KeyError:
-            print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
+            print(f"Invalid architecture {arch}. Pleases input either 'resnet18','resnet50' or 'ConvNet'.")
             raise KeyError
 
         # add projection head

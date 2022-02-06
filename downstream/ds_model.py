@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision
 
 from utils import accuracy
+from models.cnn_base import ConvNet
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -22,12 +23,13 @@ class DownstreamModel(nn.Module):
         self.models_dict = {
             "resnet18": torchvision.models.resnet18(pretrained=False, num_classes=self.args.num_classes),
             "resnet50": torchvision.models.resnet50(pretrained=False, num_classes=self.args.num_classes),
+            "ConvNet": ConvNet()
         }
 
         try:
             self.model = self.models_dict[self.args.arch]
         except KeyError:
-            print(f"Invalid architecture {self.argsarch}. Pleases input either 'resnet18' or 'resnet50'.")
+            print(f"Invalid architecture {self.argsarch}. Pleases input either 'resnet18', 'resnet50' or 'ConvNet'.")
             raise KeyError
 
 
@@ -35,8 +37,10 @@ class DownstreamModel(nn.Module):
 
         print("Loading saved model...")
 
+        checkpoint_filepath = f"./saved_models/ssl_{self.args.pre_train_method}_{self.args.arch}_{self.args.pretrain_dataset_name}_trained_model.pth.tar"
+
         # load in weights from pretrained model
-        checkpoint_filepath = self.args.pretrained_path
+        # checkpoint_filepath = self.args.pretrained_path
         checkpoint = torch.load(checkpoint_filepath)
         state_dict = checkpoint['model_state_dict']
 
@@ -51,11 +55,11 @@ class DownstreamModel(nn.Module):
             self.model.load_state_dict(formated_state_dict, strict=False)
             print("Succesfully loaded saved model!")
 
-        # If not finetuning (only adding a linear layer), freeze weights not in fc layer
-        if not self.args.finetune:
-            for name, param in self.model.named_parameters():
-                if name not in ['fc.weight', 'fc.bias']:
-                    param.requires_grad = False
+            # If not finetuning (only adding a linear layer), freeze weights not in fc layer
+            if not self.args.finetune:
+                for name, param in self.model.named_parameters():
+                    if name not in ['fc.weight', 'fc.bias']:
+                        param.requires_grad = False
 
         
         # BYOL 
@@ -70,11 +74,11 @@ class DownstreamModel(nn.Module):
             self.model.load_state_dict(formated_state_dict, strict=False)
             print("Succesfully loaded saved model!")
 
-        # If not finetuning (only adding a linear layer), freeze weights not in fc layer
-        if not self.args.finetune:
-            for name, param in self.model.named_parameters():
-                if name not in ['fc.weight', 'fc.bias']:
-                    param.requires_grad = False
+            # If not finetuning (only adding a linear layer), freeze weights not in fc layer
+            if not self.args.finetune:
+                for name, param in self.model.named_parameters():
+                    if name not in ['fc.weight', 'fc.bias']:
+                        param.requires_grad = False
 
 
     def forward(self, x):
@@ -85,7 +89,7 @@ class DownstreamModel(nn.Module):
 
     def train(self, optimizer, train_loader, test_loader):
         
-        self.optimzer = optimizer
+        self.optimizer = optimizer
         self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
 
         logging.info(f"Starting downstream training for {self.args.epochs} epochs.")
@@ -137,9 +141,9 @@ class DownstreamModel(nn.Module):
             training_loss = running_loss/len(train_loader)
             top1_train_acc = top1_train_acc/len(train_loader)
             top1_test_acc = top1_test_acc/len(test_loader)
-            print("Train Loss:", training_loss)
-            print("Train Accuracy:", top1_train_acc)
-            print("Test Accuracy:", top1_test_acc)
+            # print("Train Loss:", training_loss)
+            # print("Train Accuracy:", top1_train_acc)
+            # print("Test Accuracy:", top1_test_acc)
             logging.info(f"Epoch: {epoch}\tLoss: {training_loss}")
             logging.info(f"Epoch: {epoch}\tAccuracy: {top1_train_acc}")
             logging.info(f"Epoch: {epoch}\tTest Accuracy: {top1_test_acc}")
@@ -162,7 +166,6 @@ class DownstreamModel(nn.Module):
                 }, checkpoint_filepath)
 
         logging.info(f"Model has been saved in directory {self.args.outpath}.")
-
 
 if __name__ == "__main__":
     pass

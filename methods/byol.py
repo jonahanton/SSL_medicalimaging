@@ -106,7 +106,6 @@ class BYOLTrainer:
 
                 # Update weights for target net
                 num_batches = len(train_loader)
-                print("k is:", epoch * num_batches + batch_idx)
                 self.ema_updater.tau_decay(k = epoch * num_batches + batch_idx, K = num_batches * self.args.epochs)
                 self.update_moving_average(self.ema_updater, self.target_net, self.model)
 
@@ -118,12 +117,10 @@ class BYOLTrainer:
             print("Train Loss:", training_loss)
             logging.debug(f"Epoch: {epoch}\tLoss: {training_loss}")
 
-
-
         logging.info("Finished training.")
 
         # Save model
-        checkpoint_name = 'ssl_{self.args.dataset_name}_trained_model.pth.tar'
+        checkpoint_name = f'ssl_{self.args.method}_{self.args.arch}_{self.args.dataset_name}_trained_model.pth.tar'
         checkpoint_filepath = os.path.join(self.args.outpath, checkpoint_name)
         torch.save(
                 {
@@ -133,7 +130,7 @@ class BYOLTrainer:
                 'optimizer_state_dict': self.optimizer.state_dict()
                 }, checkpoint_filepath)
 
-        logging.info(f"Model has been saved at {self.args.outpath}.")
+        logging.info(f"BYOL Model has been saved in directory {self.args.outpath}.")
 
 if __name__ == "__main__":
     pass

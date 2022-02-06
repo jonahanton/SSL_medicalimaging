@@ -8,15 +8,13 @@
 
 
 ### Things to work on 
-1. Weight decay/regularisation (Page 9 of paper) - may have to implement in SimCLR too (Mathilde) 
-2. Testing of code - loss should go down more significantly (Mun Fai) 
-  - Work on Google Colab and run it for more epochs 
-  - Perhaps increase LR 
-  - Perhaps work with a pretrained model (e.g. pretrained ResNet 18) 
-3. Extend to RGB datasets (e.g. CIFAR 10) (anyone) 
+1. ~Weight decay/regularisation~
+    - Already implemented in both BYOL(10-6 in original paper) and SimCLR 
+2. Testing of code (Mathilde and Venus)
+3. Extend to RGB datasets (e.g. CIFAR 10) (Mun fai) 
   - Color augmentations for data transformations - JONAH: I think this is inplace.  
 4. Closer resemblance to paper 
-  - LARS optimiser 
-    - check if tau(hyperparameter for Moving Average) is indeed going down 
+  - ~LARS optimiser~ suffering from installation issues; may not be very important as it is just a tool to help with large batch sizes  
+    
     
     

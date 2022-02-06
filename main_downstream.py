@@ -9,12 +9,11 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--pre-train-method', default='simclr')
-parser.add_argument('--arch', default='resnet18')
+parser.add_argument('--pre-train-method', default='byol')
+parser.add_argument('--arch', default='ConvNet')
 parser.add_argument('--data-path', default='./datasets')
-parser.add_argument('--dataset-name', default='cifar10')
-parser.add_argument('--pretrain-dataset-name', default='cifar10')
-parser.add_argument('--pretrained-path', default='./saved_models/ssl_cifar10_trained_model.pth.tar')
+parser.add_argument('--dataset-name', default='MNIST')
+parser.add_argument('--pretrain-dataset-name', default='MNIST')
 parser.add_argument('--outpath', default='./saved_models')
 parser.add_argument('--num-classes', type=int, default=10)
 parser.add_argument('--disable-cuda', action='store_true')
@@ -23,7 +22,7 @@ parser.add_argument('--n_views', type=int, default=1)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
-parser.add_argument('--epochs', default=40, type=int)
+parser.add_argument('--epochs', default=1, type=int)
 parser.add_argument('--finetune', action='store_true')
 
 def main():
@@ -51,9 +50,8 @@ def main():
     # Training
     optimizer = torch.optim.Adam(ds_model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     with torch.cuda.device(args.gpu_index):
-            print("Downstream training beginning.")
-            ds_model.train(optimizer, train_loader, test_loader)
-
+        print("Downstream training beginning.")
+        ds_model.train(optimizer, train_loader, test_loader)
 
 
 if __name__ == "__main__":

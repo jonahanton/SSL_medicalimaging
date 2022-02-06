@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision 
+import torchvision
+from models.cnn_base import ConvNet
 
 
 class SimCLRBase(nn.Module):
@@ -13,12 +14,13 @@ class SimCLRBase(nn.Module):
         self.backbones_dict = {
             "resnet18": torchvision.models.resnet18(pretrained=True),
             "resnet50": torchvision.models.resnet50(pretrained=True),
+            "ConvNet": ConvNet()
         }
         
         try:
             self.backbone = self.backbones_dict[arch]
         except KeyError:
-            print(f"Invalid architecture {arch}. Pleases input either 'resnet18' or 'resnet50'.")
+            print(f"Invalid architecture {arch}. Pleases input either 'resnet18','resnet50' or 'ConvNet'.")
             raise KeyError
 
         
