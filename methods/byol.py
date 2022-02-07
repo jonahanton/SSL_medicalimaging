@@ -25,6 +25,7 @@ class EMA():
     def tau_decay(self, k, K):
         self.tau = 1 - (1-self.tau_base) * (math.cos(math.pi * k/K) + 1)/2
 
+
 class BYOLTrainer:
 
     def __init__(self, *args, **kwargs):
