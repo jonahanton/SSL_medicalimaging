@@ -44,6 +44,10 @@ def main():
     if not os.path.isdir(args.outpath):
         os.makedirs(args.outpath)
 
+    # create directory for saving/downloading data
+    if not os.path.isdir(args.data_path):
+        os.makedirs(args.data_path)
+
     # check if gpu training is available
     if not args.disable_cuda and torch.cuda.is_available():
         args.device = torch.device('cuda')
