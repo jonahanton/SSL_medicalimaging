@@ -24,7 +24,7 @@ parser.add_argument('--method', '-m', default='byol', help='type of ssl pretrain
 parser.add_argument('--data-path', default='./datasets', help='path to dataset')
 parser.add_argument('--dataset-name', default='CheXpert_small', help='dataset name')
 parser.add_argument('-a', '--arch', default='resnet18', choices=arch_choices)
-parser.add_argument('--epochs', default=400, type=int)
+parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-5)
@@ -34,19 +34,11 @@ parser.add_argument('--n-views', type=int, default=2)
 parser.add_argument('--outpath', default='saved_models')
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
+parser.add_argument('--set-default-args', '-d', action='store_true')
 
 def main():
 
     args = parser.parse_args()
-
-    # From SimCLR paper:
-    # BatchSize = 4096
-    # Epochs = 100
-    # LR = 0.3 x BatchSize/256
-    # weight decay = 1e-6
-    # Linear warmup for first 10 epochs, followed by cosine annealing LR without restarts
-    args.lr = 0.3 * (args.batch_size / 256)
-    args.weight_decay = 1e-6
 
     # create output directory for pretrained model
     if not os.path.isdir(args.outpath):
@@ -65,6 +57,13 @@ def main():
 
     # apply ssl pretraining
     if args.method == "simclr":
+        
+        if args.set_default_args:
+            args.batch_size = 4096
+            args.epochs = 100
+            args.lr = 0.3 * (args.batch_size / 256)
+            args.weight_decay = 1e-6
+
 
         model = SimCLRBase(arch=args.arch)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
