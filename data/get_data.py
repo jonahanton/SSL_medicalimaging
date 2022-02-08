@@ -1,6 +1,7 @@
 from torchvision.transforms import transforms
 from torchvision import datasets
 from data.generate_views import GenerateViews
+from data.custom_chexpert_dataset import CustomChexpertDataset
 
 
 class DatasetGetter:
@@ -17,11 +18,8 @@ class DatasetGetter:
         self.transforms_database = {
             "MNIST" : GenerateViews(self._return_transforms(28), self.args.n_views),
             "cifar10": GenerateViews(self._return_transforms(32), self.args.n_views),
-            "CheXpert_small": GenerateViews(self._return_transforms(128), self.args.n_views) # look at paper
+            "CheXpert": GenerateViews(self._return_transforms(224), self.args.n_views) # look at paper
             }
-
-        # Datasets that are available only on DOC Bitbucket
-        CheXpert_small_data_path = "/vol/bitbucket/lrc121/CheXpert_data_small/CheXpert-v1.0-small/train" # need to check if can load in properly
 
         if self.pretrain:
                 self.datasets_database = {
@@ -29,8 +27,8 @@ class DatasetGetter:
                                                 transform=self.transforms_database["MNIST"]),
                 "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                                 transform=self.transforms_database["cifar10"]),
-                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path,
-                                                transform=self.transforms_database["CheXpert_small"]),
+                "CheXpert": lambda: CustomChexpertDataset("/vol/bitbucket/lrc121/CheXpert-v1.0/train.csv","/vol/bitbucket/lrc121",
+                                                train = self.train, transforms = self.transforms_database["CheXpert"])
             }
         else:
             self.datasets_database = {
@@ -38,8 +36,8 @@ class DatasetGetter:
                                                 transform=self._return_transforms(28)),
                 "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                                 transform=self._return_transforms(32)),
-                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path, train=self.train, download=False,
-                                                    transform=self._return_transforms(128)),
+                "CheXpert": lambda: CustomChexpertDataset("/vol/bitbucket/lrc121/CheXpert-v1.0/train.csv","/vol/bitbucket/lrc121",
+                                                train = self.train, transforms = self._return_transforms(224)),
             }
 
     
