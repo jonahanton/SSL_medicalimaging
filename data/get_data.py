@@ -21,7 +21,7 @@ class DatasetGetter:
             }
 
         # Datasets that are available only on DOC Bitbucket
-        CheXpert_small_data_path = "~/vol/bitbucket/lrc121/CheXpert_data_small/CheXpert-v1.0-small/train" # need to check if can load in properly
+        CheXpert_small_data_path = "/vol/bitbucket/lrc121/CheXpert_data_small/CheXpert-v1.0-small/train" # need to check if can load in properly
 
         if self.pretrain:
                 self.datasets_database = {
