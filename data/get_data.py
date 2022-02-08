@@ -17,7 +17,11 @@ class DatasetGetter:
         self.transforms_database = {
             "MNIST" : GenerateViews(self._return_transforms(28), self.args.n_views),
             "cifar10": GenerateViews(self._return_transforms(32), self.args.n_views),
+            "CheXpert_small": GenerateViews(self._return_transforms(128), self.args.n_views) # look at paper
             }
+
+        # Datasets that are available only on DOC Bitbucket
+        CheXpert_small_data_path = "~/vol/bitbucket/lrc121/CheXpert_data_small"
 
         if self.pretrain:
                 self.datasets_database = {
@@ -25,6 +29,8 @@ class DatasetGetter:
                                                 transform=self.transforms_database["MNIST"]),
                 "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                                 transform=self.transforms_database["cifar10"]),
+                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path, train=self.train, download=False,
+                                                    transform=self.transforms_database["CheXpert_small"]),
             }
         else:
             self.datasets_database = {
@@ -32,6 +38,8 @@ class DatasetGetter:
                                                 transform=self._return_transforms(28)),
                 "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                                 transform=self._return_transforms(32)),
+                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path, train=self.train, download=False,
+                                                    transform=self._return_transforms(128)),
             }
 
     
