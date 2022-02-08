@@ -21,7 +21,7 @@ class DatasetGetter:
             }
 
         # Datasets that are available only on DOC Bitbucket
-        CheXpert_small_data_path = "~/vol/bitbucket/lrc121/CheXpert_data_small"
+        CheXpert_small_data_path = "~/vol/bitbucket/lrc121/CheXpert_data_small/CheXpert-v1.0-small/train" # need to check if can load in properly
 
         if self.pretrain:
                 self.datasets_database = {
@@ -29,8 +29,8 @@ class DatasetGetter:
                                                 transform=self.transforms_database["MNIST"]),
                 "cifar10": lambda : datasets.CIFAR10(self.args.data_path, train=self.train, download=True,
                                                 transform=self.transforms_database["cifar10"]),
-                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path, train=self.train, download=False,
-                                                    transform=self.transforms_database["CheXpert_small"]),
+                "CheXpert_small": lambda: datasets.ImageFolder(CheXpert_small_data_path,
+                                                transform=self.transforms_database["CheXpert_small"]),
             }
         else:
             self.datasets_database = {
