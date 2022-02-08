@@ -4,6 +4,7 @@ import numpy as np
 import math
 from torch.utils.data import Dataset
 from torchvision.io import read_image
+from PIL import Image
 
 class CustomChexpertDataset(Dataset):
     def __init__(self, csv_file, img_dir, train = False, transforms=None, target_transforms=None):
@@ -28,7 +29,7 @@ class CustomChexpertDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx])
-        image = read_image(img_path)
+        image = Image.open(img_path)
         label = self.img_labels.iloc[idx]
         if self.transform:
             image = self.transform(image)
