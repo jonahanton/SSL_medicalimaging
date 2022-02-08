@@ -31,6 +31,7 @@ class CustomChexpertDataset(Dataset):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx])
         image = Image.open(img_path)
         label = self.img_labels.iloc[idx]
+        label = label.to_numpy()
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
