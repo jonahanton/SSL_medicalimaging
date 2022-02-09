@@ -29,7 +29,7 @@ class DownstreamModel(nn.Module):
         try:
             self.model = self.models_dict[self.args.arch]
         except KeyError:
-            print(f"Invalid architecture {self.argsarch}. Pleases input either 'resnet18', 'resnet50' or 'ConvNet'.")
+            print(f"Invalid architecture {self.args.arch}. Pleases input either 'resnet18', 'resnet50' or 'ConvNet'.")
             raise KeyError
 
 
