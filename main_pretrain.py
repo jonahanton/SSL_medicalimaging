@@ -55,6 +55,15 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
+    # Default args as from original papers (exact implementation)
+    if args.set_default_args:
+        if args.method == "simclr":
+            args.batch_size = 4096
+            args.epochs = 100
+            args.lr = 0.3 * (args.batch_size / 256)
+            args.weight_decay = 1e-6
+
+
     # load data
     pretrain_dataset = DatasetGetter(pretrain=True, train=True, args=args).load()
     pretrain_loader = DataLoader(pretrain_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
@@ -62,13 +71,6 @@ def main():
     # apply ssl pretraining
     if args.method == "simclr":
         
-        if args.set_default_args:
-            args.batch_size = 4096
-            args.epochs = 100
-            args.lr = 0.3 * (args.batch_size / 256)
-            args.weight_decay = 1e-6
-
-
         model = SimCLRBase(arch=args.arch)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(pretrain_loader), eta_min=0, last_epoch=-1)
