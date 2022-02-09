@@ -37,7 +37,7 @@ class DownstreamModel(nn.Module):
 
         print("Loading saved model...")
 
-        checkpoint_filepath = f"./saved_models/ssl_{self.args.pre_train_method}_{self.args.arch}_{self.args.pretrain_dataset_name}_trained_model.pth.tar"
+        checkpoint_filepath = f"{self.args.outpath}/ssl_{self.args.pre_train_method}_{self.args.arch}_{self.args.pretrain_dataset_name}_trained_model.pth.tar"
 
         # load in weights from pretrained model
         # checkpoint_filepath = self.args.pretrained_path
