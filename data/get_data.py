@@ -46,15 +46,28 @@ class DatasetGetter:
         if self.pretrain:
             # Data augmentations to apply for pretraining
             color_jitter = transforms.ColorJitter(0.8, 0.8, 0.8, 0.2)
-            data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=size),
-                                              transforms.RandomHorizontalFlip(),
-                                              transforms.RandomApply([color_jitter], p=0.8),
-                                              transforms.RandomGrayscale(p=0.2),
-                                              transforms.ToTensor()])
+            transforms_list = [transforms.RandomResizedCrop(size=size),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.RandomApply([color_jitter], p=0.8),
+                                transforms.RandomGrayscale(p=0.2),
+                                transforms.ToTensor()]
+            
+            if self.args.grayscale:
+                # transforms_list += [transforms.Lambda(lambda x: x.repeat(1, 3, 1, 1))]
+                transforms_list += [transforms.Lambda(lambda x: x.repeat(3, 1, 1))]
+
+            data_transforms = transforms.Compose(transforms_list)
+        
         else:
             # Data augmentations to apply to dataset when loading in for fine-tuning/linear classifier
             # Not sure which to apply here? - Just transforms.ToTensor()? What about .Normalize()? Also assume this is dataset specific...?
-            data_transforms = transforms.Compose([transforms.ToTensor()])
+            transforms_list = [transforms.ToTensor()]
+
+            if self.args.grayscale:
+                # transforms_list += [transforms.Lambda(lambda x: x.repeat(1, 3, 1, 1))]
+                transforms_list += [transforms.Lambda(lambda x: x.repeat(3, 1, 1))]
+
+            data_transforms = transforms.Compose(transforms_list)
                                             
         return data_transforms
         

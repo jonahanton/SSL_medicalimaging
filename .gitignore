@@ -1,6 +1,7 @@
 datasets/
 runs/
 saved_models/
+playground.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

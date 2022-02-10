@@ -16,7 +16,6 @@ from data.get_data import DatasetGetter
 arch_choices = [name for name in models.__dict__
                       if name.islower() and not name.startswith("__")
                       and callable(models.__dict__[name])]
-
 arch_choices.append("ConvNet")
 
 parser = argparse.ArgumentParser()
@@ -35,6 +34,7 @@ parser.add_argument('--outpath', default='saved_models')
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
 parser.add_argument('--set-default-args', '-d', action='store_true')
+parser.add_argument('--grayscale', '-g', action='store_true', help='are the images grayscale?')
 
 def main():
 

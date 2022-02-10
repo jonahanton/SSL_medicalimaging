@@ -24,6 +24,8 @@ parser.add_argument('--lr', type=float, default=3e-4)
 parser.add_argument('--weight-decay', type=float, default=1e-4)
 parser.add_argument('--epochs', default=1, type=int)
 parser.add_argument('--finetune', action='store_true')
+parser.add_argument('--grayscale', '-g', action='store_true', help='are the images grayscale?')
+
 
 def main():
 
