@@ -7,6 +7,7 @@ source activate
 source /vol/cuda/11.0.3-cudnn8.0.5.39/setup.sh
 TERM=vt100 # or TERM=xterm
 echo Starting Script
-python3 ~/SSL/main_pretrain.py -m simclr --dataset-name CheXpert --epochs 5 --grayscale 
+# python3 ~/SSL/main_pretrain.py -m simclr --dataset-name CheXpert --epochs 5 --grayscale 
+python3 ~/SSL/main_pretrain.py -m simclr --dataset-name CheXpert --epochs 5 --grayscale --batch-size 4096 --lr 4.8 --weight-decay 1e-6
 /usr/bin/nvidia-smi
 uptime
