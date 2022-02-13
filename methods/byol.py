@@ -94,14 +94,18 @@ class BYOLTrainer:
 
                 # forward pass
                 q_online = self.model(x1)
-                z_target = self.target_net(x2)
-
                 symmetric_q_online = self.model(x2)
-                symmetric_z_target = self.target_net(x1)
+
+                # forward pass through target network
+                with torch.no_grad():
+                    z_target = self.target_net(x2)
+                    symmetric_z_target = self.target_net(x1)
+                    z_target.detach()
+                    symmetric_z_target.detach()
 
                 # loss
-                loss = self.criterion(q_online, z_target)
-                symmetric_loss = self.criterion(symmetric_q_online, symmetric_z_target)
+                loss = self.criterion(q_online, z_target.detach())
+                symmetric_loss = self.criterion(symmetric_q_online, symmetric_z_target.detach())
                 byol_loss = loss + symmetric_loss
 
                 # backprop
