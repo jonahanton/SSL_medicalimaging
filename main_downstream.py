@@ -9,13 +9,13 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--pre-train-method', default='byol')
-parser.add_argument('--arch', default='ConvNet')
+parser.add_argument('--pre-train-method', default='simclr')
+parser.add_argument('--arch', default='resnet18')
 parser.add_argument('--data-path', default='./datasets')
-parser.add_argument('--dataset-name', default='MNIST')
-parser.add_argument('--pretrain-dataset-name', default='MNIST')
+parser.add_argument('--dataset-name', default='CheXpert')
+parser.add_argument('--pretrain-dataset-name', default='CheXpert')
 parser.add_argument('--outpath', default='./saved_models')
-parser.add_argument('--num-classes', type=int, default=10)
+parser.add_argument('--num-classes', type=int, default=5)
 parser.add_argument('--disable-cuda', action='store_true')
 parser.add_argument('--gpu-index', type=int, default=0)
 parser.add_argument('--n_views', type=int, default=1)
