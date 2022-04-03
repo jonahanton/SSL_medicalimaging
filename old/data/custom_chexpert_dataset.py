@@ -13,7 +13,7 @@ class CustomChexpertDataset(Dataset):
         # Read in csv containing path information
         self.preclean_dataframe = pd.read_csv(csv_file)
         # Shuffle dataframe
-        self.preclean_dataframe.sample(frac=1, random_state = 42).reset_index(drop=True)
+        self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = 42).reset_index(drop=True)
         # Add a bit to split dataframe to train and test
         if train: # Train data
             self.preclean_dataframe = self.preclean_dataframe.iloc[:134049,:]
