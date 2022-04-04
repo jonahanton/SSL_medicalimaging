@@ -7,14 +7,16 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, csv_file, img_dir, train = False, transform=None, target_transform=None, download=False):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
         # Random seed
         random_state = 42
         # Read in csv containing path information
+        csv_file = os.path.join(img_dir, "train.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = 42).reset_index(drop=True)
         # Add a bit to split dataframe to train and test
+        # Validation set is ignored! (as in simCLR cheXpert paper)
         if train: # Train data
             self.preclean_dataframe = self.preclean_dataframe.iloc[:134049,:]
         else: # Test Data
@@ -29,9 +31,11 @@ class CustomChexpertDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx])
+        print(img_path)
         image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
         label = label.to_numpy()
+        print(label)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -64,6 +68,8 @@ class CustomChexpertDataset(Dataset):
         path = dataframe.iloc[:,0]
         aux = dataframe.iloc[:,1:5]
         label = dataframe.iloc[:,6:]
+        # Only take the 5 pathologies as specified in Azizi et al.
+        label = label[["Atelectasis", "Cardiomegaly", "Consolidation","Edema", "Pleural Effusion"]]
         return path, aux, label
 
     def _basic_preclean(self, dataframe):
@@ -72,22 +78,10 @@ class CustomChexpertDataset(Dataset):
         return path, aux, label
 
 def test_class():
-    data = np.random.randint(-1,2, size=(5,10))
-    df = pd.DataFrame(data)
-    df = df.astype(float)
-    print(df)
-    print(df.iloc[:4,:])
-    cid = CustomChexpertDataset('train.csv', '.dataset')
-    #print(cid)
-    #print(cid._clean_dataframe(df))
-    path, aux, label = cid._split_labels(df)
-    print(len(label))
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True)
+    print(cid[10])
 
 
 if __name__ == "__main__":
-    # test_class()
-    # cid = CustomChexpertDataset('train.csv', '.dataset', train = True)
-    # print(len(cid))
-    # cid = CustomChexpertDataset('train.csv', '.dataset')
-    # print(len(cid))
+    #test_class()
     pass
