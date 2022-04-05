@@ -15,7 +15,7 @@ We evaluate the following pretrained ResNet50 models (with links)
 | SwAV | https://dl.fbaipublicfiles.com/deepcluster/swav_800ep_pretrain.pth.tar |
 | Supervised | Weights from `torchvision.models.resnet50(pretrained=True)` |
 
-**Note 1**: For SimCLR-v2, the TensorFlow checkpoints need to be downloaded manually and converted into PyTorch format (using https://github.com/tonylins/simclr-converter and https://github.com/Separius/SimCLRv2-Pytorch, respectively).
+**Note 1**: For SimCLR-v2, the TensorFlow checkpoints need to be downloaded manually and converted into PyTorch format (using https://github.com/Separius/SimCLRv2-Pytorch).
 
 **Note 2**: In order to convert BYOL, you may need to install some packages by running:
 ```
