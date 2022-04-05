@@ -2,6 +2,19 @@
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well (and Why) Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
 Authors: Jonah Anton, Liam Castelli, Wan Hee Tang, Venus Cheung, Mathilde Outters, Mun Fai Chan
 
+Note that much of the code is taken/adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
+
+```
+@inproceedings{Ericsson2021HowTransfer,
+    title = {{How Well Do Self-Supervised Models Transfer?}},
+    year = {2021},
+    booktitle = {CVPR},
+    author = {Ericsson, Linus and Gouk, Henry and Hospedales, Timothy M.},
+    url = {http://arxiv.org/abs/2011.13377},
+    arxivId = {2011.13377}
+}
+```
+
 
 ## Pre-trained Models
 We evaluate the following pretrained ResNet50 models (with links)
