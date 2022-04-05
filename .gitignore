@@ -1,6 +1,7 @@
 ssl-transfer
 simclr-converter
 models
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
