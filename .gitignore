@@ -1,7 +1,4 @@
-datasets/
-runs/
-saved_models/
-playground.ipynb
+ssl-transfer
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
