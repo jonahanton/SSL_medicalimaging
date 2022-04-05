@@ -15,7 +15,7 @@ import PIL
 import numpy as np
 from tqdm import tqdm
 
-from sklearn.linear_model import LogReg
+from sklearn.linear_model import LogisticRegression as LogReg
 from sklearn.metrics import confusion_matrix, precision_recall_curve
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
