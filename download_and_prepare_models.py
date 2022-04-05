@@ -191,3 +191,11 @@ if __name__ == '__main__':
         state_dict = model.state_dict()
         state_dict = {key.replace('model.', ''): val for key, val in state_dict.items()}
         torch.save(state_dict, os.path.join('models', f'{model_name}.pth'))
+    
+    
+    # resave simclr-v1 in the correct format
+    model_name = 'simclr-v1'
+    model = LoadedResNet(model_name)
+    state_dict = model.state_dict()
+    state_dict = {key.replace('model.', ''): val for key, val in state_dict.items()}
+    torch.save(state_dict, os.path.join('models', f'{model_name}.pth'))
