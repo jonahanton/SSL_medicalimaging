@@ -42,10 +42,10 @@ class LogisticRegression(nn.Module):
         self.metric = metric
         self.clf = LogReg(solver='lbfgs', multi_class='multinomial', warm_start=True)
 
-        logging.info('Logistic regression:')
-        logging.info(f'\t solver = L-BFGS')
-        logging.info(f"\t classes = {self.num_classes}")
-        logging.info(f"\t metric = {self.metric}")
+        print('Logistic regression:')
+        print(f'\t solver = L-BFGS')
+        print(f"\t classes = {self.num_classes}")
+        print(f"\t metric = {self.metric}")
 
     def set_params(self, d):
         self.clf.set_params(**d)
@@ -131,7 +131,7 @@ class LinearTester():
                 self.best_params['C'] = C
 
     def evaluate(self):
-        logging.info(f"Best hyperparameters {self.best_params}")
+        print(f"Best hyperparameters {self.best_params}")
         X_trainval_feature, y_trainval, X_test_feature, y_test = self.get_features(
             self.trainval_loader, self.test_loader, self.model
         )
@@ -154,7 +154,7 @@ class ResNetBackbone(nn.Module):
         self.model.load_state_dict(state_dict)
 
         self.model.eval()
-        # print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -352,7 +352,8 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=str, default='cuda', help='CUDA or CPU training (cuda | cpu)')
     args = parser.parse_args()
     args.norm = not args.no_norm
-    logging.info(args)
+    print(args)
+
 
     # set-up logging
     log_fname = f'linear_{args.model}_{args.dataset}.log'
@@ -360,6 +361,7 @@ if __name__ == "__main__":
         os.makedirs('./logs')
     log_path = os.path.join('./logs', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', encoding='utf-8', level=logging.INFO)
+    logging.info(args)
 
     # load dataset
     dset, data_dir, num_classes, metric = LINEAR_DATASETS[args.dataset]
@@ -384,5 +386,6 @@ if __name__ == "__main__":
         tester.best_params = {'C': args.C}
     # use best hyperparameters to finally evaluate the model
     test_acc, C = tester.evaluate()
+    print(f'Final accuracy for {args.model} on {args.dataset}: {test_acc:.2f}% using hyperparameter C: {C:.3f}')
     logging.info(f'Final accuracy for {args.model} on {args.dataset}: {test_acc:.2f}% using hyperparameter C: {C:.3f}')
 
