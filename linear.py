@@ -360,7 +360,7 @@ if __name__ == "__main__":
     if not os.path.isdir('./logs'):
         os.makedirs('./logs')
     log_path = os.path.join('./logs', log_fname)
-    logging.basicConfig(filename=log_path, filemode='w', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
     # load dataset
