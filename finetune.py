@@ -18,7 +18,8 @@ from tqdm import tqdm
 
 from sklearn.metrics import confusion_matrix, precision_recall_curve
 
-
+from datasets.custom_chexpert_dataset import CustomChexpertDataset
+from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
 
 
 
@@ -421,6 +422,7 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, num_work
 FINETUNE_DATASETS = {
     'cifar10': [datasets.CIFAR10, '../data/CIFAR10', 10, 'accuracy'],
     'cifar100': [datasets.CIFAR100, '../data/CIFAR100', 100, 'accuracy'],
+    'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
 }
 
 
