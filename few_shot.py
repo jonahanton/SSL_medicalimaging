@@ -143,7 +143,8 @@ class ProtoNet(nn.Module):
             z = self.encoder.forward(x)
             z_dim = z.size(-1)
             # [z] = [n_class*(n_support + n_query), z_dim]
-            # for resnet backbone, z_dim = 2048
+            # for resnet50 backbone, z_dim = 2048
+            # for resnet18 backbone, z_dim = 512
             # for densenet backbone, z_dim = 1024
             
 
@@ -168,6 +169,37 @@ class ProtoNet(nn.Module):
 
 
 # Model classes and functions
+
+class ResNet18Backbone(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+        self.model = models.resnet18(pretrained=False)
+        del self.model.fc
+
+        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
+        self.model.load_state_dict(state_dict)
+
+        self.model.train()
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+
+    def forward(self, x):
+        x = self.model.conv1(x)
+        x = self.model.bn1(x)
+        x = self.model.relu(x)
+        x = self.model.maxpool(x)
+
+        x = self.model.layer1(x)
+        x = self.model.layer2(x)
+        x = self.model.layer3(x)
+        x = self.model.layer4(x)
+
+        x = self.model.avgpool(x)
+        x = torch.flatten(x, 1)
+
+        return x
+
 
 class ResNetBackbone(nn.Module):
     def __init__(self, model_name):
@@ -253,9 +285,16 @@ if __name__ == "__main__":
     # load pretrained model
     if 'mimic-chexpert' in args.model:
         model = DenseNetBackbone(args.model)
+    elif 'mimic-cxr' in args.model:
+        if 'r18' in args.model:
+            model = ResNet18Backbone(args.model)
+        else:
+            model = DenseNetBackbone(args.model)
     else:
         model = ResNetBackbone(args.model)
+    
     model = model.to(args.device)
+
 
     # evaluate model on dataset by protonet few-shot-learning evaluation
     tester = FewShotTester(model, dataloader, args.n_way, args.n_support, args.n_query, args.iter_num, args.device)

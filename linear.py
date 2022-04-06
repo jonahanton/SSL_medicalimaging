@@ -139,6 +139,36 @@ class LinearTester():
         return test_score, self.best_params['C']
 
 
+class ResNet18Backbone(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+        self.model = models.resnet18(pretrained=False)
+        del self.model.fc
+
+        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
+        self.model.load_state_dict(state_dict)
+
+        self.model.eval()
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+
+    def forward(self, x):
+        x = self.model.conv1(x)
+        x = self.model.bn1(x)
+        x = self.model.relu(x)
+        x = self.model.maxpool(x)
+
+        x = self.model.layer1(x)
+        x = self.model.layer2(x)
+        x = self.model.layer3(x)
+        x = self.model.layer4(x)
+
+        x = self.model.avgpool(x)
+        x = torch.flatten(x, 1)
+
+        return x
+
 
 class ResNetBackbone(nn.Module):
     def __init__(self, model_name):
@@ -401,10 +431,19 @@ if __name__ == "__main__":
     if 'mimic-chexpert' in args.model:
         model = DenseNetBackbone(args.model)
         feature_dim = 1024
+    elif 'mimic-cxr' in args.model:
+        if 'r18' in args.model:
+            model = ResNet18Backbone(args.model)
+            feature_dim = 512
+        else:
+            model = DenseNetBackbone(args.model)
+            feature_dim = 1024
     else:
         model = ResNetBackbone(args.model)
         feature_dim = 2048
+    
     model = model.to(args.device)
+
 
     # evaluate model on dataset by fitting logistic regression
     tester = LinearTester(model, train_loader, val_loader, trainval_loader, test_loader, args.batch_size,
