@@ -170,7 +170,7 @@ class FinetuneTester():
 
     def validate(self):
         best_score = 0
-        for i, (lr, wd) in enumerate(grid):
+        for i, (lr, wd) in enumerate(self.grid):
             print(f'Run {i}')
             print(f'lr={lr}, wd={wd}')
 
