@@ -115,7 +115,10 @@ class ProtoNet(nn.Module):
 
     def loss(self, sample):
         with torch.no_grad():
+            # [xs] = [n_class, n_support, 3, 224, 224]  # 224 = image_size 
+            # note that n_class == n_way (number of classes sampled per episode)
             xs = Variable(sample['xs']) # support
+            # [xq] = [n_class, n_query, 3, 224, 224]
             xq = Variable(sample['xq']) # query
 
             n_class = xs.size(0)
@@ -125,17 +128,27 @@ class ProtoNet(nn.Module):
 
             target_inds = torch.arange(0, n_class).view(n_class, 1, 1).expand(n_class, n_query, 1).long()
             target_inds = Variable(target_inds, requires_grad=False)
+            # [target_inds] = [n_class, n_query, 1]
+            # e.g. for n_class = 2, n_query = 5, 
+            # target_inds = [[[0 0 0 0 0]]
+            #                [[1 1 1 1 1]]]
 
             if xq.is_cuda:
                 target_inds = target_inds.cuda()
 
+            # move all examples for each class in the same dimension (dim 0, i.e., one large batch)
             x = torch.cat([xs.view(n_class * n_support, *xs.size()[2:]),
                            xq.view(n_class * n_query, *xq.size()[2:])], 0)
 
             z = self.encoder.forward(x)
             z_dim = z.size(-1)
+            # [z] = [n_class*(n_support + n_query), z_dim]
+            # for resnet50 backbone, z_dim = 2048
+            
 
+            # compute prototypes for each class from support examples
             z_proto = z[:n_class*n_support].view(n_class, n_support, z_dim).mean(1)
+            # calculate z embeddings for query examples
             zq = z[n_class*n_support:]
 
             dists = euclidean_dist(zq, z_proto)

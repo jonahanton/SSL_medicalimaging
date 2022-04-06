@@ -186,6 +186,7 @@ class SetDataManager(DataManager):
         transform = self.trans_loader.get_composed_transform(aug, normalise)
         dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform)
         sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )  
+        # Custom sampler that yileds n_way random class indices each time it's called
         data_loader_params = dict(batch_sampler = sampler,  num_workers = 12, pin_memory = True)       
         data_loader = torch.utils.data.DataLoader(dataset, **data_loader_params)
         return data_loader
