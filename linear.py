@@ -8,6 +8,7 @@ import logging
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader, ConcatDataset
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, transforms, models
@@ -170,6 +171,26 @@ class ResNetBackbone(nn.Module):
         return x
 
 
+class DenseNetBackbone(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+        self.model = models.densenet121(pretrained=False)
+        del self.model.classifier
+
+        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
+        self.model.load_state_dict(state_dict)
+
+        self.model.eval()
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+    
+    def forward(self, x):
+        features = self.model.features(x)
+        out = F.relu(features, inplace=True)
+        out = F.adaptive_avg_pool2d(out, (1, 1))
+        out = torch.flatten(out, 1)
+        return out
 
 
 
@@ -377,12 +398,17 @@ if __name__ == "__main__":
 
 
     # load pretrained model
-    model = ResNetBackbone(args.model)
+    if 'mimic-chexpert' in args.model:
+        model = DenseNetBackbone(args.model)
+        feature_dim = 1024
+    else:
+        model = ResNetBackbone(args.model)
+        feature_dim = 2048
     model = model.to(args.device)
 
     # evaluate model on dataset by fitting logistic regression
     tester = LinearTester(model, train_loader, val_loader, trainval_loader, test_loader, args.batch_size,
-                          metric, args.device, num_classes, wd_range=torch.logspace(-6, 5, args.wd_values))
+                          metric, args.device, num_classes, feature_dim, wd_range=torch.logspace(-6, 5, args.wd_values))
 
     if args.C is None:
         # tune hyperparameters

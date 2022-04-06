@@ -143,7 +143,8 @@ class ProtoNet(nn.Module):
             z = self.encoder.forward(x)
             z_dim = z.size(-1)
             # [z] = [n_class*(n_support + n_query), z_dim]
-            # for resnet50 backbone, z_dim = 2048
+            # for resnet backbone, z_dim = 2048
+            # for densenet backbone, z_dim = 1024
             
 
             # compute prototypes for each class from support examples
@@ -199,6 +200,29 @@ class ResNetBackbone(nn.Module):
         return x
 
 
+class DenseNetBackbone(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+        self.model = models.densenet121(pretrained=False)
+        del self.model.classifier
+
+        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
+        self.model.load_state_dict(state_dict)
+
+        self.model.train()
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+    
+    def forward(self, x):
+        features = self.model.features(x)
+        out = F.relu(features, inplace=True)
+        out = F.adaptive_avg_pool2d(out, (1, 1))
+        out = torch.flatten(out, 1)
+        return out
+
+
+
 
 
 if __name__ == "__main__":
@@ -225,8 +249,12 @@ if __name__ == "__main__":
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm)
 
+
     # load pretrained model
-    model = ResNetBackbone(args.model)
+    if 'mimic-chexpert' in args.model:
+        model = DenseNetBackbone(args.model)
+    else:
+        model = ResNetBackbone(args.model)
     model = model.to(args.device)
 
     # evaluate model on dataset by protonet few-shot-learning evaluation

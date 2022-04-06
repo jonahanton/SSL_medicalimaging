@@ -7,6 +7,7 @@ from pprint import pprint
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, ConcatDataset
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -174,8 +175,13 @@ class FinetuneTester():
             print(f'lr={lr}, wd={wd}')
 
             # load pretrained model
-            self.model = ResNetBackbone(self.model_name)
-            self.model = self.model.to(self.device)
+            if 'mimic-chexpert' in self.model_name:
+                self.model = DenseNetBackbone(self.model_name)
+                self.feature_dim = 1024
+            else:
+                self.model = ResNetBackbone(self.model_name)
+            model = model.to(args.device)
+
             self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
                                            self.metric, self.device, self.feature_dim)
             val_acc = self.finetuner.tune(self.train_loader, self.val_loader, lr, wd)
@@ -230,6 +236,28 @@ class ResNetBackbone(nn.Module):
         x = torch.flatten(x, 1)
 
         return x
+
+
+class DenseNetBackbone(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+        self.model = models.densenet121(pretrained=False)
+        del self.model.classifier
+
+        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
+        self.model.load_state_dict(state_dict)
+
+        self.model.train()
+        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+    
+    def forward(self, x):
+        features = self.model.features(x)
+        out = F.relu(features, inplace=True)
+        out = F.adaptive_avg_pool2d(out, (1, 1))
+        out = torch.flatten(out, 1)
+        return out
 
 
 
