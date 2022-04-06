@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     # load dataset
     dset, data_dir, num_classes, metric = FEW_SHOT_DATASETS[args.dataset]
-    datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
+    datamgr = few_shot_dataset.SetDataManagercp (dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm)
 
