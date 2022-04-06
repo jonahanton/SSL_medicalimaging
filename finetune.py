@@ -122,8 +122,6 @@ class FinetuneModel(nn.Module):
             for i, (data, targets) in enumerate(tqdm(data_loader, desc=' Testing')):
                 num_data_points += data.size(0)
                 data, targets = data.to(self.device), targets.to(self.device)
-                if self.metric == 'mAP':
-                    targets = targets.to(torch.float32)
                 output = self.model(data)
                 tl = self.criterion(output, targets).item()
                 tl *= data.size(0)

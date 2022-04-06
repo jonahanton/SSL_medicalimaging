@@ -21,13 +21,10 @@ from sklearn.metrics import confusion_matrix, precision_recall_curve
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 
-# name: {class, root, num_classes, metric}
-LINEAR_DATASETS = {
-    'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
-}
-
-
-
+from datasets.custom_chexpert_dataset import CustomChexpertDataset
+from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
+from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
+from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 
 
 
@@ -334,6 +331,15 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation):
 
 
 
+
+# name: {class, root, num_classes, metric}
+LINEAR_DATASETS = {
+    'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
+    'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
+    'shenzhen_cxr': [CustomShenzhenCXRDataset, './data/shenzhen_cxr', 2, 'accuracy'],
+    'montgomery_cxr': [CustomMontgomeryCXRDataset, './data/montgomery_cxr', 2, 'accuracy'],
+    'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+}
 
 
 if __name__ == "__main__":
