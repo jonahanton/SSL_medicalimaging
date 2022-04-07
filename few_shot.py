@@ -4,6 +4,7 @@
 import os
 import argparse
 from pprint import pprint
+import logging
 
 import torch
 import torch.nn as nn
@@ -37,6 +38,7 @@ class FewShotTester():
     def test(self):
         loss, acc, std = self.evaluate(self.protonet, self.dataloader, self.n_support, self.n_query, self.iter_num)
         print('Test Acc = %4.2f%% +- %4.2f%%' %(acc, 1.96 * std / np.sqrt(self.iter_num)))
+        logging.info('Test Acc = %4.2f%% +- %4.2f%%' %(acc, 1.96 * std / np.sqrt(self.iter_num)))
         return acc, std
 
     def extract_episode(self, data, n_support, n_query):
@@ -179,6 +181,7 @@ class ResNet18Backbone(nn.Module):
 
         self.model.train()
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -210,6 +213,7 @@ class ResNetBackbone(nn.Module):
 
         self.model.train()
         print("num parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -241,6 +245,7 @@ class DenseNetBackbone(nn.Module):
 
         self.model.train()
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
     
     def forward(self, x):
         features = self.model.features(x)
@@ -281,6 +286,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.norm = not args.no_norm
     pprint(args)
+
+    # set-up logging
+    log_fname = f'few-shot_{args.model}_{args.dataset}.log'
+    if not os.path.isdir('./logs'):
+        os.makedirs('./logs')
+    log_path = os.path.join('./logs', log_fname)
+    logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
+    logging.info(args)
 
     # load dataset
     dset, data_dir, num_classes, metric = FEW_SHOT_DATASETS[args.dataset]

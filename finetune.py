@@ -4,6 +4,7 @@
 import os
 import argparse
 from pprint import pprint
+import logging 
 
 import torch
 import torch.nn as nn
@@ -79,6 +80,7 @@ class FinetuneModel(nn.Module):
         optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wd)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.steps)
         print(optimizer)
+        logging.info(optimizer)
         # train the model with labels on the validation data
         self.model.train()
         train_loss = AverageMeter('loss', ':.4e')
@@ -172,7 +174,9 @@ class FinetuneTester():
         best_score = 0
         for i, (lr, wd) in enumerate(self.grid):
             print(f'Run {i}')
+            logging.info(f'Run {i}')
             print(f'lr={lr}, wd={wd}')
+            logging.info(f'lr={lr}, wd={wd}')
 
             
             # load pretrained model
@@ -197,15 +201,18 @@ class FinetuneTester():
                                            self.metric, self.device, self.feature_dim)
             val_acc = self.finetuner.tune(self.train_loader, self.val_loader, lr, wd)
             print(f'Finetuned val accuracy {val_acc:.2f}%')
+            logging.info(f'Finetuned val accuracy {val_acc:.2f}%')
 
             if val_acc > best_score:
                 best_score = val_acc
                 self.best_params['lr'] = lr
                 self.best_params['wd'] = wd
                 print(f"New best {self.best_params}")
+                logging.info(f"New best {self.best_params}")
 
     def evaluate(self):
         print(f"Best params {self.best_params}")
+        logging.info(f"Best params {self.best_params}")
 
         # load pretrained model
         if 'mimic-chexpert' in self.model_name:
@@ -229,6 +236,7 @@ class FinetuneTester():
                                        self.metric, self.device, self.feature_dim)
         test_score = self.finetuner.tune(self.trainval_loader, self.test_loader, self.best_params['lr'], self.best_params['wd'])
         print(f'Finetuned test accuracy {test_score:.2f}%')
+        logging.info(f'Finetuned test accuracy {test_score:.2f}%')
         return test_score
 
 
@@ -245,6 +253,7 @@ class ResNet18Backbone(nn.Module):
 
         self.model.train()
         print("num parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -276,6 +285,7 @@ class ResNetBackbone(nn.Module):
 
         self.model.train()
         print("num parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -307,6 +317,7 @@ class DenseNetBackbone(nn.Module):
 
         self.model.train()
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
+        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
     
     def forward(self, x):
         features = self.model.features(x)
@@ -372,6 +383,7 @@ def get_train_valid_loader(dset,
 
     normalize = transforms.Normalize(**normalise_dict)
     print("Train normaliser:", normalize)
+    logging.info("Train normaliser:", normalize)
 
     # define transforms with augmentations
     transform_aug = transforms.Compose([
@@ -392,8 +404,11 @@ def get_train_valid_loader(dset,
         transform_aug = transform_no_aug
 
     print("Train transform:", transform_aug)
+    logging.info("Train transform:", transform_aug)
     print("Val transform:", transform_no_aug)
+    logging.info("Val transform:", transform_no_aug)
     print("Trainval transform:", transform_aug)
+    logging.info("Trainval transform:", transform_no_aug)
 
 
     # select a random subset of the train set to form the validation set
@@ -458,6 +473,7 @@ def get_test_loader(dset,
 
     normalize = transforms.Normalize(**normalise_dict)
     print("Test normaliser:", normalize)
+    logging.info("Test normaliser:", normalize)
 
     # define transform
     transform = transforms.Compose([
@@ -468,6 +484,7 @@ def get_test_loader(dset,
     ])
 
     print("Test transform:", transform)
+    logging.info("Test transform:", transform)
 
     dataset = get_dataset(dset, data_dir, 'test', transform)
 
@@ -481,6 +498,7 @@ def get_test_loader(dset,
 
 def prepare_data(dset, data_dir, batch_size, image_size, normalisation, num_workers, data_augmentation):
     print(f'Loading {dset} from {data_dir}, with batch size={batch_size}, image size={image_size}, norm={normalisation}')
+    logging.info(f'Loading {dset} from {data_dir}, with batch size={batch_size}, image size={image_size}, norm={normalisation}')
     if normalisation:
         normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
     else:
@@ -530,6 +548,14 @@ if __name__ == "__main__":
     del args.no_norm
     del args.no_da
     pprint(args)
+
+    # set-up logging
+    log_fname = f'finetune_{args.model}_{args.dataset}.log'
+    if not os.path.isdir('./logs'):
+        os.makedirs('./logs')
+    log_path = os.path.join('./logs', log_fname)
+    logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
+    logging.info(args)
 
     # load dataset
     dset, data_dir, num_classes, metric = FINETUNE_DATASETS[args.dataset]
