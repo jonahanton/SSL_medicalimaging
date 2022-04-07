@@ -26,7 +26,7 @@ class CustomMontgomeryCXRDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.img_dir+"MontgomerySet/CXR_png/", self.img_paths.iloc[idx])
+        img_path = os.path.join(os.path.join(self.img_dir, "MontgomerySet/CXR_png/"), self.img_paths.iloc[idx])
         image = Image.open(img_path)
         label = self.img_labels.iloc[idx]
         if self.transform:

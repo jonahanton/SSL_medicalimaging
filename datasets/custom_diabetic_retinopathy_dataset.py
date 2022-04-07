@@ -11,11 +11,11 @@ class CustomDiabeticRetinopathyDataset(Dataset):
         # Random seed
         random_state = 42
         if train:
-            self.img_dir = img_dir + "train/"
-            csv_file = img_dir + "trainLabels.csv"
+            self.img_dir = os.path.join(img_dir, "train")
+            csv_file = os.path.join(img_dir, "trainLabels.csv")
         else:
-            self.img_dir = img_dir + "test/"
-            csv_file = img_dir + "testLabels.csv"
+            self.img_dir = os.path.join(img_dir, "test")
+            csv_file = os.path.join(img_dir, "testLabels.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
