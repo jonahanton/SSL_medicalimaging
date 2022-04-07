@@ -229,10 +229,11 @@ class DenseNetBackbone(nn.Module):
 # Data classes and functions
 
 def get_dataset(dset, root, split, transform):
-    try:
-        return dset(root, train=(split == 'train'), transform=transform, download=True)
-    except:
-        return dset(root, split=split, transform=transform, download=True)
+    return dset(root, train=(split == 'train'), transform=transform, download=True)
+    # try:
+    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
+    # except:
+    #     return dset(root, split=split, transform=transform, download=True)
 
 
 def get_train_valid_loader(dset,
