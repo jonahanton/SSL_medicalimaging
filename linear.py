@@ -27,6 +27,8 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
 from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 
+from datasets.transforms import HistogramNormalize
+
 
 
 
@@ -239,6 +241,7 @@ def get_dataset(dset, root, split, transform):
 def get_train_valid_loader(dset,
                            data_dir,
                            normalise_dict,
+                           hist_norm,
                            batch_size,
                            image_size,
                            random_seed,
@@ -277,12 +280,20 @@ def get_train_valid_loader(dset,
     # print("Train normaliser:", normalize)
 
     # define transforms
-    transform = transforms.Compose([
-        transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    if hist_norm:
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            HistogramNormalize(),
+        ])
+    else:
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
 
     # Assume no predefined train-valid split
     # Select a random subset of the train set to form the validation set
@@ -320,6 +331,7 @@ def get_train_valid_loader(dset,
 def get_test_loader(dset,
                     data_dir,
                     normalise_dict,
+                    hist_norm,
                     batch_size,
                     image_size,
                     shuffle=False,
@@ -348,13 +360,21 @@ def get_test_loader(dset,
     normalize = transforms.Normalize(**normalise_dict)
     # print("Test normaliser:", normalize)
 
-    # define transform
-    transform = transforms.Compose([
-        transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    # define transforms
+    if hist_norm:
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            HistogramNormalize(),
+        ])
+    else:
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
 
     dataset = get_dataset(dset, data_dir, 'test', transform)
 
@@ -367,14 +387,14 @@ def get_test_loader(dset,
 
 
 
-def prepare_data(dset, data_dir, batch_size, image_size, normalisation):
+def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_norm):
     if normalisation:
         normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
     else:
         normalise_dict = {'mean': [0.0, 0.0, 0.0], 'std': [1.0, 1.0, 1.0]}
     train_loader, val_loader, trainval_loader = get_train_valid_loader(dset, data_dir, normalise_dict,
-                                                batch_size, image_size, random_seed=0)
-    test_loader = get_test_loader(dset, data_dir, normalise_dict, batch_size, image_size)
+                                                hist_norm, batch_size, image_size, random_seed=0)
+    test_loader = get_test_loader(dset, data_dir, normalise_dict, hist_norm, batch_size, image_size)
 
     return train_loader, val_loader, trainval_loader, test_loader
 
@@ -410,6 +430,11 @@ if __name__ == "__main__":
     args.norm = not args.no_norm
     print(args)
 
+    # histogram normalization
+    hist_norm = False
+    if 'mimic-chexpert' in args.model:
+        hist_norm = True
+
 
     # set-up logging
     log_fname = f'linear_{args.model}_{args.dataset}.log'
@@ -423,7 +448,8 @@ if __name__ == "__main__":
     dset, data_dir, num_classes, metric = LINEAR_DATASETS[args.dataset]
     # prepare data loaders
     train_loader, val_loader, trainval_loader, test_loader = prepare_data(
-        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm)
+        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm, 
+        hist_norm=hist_norm)
 
 
     # load pretrained model

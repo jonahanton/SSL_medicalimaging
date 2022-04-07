@@ -14,6 +14,8 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
 from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 
+from datasets.transforms import HistogramNormalize
+
 from PIL import ImageFile
 from PIL import ImageEnhance
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -150,19 +152,25 @@ class TransformLoader:
         elif transform_type=='Resize':
             return method([int(self.image_size*1.15), int(self.image_size*1.15)])
         elif transform_type=='Normalize':
-            return method(**self.normalize_param )
+            return method(**self.normalize_param)
+        elif transform_type=='HistogramNormalize':
+            return HistogramNormalize()
         else:
             return method()
 
-    def get_composed_transform(self, aug=False, normalise=True):
+    def get_composed_transform(self, aug=False, normalise=True, hist_norm=False):
         if aug:
             if normalise:
                 transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor', 'Normalize']
+            elif hist_norm:
+                transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor', 'HistogramNormalize']
             else:
                 transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor']
         else:
             if normalise:
                 transform_list = ['Resize','CenterCrop', 'ToTensor', 'Normalize']
+            elif hist_norm:
+                transform_list = ['Resize','CenterCrop', 'ToTensor', 'HistogramNormalize']
             else:
                 transform_list = ['Resize','CenterCrop', 'ToTensor']
 

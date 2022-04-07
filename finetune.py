@@ -23,6 +23,8 @@ from sklearn.metrics import confusion_matrix, precision_recall_curve
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
 
+from datasets.transforms import HistogramNormalize
+
 
 
 
@@ -347,6 +349,7 @@ def get_dataset(dset, root, split, transform):
 def get_train_valid_loader(dset,
                            data_dir,
                            normalise_dict,
+                           hist_norm,
                            batch_size,
                            image_size,
                            random_seed,
@@ -386,20 +389,39 @@ def get_train_valid_loader(dset,
     print("Train normaliser:", normalize)
     logging.info("Train normaliser:", normalize)
 
+
     # define transforms with augmentations
-    transform_aug = transforms.Compose([
-        transforms.RandomResizedCrop(image_size, interpolation=PIL.Image.BICUBIC),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize
-    ])
+    if hist_norm:
+        transform_aug = transforms.Compose([
+            transforms.RandomResizedCrop(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            HistogramNormalize(),
+        ])
+    else:
+        transform_aug = transforms.Compose([
+            transforms.RandomResizedCrop(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ])
+
+
     # define transform without augmentations
-    transform_no_aug = transforms.Compose([
-        transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    if hist_norm:
+        transform_no_aug = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            HistogramNormalize(),
+        ])
+    else:
+        transform_no_aug = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
 
     if not data_augmentation:
         transform_aug = transform_no_aug
@@ -447,6 +469,7 @@ def get_train_valid_loader(dset,
 def get_test_loader(dset,
                     data_dir,
                     normalise_dict,
+                    hist_norm,
                     batch_size,
                     image_size,
                     shuffle=False,
@@ -477,12 +500,20 @@ def get_test_loader(dset,
     logging.info("Test normaliser:", normalize)
 
     # define transform
-    transform = transforms.Compose([
-        transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    if hist_norm:              
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            HistogramNormalize(),
+        ])
+    else:
+        transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
 
     print("Test transform:", transform)
     logging.info("Test transform:", transform)
@@ -497,7 +528,7 @@ def get_test_loader(dset,
     return data_loader
 
 
-def prepare_data(dset, data_dir, batch_size, image_size, normalisation, num_workers, data_augmentation):
+def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_norm, num_workers, data_augmentation):
     print(f'Loading {dset} from {data_dir}, with batch size={batch_size}, image size={image_size}, norm={normalisation}')
     logging.info(f'Loading {dset} from {data_dir}, with batch size={batch_size}, image size={image_size}, norm={normalisation}')
     if normalisation:
@@ -550,6 +581,13 @@ if __name__ == "__main__":
     del args.no_da
     pprint(args)
 
+
+    # histogram normalization
+    hist_norm = False
+    if 'mimic-chexpert' in args.model:
+        hist_norm = True
+
+
     # set-up logging
     log_fname = f'finetune_{args.model}_{args.dataset}.log'
     if not os.path.isdir('./logs'):
@@ -561,8 +599,8 @@ if __name__ == "__main__":
     # load dataset
     dset, data_dir, num_classes, metric = FINETUNE_DATASETS[args.dataset]
     train_loader, val_loader, trainval_loader, test_loader = prepare_data(
-        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm, num_workers=args.workers,
-        data_augmentation=args.da)
+        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm,
+        hist_norm=hist_norm, num_workers=args.workers, data_augmentation=args.da)
     
     # set up learning rate and weight decay ranges
     lr = torch.logspace(-4, -1, args.grid_size).flip(dims=(0,))
