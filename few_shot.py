@@ -70,11 +70,17 @@ class FewShotTester():
             data_loader = tqdm(data_loader, desc=desc)
 
         with torch.no_grad():
-            for data, targets in tqdm(data_loader, desc=f'Few-shot test episodes'):
+            for i, (data, targets) in enumerate(tqdm(data_loader, desc=f'Few-shot test episodes')):
                 sample = self.extract_episode(data, n_support, n_query)
                 loss_val, acc_val = model.loss(sample)
                 loss_all.append(loss_val.item())
                 acc_all.append(acc_val.item() * 100.)
+                
+                print(f'Episode #{i}')
+                print('Episode Test Acc = %4.2f%%' %(acc_val.item()))
+                logging.info(f'Episode #{i}')
+                logging.info('Episode Test Acc = %4.2f%%' %(acc_val.item()))
+
 
         loss = np.mean(loss_all)
         acc = np.mean(acc_all)
@@ -288,10 +294,10 @@ if __name__ == "__main__":
     pprint(args)
 
     # set-up logging
-    log_fname = f'few-shot_{args.model}_{args.dataset}.log'
-    if not os.path.isdir('./logs'):
-        os.makedirs('./logs')
-    log_path = os.path.join('./logs', log_fname)
+    log_fname = f'{args.dataset}.log'
+    if not os.path.isdir('./logs/few-shot/{args.model}'):
+        os.makedirs('./logs/few-shot/{args.model}')
+    log_path = os.path.join('./logs/few-shot/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 

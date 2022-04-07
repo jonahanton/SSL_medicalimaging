@@ -1,10 +1,9 @@
 #!/bin/bash
+#SBATCH --gres=gpu:1
+#SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/linear/%j.out
 
 dset=cifar10
 model=moco-v2
-
-#SBATCH --gres=gpu:1
-#SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/linear/$dset_$model_%j.out
 
 export PATH=/vol/bitbucket/g21mscprj03/sslvenv/bin/:$PATH
 source activate

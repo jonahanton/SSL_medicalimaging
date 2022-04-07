@@ -1,11 +1,9 @@
 #!/bin/bash
-
-dset=cifar100
-model=moco-v2
-
 #SBATCH --gres=gpu:1
-#SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/few-shot/$dset_$model_%j.out
+#SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/few-shot/%j.out
 
+dset=shenzhencxr
+model=swav
 
 export PATH=/vol/bitbucket/g21mscprj03/sslvenv/bin/:$PATH
 source activate
@@ -16,4 +14,5 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-python few_shot.py -d $dset -m $model --n-way 5 --n-support 20
+# python few_shot.py -d $dset -m $model --n-way 5 --n-support 20
+python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way 5 --n-support 20
