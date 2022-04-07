@@ -27,7 +27,7 @@ class CustomMontgomeryCXRDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(os.path.join(self.img_dir, "MontgomerySet/CXR_png/"), self.img_paths.iloc[idx])
-        image = Image.open(img_path)
+        image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
         if self.transform:
             image = self.transform(image)

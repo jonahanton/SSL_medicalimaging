@@ -25,7 +25,7 @@ class CustomShenzhenCXRDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(os.path.join(self.img_dir, "ChinaSet_AllFiles/CXR_png"), self.img_paths.iloc[idx])
-        image = Image.open(img_path)
+        image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
         # print(img_path, label)
         if self.transform:

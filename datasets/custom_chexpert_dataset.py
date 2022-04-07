@@ -29,7 +29,7 @@ class CustomChexpertDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx])
-        image = Image.open(img_path)
+        image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
         label = label.to_numpy()
         if self.transform:
