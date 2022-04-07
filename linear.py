@@ -388,8 +388,8 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation):
 LINEAR_DATASETS = {
     'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
     'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
-    'shenzhen_cxr': [CustomShenzhenCXRDataset, './data/shenzhen_cxr', 2, 'accuracy'],
-    'montgomery_cxr': [CustomMontgomeryCXRDataset, './data/montgomery_cxr', 2, 'accuracy'],
+    'shenzhencxr': [CustomShenzhenCXRDataset, './data/shenzhencxr', 2, 'accuracy'],
+    'montgomerycxr': [CustomMontgomeryCXRDataset, './data/montgomerycxr', 2, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
 }
 
