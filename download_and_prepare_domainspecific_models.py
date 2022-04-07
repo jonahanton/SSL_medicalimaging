@@ -41,17 +41,27 @@ if __name__ == "__main__":
     
     # torch.save(state_dict, os.path.join('models', 'mimic-cxr_r18_lr_1e-4.pth'))
 
-    pretrained_dict = torch.load('models/d1w-00001.pth.tar', map_location=torch.device('cpu'))['state_dict']
-    state_dict = {}
-    for k, v in pretrained_dict.items():
-        if k.startswith("module.encoder_q."):
-            k = k.replace("module.encoder_q.", "")
-            state_dict[k] = v
+    # pretrained_dict = torch.load('models/d1w-00001.pth.tar', map_location=torch.device('cpu'))['state_dict']
+    # state_dict = {}
+    # for k, v in pretrained_dict.items():
+    #     if k.startswith("module.encoder_q."):
+    #         k = k.replace("module.encoder_q.", "")
+    #         state_dict[k] = v
 
 
-    for key in list(state_dict.keys()):
-        if 'classifier' in key:
-            print(f'removed {key}')
-            state_dict.pop(key)
+    # for key in list(state_dict.keys()):
+    #     if 'classifier' in key:
+    #         print(f'removed {key}')
+    #         state_dict.pop(key)
 
-    torch.save(state_dict, os.path.join('models', 'mimic-cxr_d121_lr_1e-4.pth'))
+    # torch.save(state_dict, os.path.join('models', 'mimic-cxr_d121_lr_1e-4.pth'))
+
+    model_name = 'supervised_r18'
+    model = torchvision.models.resnet18(pretrained=True)
+    del model.fc
+    torch.save(model.state_dict(), os.path.join('models', f'{model_name}.pth'))
+
+    model_name = 'supervised_d121'
+    model = torchvision.models.densenet121(pretrained=True)
+    del model.classifier
+    torch.save(model.state_dict(), os.path.join('models', f'{model_name}.pth'))

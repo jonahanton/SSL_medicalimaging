@@ -2,8 +2,6 @@
 #SBATCH --gres=gpu:1
 #SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/linear/%j.out
 
-dset=cifar10
-model=moco-v2
 
 export PATH=/vol/bitbucket/g21mscprj03/sslvenv/bin/:$PATH
 source activate
@@ -13,5 +11,7 @@ TERM=vt100  # TERM=xterm
 uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
-python linear.py -d $dset -m $model
+
+dset=diabetic_retinopathy
+python linear.py -d $dset -m moco-v2
 

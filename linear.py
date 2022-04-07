@@ -125,6 +125,8 @@ class LinearTester():
             C = 1. / wd.item()
             self.classifier.set_params({'C': C})
             test_score = self.classifier.fit_logistic_regression(X_train_feature, y_train, X_val_feature, y_val)
+            print(f'Accuracy on val set: {test_score:.2f}% using hyperparameter C: {C:.3f}')
+            logging.info(f'Accuracy on val set: {test_score:.2f}% using hyperparameter C: {C:.3f}')
 
             if test_score > best_score:
                 best_score = test_score
@@ -409,6 +411,7 @@ LINEAR_DATASETS = {
     'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
     'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+    'chexpert': [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
 }
 
 
@@ -421,7 +424,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='name of the dataset to evaluate on')
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
-    parser.add_argument('-w', '--wd-values', type=int, default=10, help='the number of weight decay values to validate')
+    parser.add_argument('-w', '--wd-values', type=int, default=5, help='the number of weight decay values to validate')
     parser.add_argument('-c', '--C', type=float, default=None, help='sklearn C value (1 / weight_decay), if not tuning on validation set')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
                         help='whether to turn off data normalisation (based on ImageNet values)')
@@ -437,10 +440,10 @@ if __name__ == "__main__":
 
 
     # set-up logging
-    log_fname = f'linear_{args.model}_{args.dataset}.log'
-    if not os.path.isdir('./logs'):
-        os.makedirs('./logs')
-    log_path = os.path.join('./logs', log_fname)
+    log_fname = f'{args.dataset}.log'
+    if not os.path.isdir(f'./logs/linear/{args.model}'):
+        os.makedirs(f'./logs/linear/{args.model}')
+    log_path = os.path.join(f'./logs/linear/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
@@ -453,7 +456,7 @@ if __name__ == "__main__":
 
 
     # load pretrained model
-    if 'mimic-chexpert' in args.model:
+    if args.model in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01', 'mimic-chexpert_lr_1.0', 'supervised_d121']:
         model = DenseNetBackbone(args.model)
         feature_dim = 1024
     elif 'mimic-cxr' in args.model:
@@ -463,6 +466,8 @@ if __name__ == "__main__":
         else:
             model = DenseNetBackbone(args.model)
             feature_dim = 1024
+    elif args.model == 'supervised_r18':
+        feature_dim = 512
     else:
         model = ResNetBackbone(args.model)
         feature_dim = 2048

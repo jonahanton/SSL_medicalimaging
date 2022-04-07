@@ -257,8 +257,8 @@ class DenseNetBackbone(nn.Module):
 
 # name: {class, root, num_classes (not necessary here), metric}
 FEW_SHOT_DATASETS = {
-    'cifar10': [datasets.CIFAR10, '../data/CIFAR10', 10, 'accuracy'],
-    'cifar100': [datasets.CIFAR100, '../data/CIFAR100', 100, 'accuracy'],
+    'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
+    'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'shenzhencxr': [CustomShenzhenCXRDataset, './data/shenzhencxr', 2, 'accuracy'],
     'montgomerycxr': [CustomMontgomeryCXRDataset, './data/montgomerycxr', 2, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
@@ -287,6 +287,11 @@ if __name__ == "__main__":
     args.norm = not args.no_norm
     pprint(args)
 
+    # histogram normalization
+    hist_norm = False
+    if 'mimic-chexpert' in args.model:
+        hist_norm = True
+
     # set-up logging
     log_fname = f'{args.dataset}.log'
     if not os.path.isdir(f'./logs/few-shot/{args.model}'):
@@ -299,17 +304,19 @@ if __name__ == "__main__":
     dset, data_dir, num_classes, metric = FEW_SHOT_DATASETS[args.dataset]
     datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
-    dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm)
+    dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm, hist_norm=hist_norm)
 
 
     # load pretrained model
-    if 'mimic-chexpert' in args.model:
+    if args.model in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01', 'mimic-chexpert_lr_1.0', 'supervised_d121']:
         model = DenseNetBackbone(args.model)
     elif 'mimic-cxr' in args.model:
         if 'r18' in args.model:
             model = ResNet18Backbone(args.model)
         else:
             model = DenseNetBackbone(args.model)
+    elif args.model == 'supervised_r18':
+        model = ResNet18Backbone(args.model)
     else:
         model = ResNetBackbone(args.model)
     

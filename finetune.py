@@ -217,7 +217,7 @@ class FinetuneTester():
         logging.info(f"Best params {self.best_params}")
 
         # load pretrained model
-        if 'mimic-chexpert' in self.model_name:
+        if self.model_name in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01', 'mimic-chexpert_lr_1.0', 'supervised_d121']:
             self.model = DenseNetBackbone(self.model_name)
             self.feature_dim = 1024
         elif 'mimic-cxr' in self.model_name:
@@ -227,11 +227,14 @@ class FinetuneTester():
             else:
                 self.model = DenseNetBackbone(self.model_name)
                 self.feature_dim = 1024
+        elif self.model_name == 'supervised_r18':
+            self.model = ResNet18Backbone(self.model_name)
+            self.feature_dim = 512
         else:
             self.model = ResNetBackbone(self.model_name)
             self.feature_dim = 2048
         
-        model = model.to(args.device)
+        self.model = self.model.to(args.device)
 
         
         self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
@@ -554,8 +557,8 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_nor
 
 # name: {class, root, num_classes, metric}
 FINETUNE_DATASETS = {
-    'cifar10': [datasets.CIFAR10, '../data/CIFAR10', 10, 'accuracy'],
-    'cifar100': [datasets.CIFAR100, '../data/CIFAR100', 100, 'accuracy'],
+    'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
+    'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
 }
 

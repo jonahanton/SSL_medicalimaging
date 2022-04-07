@@ -144,6 +144,9 @@ class TransformLoader:
         if transform_type=='ImageJitter':
             method = ImageJitter( self.jitter_param )
             return method
+        if transform_type=='HistogramNormalize':
+            method = HistogramNormalize()
+            return method
         method = getattr(transforms, transform_type)
         if transform_type=='RandomSizedCrop':
             return method(self.image_size) 
@@ -153,24 +156,22 @@ class TransformLoader:
             return method([int(self.image_size*1.15), int(self.image_size*1.15)])
         elif transform_type=='Normalize':
             return method(**self.normalize_param)
-        elif transform_type=='HistogramNormalize':
-            return HistogramNormalize()
         else:
             return method()
 
     def get_composed_transform(self, aug=False, normalise=True, hist_norm=False):
         if aug:
-            if normalise:
-                transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor', 'Normalize']
-            elif hist_norm:
+            if hist_norm:
                 transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor', 'HistogramNormalize']
+            elif normalise:
+                transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor', 'Normalize']
             else:
                 transform_list = ['RandomSizedCrop', 'ImageJitter', 'RandomHorizontalFlip', 'ToTensor']
         else:
-            if normalise:
-                transform_list = ['Resize','CenterCrop', 'ToTensor', 'Normalize']
-            elif hist_norm:
+            if hist_norm:
                 transform_list = ['Resize','CenterCrop', 'ToTensor', 'HistogramNormalize']
+            elif normalise:
+                transform_list = ['Resize','CenterCrop', 'ToTensor', 'Normalize']
             else:
                 transform_list = ['Resize','CenterCrop', 'ToTensor']
 
@@ -202,8 +203,8 @@ class SetDataManager(DataManager):
         np.random.seed(seed)
         torch.manual_seed(seed)
 
-    def get_data_loader(self, aug, normalise): #parameters that would change on train/val set
-        transform = self.trans_loader.get_composed_transform(aug, normalise)
+    def get_data_loader(self, aug, normalise, hist_norm): #parameters that would change on train/val set
+        transform = self.trans_loader.get_composed_transform(aug, normalise, hist_norm)
         dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform)
         # Custom sampler that yields n_way random class indices each time it's called
         sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )  
