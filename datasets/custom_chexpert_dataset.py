@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, csv_file, img_dir, train = False, transforms=None, target_transforms=None):
+    def __init__(self, csv_file, img_dir, train = False, transform=None, target_transform=None):
         # Random seed
         random_state = 42
         # Read in csv containing path information
@@ -21,8 +21,8 @@ class CustomChexpertDataset(Dataset):
             self.preclean_dataframe = self.preclean_dataframe.iloc[134049:,:]
         self.img_paths, self.img_aux, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
         self.img_dir = img_dir
-        self.transform = transforms
-        self.target_transform = target_transforms
+        self.transform = transform
+        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.img_labels)
