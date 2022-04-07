@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, csv_file, img_dir, train = False, transform=None, target_transform=None):
+    def __init__(self, csv_file, img_dir, train = False, transform=None, target_transform=None, download=False):
         # Random seed
         random_state = 42
         # Read in csv containing path information

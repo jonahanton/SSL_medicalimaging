@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomShenzhenCXRDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
         # Random seed
         random_state = 42
         # Note only exists train data!

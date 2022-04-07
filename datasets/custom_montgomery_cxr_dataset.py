@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomMontgomeryCXRDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
         # Random seed
         random_state = 42
         # csv_file should be the full/relative path to the csv file to use
