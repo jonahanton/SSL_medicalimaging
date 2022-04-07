@@ -9,6 +9,11 @@ from torchvision import datasets, transforms
 from torch.utils.data import Dataset, ConcatDataset, DataLoader
 from abc import abstractmethod
 
+from datasets.custom_chexpert_dataset import CustomChexpertDataset
+from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
+from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
+from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
+
 from PIL import ImageFile
 from PIL import ImageEnhance
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -48,6 +53,7 @@ class SetDataset:
         for cl in self.cl_list:
             self.sub_meta[cl] = []
 
+
         if dset in [datasets.CIFAR10, datasets.CIFAR100]:
             trainval_dataset = get_dataset(dset, root, 'train', identity)
         else:
@@ -57,8 +63,12 @@ class SetDataset:
             test_dataset = get_dataset(dset, root, 'test', identity)
         else:
             test_dataset = get_dataset(dset, root, 'test', transform)
+
+        if dset in [CustomMontgomeryCXRDataset, CustomShenzhenCXRDataset]:
+            d = trainval_dataset
+        else:   
+            d = ConcatDataset([trainval_dataset, test_dataset])
             
-        d = ConcatDataset([trainval_dataset, test_dataset])
         print(f'Total dataset size: {len(d)}')
 
         for i, (data, label) in enumerate(d):

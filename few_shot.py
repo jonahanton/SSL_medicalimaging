@@ -75,12 +75,6 @@ class FewShotTester():
                 loss_val, acc_val = model.loss(sample)
                 loss_all.append(loss_val.item())
                 acc_all.append(acc_val.item() * 100.)
-                
-                print(f'Episode #{i}')
-                print('Episode Test Acc = %4.2f%%' %(acc_val.item()))
-                logging.info(f'Episode #{i}')
-                logging.info('Episode Test Acc = %4.2f%%' %(acc_val.item()))
-
 
         loss = np.mean(loss_all)
         acc = np.mean(acc_all)
@@ -295,9 +289,9 @@ if __name__ == "__main__":
 
     # set-up logging
     log_fname = f'{args.dataset}.log'
-    if not os.path.isdir('./logs/few-shot/{args.model}'):
-        os.makedirs('./logs/few-shot/{args.model}')
-    log_path = os.path.join('./logs/few-shot/{args.model}', log_fname)
+    if not os.path.isdir(f'./logs/few-shot/{args.model}'):
+        os.makedirs(f'./logs/few-shot/{args.model}')
+    log_path = os.path.join(f'./logs/few-shot/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 

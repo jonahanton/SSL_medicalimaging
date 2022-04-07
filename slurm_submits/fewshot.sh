@@ -2,9 +2,6 @@
 #SBATCH --gres=gpu:1
 #SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/few-shot/%j.out
 
-dset=shenzhencxr
-model=swav
-
 export PATH=/vol/bitbucket/g21mscprj03/sslvenv/bin/:$PATH
 source activate
 source /vol/cuda/11.0.3-cudnn8.0.5.39/setup.sh
@@ -14,5 +11,21 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-# python few_shot.py -d $dset -m $model --n-way 5 --n-support 20
+dset=shenzhencxr
+python few_shot.py -d $dset -m mimic-chexpert_lr_0.01 --n-way 2 --n-support 20
+python few_shot.py -d $dset -m mimic-chexpert_lr_0.1 --n-way 2 --n-support 20
+python few_shot.py -d $dset -m mimic-chexpert_lr_1.0 --n-way 2 --n-support 20
+python few_shot.py -d $dset -m mimic-cxr_r18_lr_1e-4 --n-way 2 --n-support 20
+python few_shot.py -d $dset -m mimic-cxr_d121_lr_1e-4 --n-way 2 --n-support 20
+
+dset=diabetic_retinopathy
 python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way 5 --n-support 20
+python few_shot.py -d $dset -m swav --n-way 5 --n-support 20
+python few_shot.py -d $dset -m byol --n-way 5 --n-support 20
+python few_shot.py -d $dset -m pirl --n-way 5 --n-support 20
+python few_shot.py -d $dset -m supervised --n-way 5 --n-support 20
+python few_shot.py -d $dset -m mimic-chexpert_lr_0.01 --n-way 5 --n-support 20
+python few_shot.py -d $dset -m mimic-chexpert_lr_0.1 --n-way 5 --n-support 20
+python few_shot.py -d $dset -m mimic-chexpert_lr_1.0 --n-way 5 --n-support 20
+python few_shot.py -d $dset -m mimic-cxr_r18_lr_1e-4 --n-way 5 --n-support 20
+python few_shot.py -d $dset -m mimic-cxr_d121_lr_1e-4 --n-way 5 --n-support 20
