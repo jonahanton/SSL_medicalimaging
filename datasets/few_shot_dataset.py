@@ -88,6 +88,7 @@ class SetDataset:
         return len(self.sub_dataloader)
 
 
+# dataset class to deal with each individual class
 class SubDataset:
     def __init__(self, sub_meta, cl, transform=transforms.ToTensor(), target_transform=identity):
         self.sub_meta = sub_meta
@@ -185,8 +186,8 @@ class SetDataManager(DataManager):
     def get_data_loader(self, aug, normalise): #parameters that would change on train/val set
         transform = self.trans_loader.get_composed_transform(aug, normalise)
         dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform)
+        # Custom sampler that yields n_way random class indices each time it's called
         sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )  
-        # Custom sampler that yileds n_way random class indices each time it's called
         data_loader_params = dict(batch_sampler = sampler,  num_workers = 12, pin_memory = True)       
         data_loader = torch.utils.data.DataLoader(dataset, **data_loader_params)
         return data_loader

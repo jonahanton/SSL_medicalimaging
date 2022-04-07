@@ -12,17 +12,13 @@ from torch.autograd import Variable
 from torchvision import models, datasets
 
 from datasets import few_shot_dataset
+from datasets.custom_chexpert_dataset import CustomChexpertDataset
+from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
+from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
+from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 
 import numpy as np
 from tqdm import tqdm
-
-# name: {class, root, num_classes (not necessary here), metric}
-FEW_SHOT_DATASETS = {
-    'cifar10': [datasets.CIFAR10, '../data/CIFAR10', 10, 'accuracy'],
-    'cifar100': [datasets.CIFAR100, '../data/CIFAR100', 100, 'accuracy'],
-}
-
-
 
 
 
@@ -254,6 +250,17 @@ class DenseNetBackbone(nn.Module):
         return out
 
 
+# name: {class, root, num_classes (not necessary here), metric}
+FEW_SHOT_DATASETS = {
+    'cifar10': [datasets.CIFAR10, '../data/CIFAR10', 10, 'accuracy'],
+    'cifar100': [datasets.CIFAR100, '../data/CIFAR100', 100, 'accuracy'],
+    'shenzhen_cxr': [CustomShenzhenCXRDataset, './data/shenzhen_cxr', 2, 'accuracy'],
+    'montgomery_cxr': [CustomMontgomeryCXRDataset, './data/montgomery_cxr', 2, 'accuracy'],
+    'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+}
+
+
+
 
 
 
@@ -277,7 +284,7 @@ if __name__ == "__main__":
 
     # load dataset
     dset, data_dir, num_classes, metric = FEW_SHOT_DATASETS[args.dataset]
-    datamgr = few_shot_dataset.SetDataManagercp (dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
+    datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm)
 
