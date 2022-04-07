@@ -2,7 +2,6 @@ ssl-transfer
 simclr-converter
 models
 data
-logs
 out
 test.py
 
