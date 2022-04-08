@@ -571,7 +571,7 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
     parser.add_argument('-w', '--workers', type=int, default=8, help='the number of workers for loading the data')
-    parser.add_argument('-g', '--grid-size', type=int, default=4, help='the number of learning rate values in the search grid')
+    parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
     parser.add_argument('--no-da', action='store_true', default=False, help='disables data augmentation during training')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
@@ -592,12 +592,13 @@ if __name__ == "__main__":
 
 
     # set-up logging
-    log_fname = f'finetune_{args.model}_{args.dataset}.log'
-    if not os.path.isdir('./logs'):
-        os.makedirs('./logs')
-    log_path = os.path.join('./logs', log_fname)
+    log_fname = f'{args.dataset}.log'
+    if not os.path.isdir(f'./logs/finetune/{args.model}'):
+        os.makedirs(f'./logs/finetune/{args.model}')
+    log_path = os.path.join(f'./logs/finetune/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
+
 
     # load dataset
     dset, data_dir, num_classes, metric = FINETUNE_DATASETS[args.dataset]
