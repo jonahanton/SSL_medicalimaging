@@ -7,14 +7,14 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, focus = "Pleural Effusion"):
         # Random seed
         random_state = 42
         # Read in csv containing path information
         csv_file = os.path.join(img_dir, "train.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
         # Shuffle dataframe
-        self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = 42).reset_index(drop=True)
+        self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         # Add a bit to split dataframe to train and test
         # Validation set is ignored! (as in simCLR cheXpert paper)
         if train: # Train data
@@ -25,16 +25,21 @@ class CustomChexpertDataset(Dataset):
         self.img_dir = img_dir
         self.transform = transform
         self.target_transform = target_transform
+        try:
+            self.many_to_one_label = ["Atelectasis", "Cardiomegaly", "Consolidation","Edema", "Pleural Effusion"].index(focus)
+        except:
+            raise ValueError(f"{focus} is not one of the allowed many_to_one labels (Atelectasis, Cardiomegaly, Consolidation,Edema, Pleural Effusion)")
 
     def __len__(self):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx])
-        print(img_path)
+        #print(img_path)
         image = Image.open(img_path).convert('RGB')
-        label = self.img_labels.iloc[idx]
-        label = label.to_numpy()
+        multi_label = self.img_labels.iloc[idx]
+        label = multi_label.to_numpy()[self.many_to_one_label]
+        #print(label, multi_label)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -78,7 +83,7 @@ class CustomChexpertDataset(Dataset):
 
 def test_class():
     cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True)
-    print(cid[10])
+    print(cid[5000])
 
 
 if __name__ == "__main__":
