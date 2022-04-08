@@ -56,7 +56,7 @@ class CustomDiabeticRetinopathyDataset(Dataset):
 
 def test_class():
     # Loads in Correctly (Needs / for img_dir path)
-    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/lrc121/diabetic_retinopathy/', train = True)
+    dr = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=True)
     # For Train:
     # Shuffles Correctly
     # Gives correct img path and label combinations
@@ -65,7 +65,9 @@ def test_class():
     # Shuffles correctly
     # Gives correct img path and label combinations
     # Gives correct length (53576)
-    return None
+
+
+
 
 
 

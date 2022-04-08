@@ -262,6 +262,7 @@ FEW_SHOT_DATASETS = {
     'shenzhencxr': [CustomShenzhenCXRDataset, './data/shenzhencxr', 2, 'accuracy'],
     'montgomerycxr': [CustomMontgomeryCXRDataset, './data/montgomerycxr', 2, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+    'chexpert' : [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
 }
 
 

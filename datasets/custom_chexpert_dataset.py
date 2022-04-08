@@ -35,7 +35,6 @@ class CustomChexpertDataset(Dataset):
         image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
         label = label.to_numpy()
-        print(label)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
