@@ -538,10 +538,10 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_nor
         normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
     else:
         normalise_dict = {'mean': [0.0, 0.0, 0.0], 'std': [1.0, 1.0, 1.0]}
-    train_loader, val_loader, trainval_loader = get_train_valid_loader(dset, data_dir, normalise_dict,
+    train_loader, val_loader, trainval_loader = get_train_valid_loader(dset, data_dir, normalise_dict, hist_norm,
                                                 batch_size, image_size, random_seed=0, num_workers=num_workers,
                                                 pin_memory=False, data_augmentation=data_augmentation)
-    test_loader = get_test_loader(dset, data_dir, normalise_dict, batch_size, image_size, num_workers=num_workers,
+    test_loader = get_test_loader(dset, data_dir, normalise_dict, hist_norm, batch_size, image_size, num_workers=num_workers,
                                                 pin_memory=False)
     return train_loader, val_loader, trainval_loader, test_loader
 
