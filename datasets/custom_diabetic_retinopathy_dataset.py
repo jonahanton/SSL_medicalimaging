@@ -2,8 +2,13 @@ import os
 import pandas as pd
 import numpy as np
 import math
-from torch.utils.data import Dataset
+from tqdm import tqdm
+
+import torch
+from torch.utils.data import Dataset, ConcatDataset, DataLoader
 from torchvision.io import read_image
+from torchvision import transforms, datasets
+import PIL
 from PIL import Image
 
 class CustomDiabeticRetinopathyDataset(Dataset):
@@ -54,9 +59,22 @@ class CustomDiabeticRetinopathyDataset(Dataset):
         label = self._clean_labels(label)
         return path, label
 
+
 def test_class():
+
+    normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
+    normalize = transforms.Normalize(**normalise_dict)
+
+    image_size = 224
+    transform = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
+
     # Loads in Correctly (Needs / for img_dir path)
-    dr = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=True)
+    # cdr = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=True, transform=transform)
     # For Train:
     # Shuffles Correctly
     # Gives correct img path and label combinations
@@ -66,10 +84,38 @@ def test_class():
     # Gives correct img path and label combinations
     # Gives correct length (53576)
 
+    
+    num_classes = 10
+    cl_list = range(num_classes)
+
+    sub_meta = {}
+    for cl in cl_list:
+        sub_meta[cl] = []
+    
+    trainval_dataset = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=True, transform=transform)
+    test_dataset = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=False, transform=transform)
+    # trainval_dataset = datasets.CIFAR10('/vol/bitbucket/g21mscprj03/SSL/data/CIFAR10/', train=True, transform=transform)
+    # test_dataset = datasets.CIFAR10('/vol/bitbucket/g21mscprj03/SSL/data/CIFAR10/', train=False, transform=transform)
+    d = ConcatDataset([trainval_dataset, test_dataset])
+
+    print(f'Total dataset size: {len(d)}')
+
+    pbar = tqdm(range(len(d)), desc='Iterating through dataset')
+    for i, (data, label) in enumerate(d):
+        sub_meta[label].append(data)
+        pbar.update(1)
+    pbar.close()
+    
+    print('Number of images per class')
+    for key, item in sub_meta.items():
+        print(len(sub_meta[key]))
+
+
 
 
 
 
 
 if __name__ == "__main__":
-    pass
+    
+    test_class()
