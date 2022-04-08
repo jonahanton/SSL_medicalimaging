@@ -196,7 +196,7 @@ class FinetuneTester():
                 self.model = ResNetBackbone(self.model_name)
                 self.feature_dim = 2048
             
-            model = model.to(args.device)
+            self.model = self.model.to(args.device)
 
 
             self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
@@ -570,7 +570,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='name of the dataset to evaluate on')
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
-    parser.add_argument('-w', '--workers', type=int, default=8, help='the number of workers for loading the data')
+    parser.add_argument('-w', '--workers', type=int, default=4, help='the number of workers for loading the data')
     parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
     parser.add_argument('--no-da', action='store_true', default=False, help='disables data augmentation during training')
