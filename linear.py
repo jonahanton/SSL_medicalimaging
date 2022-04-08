@@ -424,7 +424,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='name of the dataset to evaluate on')
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
-    parser.add_argument('-w', '--wd-values', type=int, default=5, help='the number of weight decay values to validate')
+    parser.add_argument('-w', '--wd-values', type=int, default=45, help='the number of weight decay values to validate')
     parser.add_argument('-c', '--C', type=float, default=None, help='sklearn C value (1 / weight_decay), if not tuning on validation set')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
                         help='whether to turn off data normalisation (based on ImageNet values)')
