@@ -39,6 +39,7 @@ class CustomChexpertDataset(Dataset):
         image = Image.open(img_path).convert('RGB')
         multi_label = self.img_labels.iloc[idx]
         label = multi_label.to_numpy()[self.many_to_one_label]
+        label = np.float32(label)
         #print(label, multi_label)
         if self.transform:
             image = self.transform(image)
