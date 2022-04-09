@@ -411,7 +411,7 @@ LINEAR_DATASETS = {
     'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
     'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
-    'chexpert': [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
+    'chexpert': [CustomChexpertDataset, './data/chexpert', 2, 'accuracy'],
 }
 
 

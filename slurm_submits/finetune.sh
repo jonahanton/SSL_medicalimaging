@@ -12,5 +12,6 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
+# dset=chexpert
 dset=diabetic_retinopathy
 python finetune.py -d $dset -m moco-v2

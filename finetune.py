@@ -212,9 +212,14 @@ class FinetuneTester():
                 print(f"New best {self.best_params}")
                 logging.info(f"New best {self.best_params}")
 
-    def evaluate(self):
-        print(f"Best params {self.best_params}")
-        logging.info(f"Best params {self.best_params}")
+    def evaluate(self, lr=None, wd=None):
+        if lr is not None:
+            self.best_params['lr'] = lr
+        if wd is not None:
+            self.best_params['wd'] = wd
+
+        print(f"Params {self.best_params}")
+        logging.info(f"Params {self.best_params}")
 
         # load pretrained model
         if self.model_name in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01', 'mimic-chexpert_lr_1.0', 'supervised_d121']:
@@ -390,7 +395,6 @@ def get_train_valid_loader(dset,
 
     normalize = transforms.Normalize(**normalise_dict)
     print("Train normaliser:", normalize)
-    logging.info("Train normaliser:", normalize)
 
 
     # define transforms with augmentations
@@ -430,11 +434,8 @@ def get_train_valid_loader(dset,
         transform_aug = transform_no_aug
 
     print("Train transform:", transform_aug)
-    logging.info("Train transform:", transform_aug)
     print("Val transform:", transform_no_aug)
-    logging.info("Val transform:", transform_no_aug)
     print("Trainval transform:", transform_aug)
-    logging.info("Trainval transform:", transform_no_aug)
 
 
     # select a random subset of the train set to form the validation set
@@ -500,7 +501,6 @@ def get_test_loader(dset,
 
     normalize = transforms.Normalize(**normalise_dict)
     print("Test normaliser:", normalize)
-    logging.info("Test normaliser:", normalize)
 
     # define transform
     if hist_norm:              
@@ -519,7 +519,6 @@ def get_test_loader(dset,
         ])
 
     print("Test transform:", transform)
-    logging.info("Test transform:", transform)
 
     dataset = get_dataset(dset, data_dir, 'test', transform)
 
@@ -560,6 +559,7 @@ FINETUNE_DATASETS = {
     'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
     'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+    'chexpert': [CustomChexpertDataset, './data/chexpert', 2, 'accuracy'],
 }
 
 
@@ -571,9 +571,12 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
     parser.add_argument('-w', '--workers', type=int, default=4, help='the number of workers for loading the data')
+    parser.add_argument('-s', '--search', action='store_true', default=False, help='whether to perform a hyperparameter search on the lr and wd')
     parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
+    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
+    parser.add_argument('--wd', type=float, default=0, help='weight decay')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
-    parser.add_argument('--no-da', action='store_true', default=False, help='disables data augmentation during training')
+    parser.add_argument('--no-da', action='store_true', default=True, help='disables data augmentation during training')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
                         help='whether to turn off data normalisation (based on ImageNet values)')
     parser.add_argument('--device', type=str, default='cuda', help='CUDA or CPU training (cuda | cpu)')
@@ -616,7 +619,11 @@ if __name__ == "__main__":
     tester = FinetuneTester(args.model, train_loader, val_loader, trainval_loader, test_loader,
                             metric, args.device, num_classes, grid=grid, steps=args.steps)
     
-    # tune hyperparameters
-    tester.validate()
-    # use best hyperparameters to finally evaluate the model
-    test_score = tester.evaluate()
+    if args.search:
+        print('Performing hyperparameter search for lr and wd')
+        # tune hyperparameters
+        tester.validate()
+        # use best hyperparameters to finally evaluate the model
+        test_score = tester.evaluate()
+    else:
+        test_score = tester.evaluate(args.lr, args.wd)
