@@ -30,29 +30,27 @@ from datasets.custom_bach_dataset import CustomBachDataset
 
 
 def compute_saliency_map(img, model, device, size=10, value=0):
-
     img = img.to(device)
 
     occlusion_window = torch.zeros((img.size(0), size, size)).to(device)
     occlusion_window.fill_(value)
 
-    occlusion_scores = torch.zeros((img.size(1), img.size(2)))
+    occlusion_scores = np.zeros((img.size(1), img.size(2)))
 
     with torch.no_grad():
-        orig_feature = model.forward(img.unsqueeze(0)).squeeze(0)
-    orig_feature_mag = torch.sqrt(torch.pow(orig_feature, 2).sum())
+        orig_feature = model.forward(img.unsqueeze(0)).squeeze(0).cpu().detach().numpy()
+    orig_feature_mag = np.sqrt((orig_feature**2).sum())
 
     pbar = tqdm(range((1+img.size(1)-size)*(1+img.size(2)-size)), desc='Computing features for occluded images')
-    
     for i in range(1 + img.size(1) - size):
         for j in range(1 + img.size(2) - size):
-            img_occluded = img
+            img_occluded = img.clone()
             img_occluded[:, i:i+size, j:j+size] = occlusion_window
             with torch.no_grad():
-                occluded_feature = model.forward(img_occluded.unsqueeze(0)).squeeze(0)
+                occluded_feature = model.forward(img_occluded.unsqueeze(0)).squeeze(0).cpu().detach().numpy()
 
-            occlusion_score = torch.sqrt(torch.pow(orig_feature - occluded_feature, 2).sum()) / orig_feature_mag
-            occlusion_scores[i:i+size, j:j+size] += occlusion_score.item()
+            occlusion_score = np.sqrt(((orig_feature - occluded_feature)**2).sum()) / orig_feature_mag
+            occlusion_scores[i:i+size, j:j+size] += occlusion_score
 
             pbar.update(1)
 
