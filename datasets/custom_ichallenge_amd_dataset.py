@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 from torchvision.io import read_image
 from PIL import Image
 
-class CustomiChallengePMDataset(Dataset):
+class CustomiChallengeAMDDataset(Dataset):
     def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
         # Random seed
         random_state = 42
@@ -61,12 +61,12 @@ class CustomiChallengePMDataset(Dataset):
         return path, label
 
 def test_class():
-    cid = CustomiChallengePMDataset("/vol/bitbucket/g21mscprj03/SSL/data/ichallenge_amd", train = True)
+    cid = CustomiChallengeAMDDataset("/vol/bitbucket/g21mscprj03/SSL/data/ichallenge_amd", train = True)
     print(cid[40])
     print(cid[41])
     print(cid[42])
     print(len(cid))
-    cid = CustomiChallengePMDataset("/vol/bitbucket/g21mscprj03/SSL/data/ichallenge_amd", train = False)
+    cid = CustomiChallengeAMDDataset("/vol/bitbucket/g21mscprj03/SSL/data/ichallenge_amd", train = False)
     print(cid[41])
     print(len(cid))
 if __name__ == "__main__":
