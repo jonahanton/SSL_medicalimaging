@@ -13,7 +13,6 @@ class CustomiChallengeAMDDataset(Dataset):
         # Read in csv containing path information
         csv_file = os.path.join(img_dir, "amd_labels.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
-        print(self.preclean_dataframe.columns)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         # Add a bit to split dataframe to train and test (80:20)
