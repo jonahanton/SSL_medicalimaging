@@ -71,7 +71,7 @@ def test_class():
             transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(image_size),
             transforms.ToTensor(),
-            # normalize,
+            normalize,
         ])
 
     # Loads in Correctly (Needs / for img_dir path)
@@ -86,7 +86,7 @@ def test_class():
     # Gives correct length (53576)
 
     
-    num_classes = 10
+    num_classes = 5
     cl_list = range(num_classes)
 
     sub_meta = {}
