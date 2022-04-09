@@ -3,6 +3,7 @@ simclr-converter
 models
 data
 out
+condor_submits
 test.py
 
 # Byte-compiled / optimized / DLL files

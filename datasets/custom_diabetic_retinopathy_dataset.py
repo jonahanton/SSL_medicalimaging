@@ -10,6 +10,7 @@ from torchvision.io import read_image
 from torchvision import transforms, datasets
 import PIL
 from PIL import Image
+import pickle
 
 class CustomDiabeticRetinopathyDataset(Dataset):
     def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
@@ -70,7 +71,7 @@ def test_class():
             transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(image_size),
             transforms.ToTensor(),
-            normalize,
+            # normalize,
         ])
 
     # Loads in Correctly (Needs / for img_dir path)
@@ -94,8 +95,6 @@ def test_class():
     
     trainval_dataset = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=True, transform=transform)
     test_dataset = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy/', train=False, transform=transform)
-    # trainval_dataset = datasets.CIFAR10('/vol/bitbucket/g21mscprj03/SSL/data/CIFAR10/', train=True, transform=transform)
-    # test_dataset = datasets.CIFAR10('/vol/bitbucket/g21mscprj03/SSL/data/CIFAR10/', train=False, transform=transform)
     d = ConcatDataset([trainval_dataset, test_dataset])
 
     print(f'Total dataset size: {len(d)}')
@@ -109,6 +108,10 @@ def test_class():
     print('Number of images per class')
     for key, item in sub_meta.items():
         print(len(sub_meta[key]))
+
+    
+    with open('sub_meta_diabetic_retinopathy.pickle', 'wb') as handle:
+        pickle.dump(sub_meta, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 
