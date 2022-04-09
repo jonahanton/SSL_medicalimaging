@@ -159,7 +159,6 @@ def get_train_loader(dset,
                     data_dir,
                     normalise_dict,
                     hist_norm,
-                    batch_size,
                     image_size,
                     random_seed,
                     num_workers=1,
@@ -186,8 +185,9 @@ def get_train_loader(dset,
 
     train_dataset = get_dataset(dset, data_dir, 'train', transform)
 
+    random_sampler = RandomSampler(train_dataset)
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, sampler=RandomSampler,
+        train_dataset, batch_size=1, sampler=random_sampler,
         num_workers=num_workers, pin_memory=pin_memory,
     )
 
@@ -195,18 +195,18 @@ def get_train_loader(dset,
     return train_loader
 
 
-def random_sample(dataloader):
-    img, label = next(iter(dataloader))
+def random_sample(loader):
+    img, label = next(iter(loader))
     return img
 
 
-def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_norm):
+def prepare_data(dset, data_dir, image_size, normalisation, hist_norm):
     if normalisation:
         normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
     else:
         normalise_dict = {'mean': [0.0, 0.0, 0.0], 'std': [1.0, 1.0, 1.0]}
-    train_loader = get_train_loader(dset, data_dir, normalise_dict,
-                                                hist_norm, batch_size, image_size, random_seed=0)
+    train_loader = get_train_loader(dset, data_dir, normalise_dict, hist_norm,
+                                     image_size, random_seed=0)
 
     return train_loader
 
@@ -232,7 +232,6 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='name of the dataset to evaluate on')
     parser.add_argument('--number', type=int, default=1, help='number of images to compute saliency map for')
     parser.add_argument('-i', '--image-size', type=int, default=242, help='the size of the input images')
-    parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches in the dataloader')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
                         help='whether to turn off data normalisation (based on ImageNet values)')
     parser.add_argument('--device', type=str, default='cuda', help='CUDA or CPU training (cuda | cpu)')
@@ -273,14 +272,16 @@ if __name__ == "__main__":
 
         # load dataset
         dset, data_dir, num_classes = DATASETS[args.dataset]
-        # prepare data loaders
-        train_loader = prepare_data(dset, data_dir, args.batch_size, args.image_size,
-                                    normalisation=args.norm, hist_norm=hist_norm)
+        # prepare data loader
+        loader = prepare_data(dset, data_dir, args.image_size,
+                              normalisation=args.norm, hist_norm=hist_norm)
 
         # compute and save saliency maps
+        saliency_maps = []
         for i in range(args.number):
-            img = random_sample(train_loader)
+            img = random_sample(loader).squeeze(0)
             saliency_map = compute_saliency_map(img, model, args.device)
+            saliency_maps.append(saliency_map)
 
     
     else:
