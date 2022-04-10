@@ -467,6 +467,7 @@ if __name__ == "__main__":
             model = DenseNetBackbone(args.model)
             feature_dim = 1024
     elif args.model == 'supervised_r18':
+        model = ResNet18Backbone(args.model)
         feature_dim = 512
     else:
         model = ResNetBackbone(args.model)
