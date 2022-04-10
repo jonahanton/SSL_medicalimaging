@@ -13,4 +13,4 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=chexpert
-python linear.py -d $dset -m supervised_r18 -b 16
+python linear.py -d $dset -m mimic-cxr_r18_lr_1e-4

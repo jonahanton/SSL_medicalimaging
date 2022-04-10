@@ -18,6 +18,8 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
 from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 from datasets.custom_bach_dataset import CustomBachDataset
+from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
+from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
 
 import numpy as np
 from tqdm import tqdm
@@ -265,6 +267,8 @@ FEW_SHOT_DATASETS = {
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
     'chexpert' : [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
     'bach' : [CustomBachDataset, './data/bach', 4, 'accuracy'],
+    'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2, 'accuracy'],
+    'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 3, 'accuracy'],
 }
 
 

@@ -77,7 +77,7 @@ class FinetuneModel(nn.Module):
         self.model.train()
         self.criterion = nn.CrossEntropyLoss()
 
-    def tune(self, train_loader, test_loader, lr, wd, early_stopping=False):
+    def tune(self, train_loader, test_loader, lr, wd, early_stopping=False, val_loader=None, patience=4):
         # set up optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wd)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.steps)
@@ -87,6 +87,10 @@ class FinetuneModel(nn.Module):
         self.model.train()
         train_loss = AverageMeter('loss', ':.4e')
         train_acc = AverageMeter('acc', ':6.2f')
+        if early_stopping:
+            best_acc = None
+            early_stop_counter = 0
+            early_stop = False
         step = 0
         pbar = tqdm(range(self.steps), desc='Training')
         running = True
@@ -114,10 +118,44 @@ class FinetuneModel(nn.Module):
                 scheduler.step()
 
                 step += 1
+            
+                # early stopping
+                if early_stopping:
+                    # check every 100 steps
+                    if step % 100 == 0:
+                        val_acc = 0
+                        c = 0
+                        for data, targets in val_loader:
+                            c += 1
+                            data, targets = data.to(self.device), targets.to(self.device)
+                            with torch.no_grad():
+                                output = self.model(data)
+                            output = output.argmax(dim=1)
+                            acc = 100. * count_acc(output, targets, "accuracy")
+                            val_acc += acc
+                        val_acc /= c
+                        if best_acc is None:
+                            best_acc = val_acc
+                        elif val_acc < best_acc:
+                            early_stop_counter += 1
+                            if early_stop_counter >= patience:
+                                early_stop = True
+                        else:
+                            best_acc = val_acc
+                            early_stop_counter = 0
+                
+                    if early_stop:
+                        print(f'Early stopping at step # {step} / 5000')
+                        logging.info(f'Early stopping at step # {step} / 5000')
+                        running = False
+                        break
+
+
+
         pbar.close()
 
-        val_loss, val_acc = self.test_classifier(test_loader)
-        return val_acc
+        test_loss, test_acc = self.test_classifier(test_loader)
+        return test_acc
 
     def test_classifier(self, data_loader):
         self.model.eval()
@@ -159,7 +197,7 @@ class FinetuneModel(nn.Module):
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
                  metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
-                 early_stopping=False):
+                 early_stopping=False, patience=4):
         self.model_name = model_name
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -172,6 +210,7 @@ class FinetuneTester():
         self.grid = grid
         self.steps = steps
         self.early_stopping = early_stopping
+        self.patience = patience
         self.best_params = {}
 
     def validate(self):
@@ -246,8 +285,15 @@ class FinetuneTester():
         
         self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
                                        self.metric, self.device, self.feature_dim)
-        test_score = self.finetuner.tune(self.trainval_loader, self.test_loader,
-                                         self.best_params['lr'], self.best_params['wd'], self.early_stopping)
+        if self.early_stopping:
+            test_score = self.finetuner.tune(self.train_loader, self.test_loader,
+                                             self.best_params['lr'], self.best_params['wd'], 
+                                             self.early_stopping, self.val_loader,
+                                             self.patience)
+        else:
+            test_score = self.finetuner.tune(self.trainval_loader, self.test_loader,
+                                             self.best_params['lr'], self.best_params['wd'], 
+                                             self.early_stopping)
         print(f'Finetuned test accuracy {test_score:.2f}%')
         logging.info(f'Finetuned test accuracy {test_score:.2f}%')
         return test_score
@@ -577,6 +623,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--search', action='store_true', default=False, help='whether to perform a hyperparameter search on the lr and wd')
     parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
     parser.add_argument('-e', '--early-stopping', action='store_true', default=False, help='whether to perform early stopping')
+    parser.add_argument('-p', '--patience', type=int, default=4, help='patience in units of 100 steps for early stopping')
     parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--wd', type=float, default=1e-8, help='weight decay')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
@@ -622,7 +669,7 @@ if __name__ == "__main__":
     # evaluate model on dataset by finetuning
     tester = FinetuneTester(args.model, train_loader, val_loader, trainval_loader, test_loader,
                             metric, args.device, num_classes, grid=grid, steps=args.steps, 
-                            early_stopping=args.early_stopping)
+                            early_stopping=args.early_stopping, patience=args.patience)
     
     if args.search:
         print('Performing hyperparameter search for lr and wd')
