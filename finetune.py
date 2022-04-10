@@ -77,7 +77,7 @@ class FinetuneModel(nn.Module):
         self.model.train()
         self.criterion = nn.CrossEntropyLoss()
 
-    def tune(self, train_loader, test_loader, lr, wd):
+    def tune(self, train_loader, test_loader, lr, wd, early_stopping=False):
         # set up optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wd)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.steps)
@@ -158,7 +158,8 @@ class FinetuneModel(nn.Module):
 
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
-                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000):
+                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
+                 early_stopping=False):
         self.model_name = model_name
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -170,6 +171,7 @@ class FinetuneTester():
         self.feature_dim = feature_dim
         self.grid = grid
         self.steps = steps
+        self.early_stopping = early_stopping
         self.best_params = {}
 
     def validate(self):
@@ -244,7 +246,8 @@ class FinetuneTester():
         
         self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
                                        self.metric, self.device, self.feature_dim)
-        test_score = self.finetuner.tune(self.trainval_loader, self.test_loader, self.best_params['lr'], self.best_params['wd'])
+        test_score = self.finetuner.tune(self.trainval_loader, self.test_loader,
+                                         self.best_params['lr'], self.best_params['wd'], self.early_stopping)
         print(f'Finetuned test accuracy {test_score:.2f}%')
         logging.info(f'Finetuned test accuracy {test_score:.2f}%')
         return test_score
@@ -573,6 +576,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--workers', type=int, default=4, help='the number of workers for loading the data')
     parser.add_argument('-s', '--search', action='store_true', default=False, help='whether to perform a hyperparameter search on the lr and wd')
     parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
+    parser.add_argument('-e', '--early-stopping', action='store_true', default=False, help='whether to perform early stopping')
     parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--wd', type=float, default=1e-8, help='weight decay')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
@@ -617,7 +621,8 @@ if __name__ == "__main__":
 
     # evaluate model on dataset by finetuning
     tester = FinetuneTester(args.model, train_loader, val_loader, trainval_loader, test_loader,
-                            metric, args.device, num_classes, grid=grid, steps=args.steps)
+                            metric, args.device, num_classes, grid=grid, steps=args.steps, 
+                            early_stopping=args.early_stopping)
     
     if args.search:
         print('Performing hyperparameter search for lr and wd')

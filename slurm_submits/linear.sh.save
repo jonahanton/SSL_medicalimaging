@@ -1,4 +1,4 @@
-#!/bin/bash
+#supervised_d121!/bin/bash
 #SBATCH --gres=gpu:1
 #SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/linear/%j.out
 
@@ -13,4 +13,4 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=chexpert
-python linear.py -d $dset -m supervised_r18 -b 16
+python linear.py -d $dset -m mimic-chexpert_lr_1.0 -b 16
