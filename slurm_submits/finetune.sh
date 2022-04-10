@@ -14,4 +14,4 @@ cd /vol/bitbucket/g21mscprj03/SSL
 
 # dset=chexpert
 dset=diabetic_retinopathy
-python finetune.py -d $dset -m supervised_r50
+python finetune.py -d $dset -m simclr-v1 -n 
