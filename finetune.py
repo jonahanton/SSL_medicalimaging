@@ -576,7 +576,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--wd', type=float, default=1e-8, help='weight decay')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')
-    parser.add_argument('--no-da', action='store_true', default=True, help='disables data augmentation during training')
+    parser.add_argument('--no-da', action='store_true', default=False, help='disables data augmentation during training')
     parser.add_argument('-n', '--no-norm', action='store_true', default=False,
                         help='whether to turn off data normalisation (based on ImageNet values)')
     parser.add_argument('--device', type=str, default='cuda', help='CUDA or CPU training (cuda | cpu)')
