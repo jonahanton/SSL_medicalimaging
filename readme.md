@@ -15,6 +15,24 @@ Much of the code is taken/adapted from the codebase for the CVPR 2021 paper [How
 }
 ```
 
+Code for image reconstruction is adapted from: 
+
+```
+@article{UlyanovVL17,
+    author    = {Ulyanov, Dmitry and Vedaldi, Andrea and Lempitsky, Victor},
+    title     = {Deep Image Prior},
+    journal   = {arXiv:1711.10925},
+    year      = {2017}
+}
+
+@inproceedings{ZhaoICLR2021, 
+    author = {Nanxuan Zhao and Zhirong Wu and Rynson W.H. Lau and Stephen Lin}, 
+    title = {What Makes Instance Discrimination Good for Transfer Learning?}, 
+    booktitle = {ICLR}, 
+    year = {2021} 
+}
+```
+
 
 ## Pre-trained Models
 We evaluate the following pretrained ResNet50 models (with links)
