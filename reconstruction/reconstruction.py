@@ -15,8 +15,7 @@ from matplotlib import pyplot as plt
 from reconstruction.skip import skip
 from torch.utils.data import Dataset, DataLoader
 
-# import sys
-# sys.path.append('../')
+from datasets import few_shot_dataset
 
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
 
@@ -34,12 +33,12 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50',
                     help='pretrained_model architecture: ' +
                         ' | '.join(model_names) +
                         ' (default: resnet50)')
-parser.add_argument('-b', '--batch-size', default=2, type=int,
+parser.add_argument('-b', '--batch-size', default=1, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('-j', '--workers', default=32, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 32)')
 
 parser.add_argument('--pretrained', default=['./checkpoints/resnet50-19c8e357.pth'],
@@ -56,9 +55,10 @@ parser.add_argument('--which_layer', default='layer4')
 parser.add_argument('--lr', default=0.001, type=float)
 parser.add_argument('--initial_size', default=256, type=int)
 parser.add_argument('--img_size', default=224, type=int)
-parser.add_argument('--max_iter', default=3000, type=int)
+parser.add_argument('--max_iter', default=200, type=int)
 parser.add_argument('--ckpt_iter', default=[1000,3000,5000])
 
+print(dir)
 
 def checkdir(dir):
     if not os.path.exists(dir):
@@ -207,26 +207,16 @@ def main():
     dir = os.path.join(args.data, 'val')
 
     # Dataloader
-    def get_dataset(dset, root, split): # add in transformations later
-        return dset(root, train=(split == 'train'),  download=True)
+    DATASETS = {
+        'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
+    }
 
-    dataset = get_dataset(CustomDiabeticRetinopathyDataset, "/Users/chanmunfai/Documents/Imperial/Group Project/Code/SSL/data/diabetic_retinopathy/train", 'train')
+    dset, data_dir, num_classes, metric = DATASETS['diabetic_retinopathy'] # use Diabetic
 
-    num_train = len(dataset)
-    print(num_train)
-    indices = list(range(num_train))
-    # train_sampler = SubsetRandomSampler(indices)
+    datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, image_size = 224, n_episode=100,
+                                    n_way=1, n_support=1, n_query=1) # no idea what all the ns mean - change later
 
-    dataloader = DataLoader(
-        dataset, batch_size=args.batch_size, sampler=indices,
-        num_workers=1, pin_memory=True,
-    )
-
-    # dataset = myDataLoader(dir)
-
-    # dataloader = torch.utils.data.DataLoader(
-    #     dataset, batch_size=args.batch_size, shuffle=False,
-    #     num_workers=args.workers)
+    dataloader = datamgr.get_data_loader(aug=False, normalise=None, hist_norm=False)
 
     criterion = nn.MSELoss() # to device
     criterion2 = TVLoss() # to device
@@ -234,16 +224,22 @@ def main():
     imsize_net = 256
     imsize = 224
 
-    for i, (img, target, filename) in enumerate(dataloader):
+    for i, (img, target) in enumerate(dataloader):
+        # print(img.shape)
+        img = img.view(img.size(1), img.size(2), img.size(3), img.size(4))
+        # print(img.shape)
+        filename = "random_filename.jpeg" # supposed to be filename of individual images
         if 1:
             # measure data loading time
             img = img # to device
 
-            for pi in range(len(args.pretrained)):
+            for pi in range(len(args.pretrained)): # number of pretrained models - can be 1
+                # pretrained_model[pi] is resnet 50 and we are doing a forward
                 targets = pretrained_model[pi](img, name=args.which_layer).detach()
+
                 for img_i in range(img.size()[0]):
-                    if 1:
-                        out_path = os.path.join(args.output_dir[pi], args.which_layer, filename[img_i])
+                    if 1: # what does this mean?
+                        out_path = os.path.join(args.output_dir[pi], args.which_layer, filename) # supposed to be a list of filenames
                         if not os.path.exists(out_path):
                             print('%d-%d'%(i,img_i))
                             start=time.time()
@@ -258,7 +254,7 @@ def main():
 
                             net_input = get_noise(input_depth, imsize_net).type(img.type()).detach()
                             out = net(net_input)[:, :, :224, :224]
-                            print(out.size())
+                            # print(out.size())
 
                             # Compute number of parameters
                             s = sum(np.prod(list(p.size())) for p in net.parameters())
@@ -293,8 +289,11 @@ def main():
                             print('Time:'+str(end-start))
 
                             checkdir(os.path.dirname(out_path))
-                            out_img.save(out_path)
+                            print(out_path) # ./result/supervised_DIP/layer4/r
 
+                            print(out)
+
+                            out_img.save(out_path)
 
 if __name__ == '__main__':
     main()

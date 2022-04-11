@@ -50,7 +50,7 @@ def get_dataset(dset, root, split, transform):
 class SetDataset:
     def __init__(self, dset, root, num_classes, batch_size, transform):
         self.sub_meta = {}
-        self.cl_list = range(num_classes)
+        self.cl_list = list(range(num_classes)) # changed this to list
 
         for cl in self.cl_list:
             self.sub_meta[cl] = []
@@ -60,7 +60,7 @@ class SetDataset:
             trainval_dataset = get_dataset(dset, root, 'train', identity)
         else:
             trainval_dataset = get_dataset(dset, root, 'train', transform)
-        
+
         if dset in [datasets.CIFAR10, datasets.CIFAR100]:
             test_dataset = get_dataset(dset, root, 'test', identity)
         else:
@@ -68,28 +68,28 @@ class SetDataset:
 
         if dset in [CustomMontgomeryCXRDataset, CustomShenzhenCXRDataset]:
             d = trainval_dataset
-        else:   
+        else:
             d = ConcatDataset([trainval_dataset, test_dataset])
-            
+
         print(f'Total dataset size: {len(d)}')
 
         for i, (data, label) in enumerate(d):
             self.sub_meta[label].append(data)
 
-        for label in self.sub_meta:
+        for label in self.sub_meta.copy(): # added copy
             if len(self.sub_meta[label]) == 0:
                 del self.sub_meta[label]
                 del self.cl_list[label]
 
-        print('Number of images per class')
-        for key, item in self.sub_meta.items():
-            print(len(self.sub_meta[key]))
-    
-        self.sub_dataloader = [] 
+        # print('Number of images per class')
+        # for key, item in self.sub_meta.items():
+        #     print(len(self.sub_meta[key]))
+
+        self.sub_dataloader = []
         sub_data_loader_params = dict(batch_size = batch_size,
                                   shuffle = True,
                                   num_workers = 0, #use main thread only or may receive multiple batches
-                                  pin_memory = False)        
+                                  pin_memory = False)
         for cl in self.cl_list:
             sub_dataset = SubDataset(self.sub_meta[cl], cl, transform=transform if dset in [datasets.CIFAR10, datasets.CIFAR100] else identity)
             self.sub_dataloader.append(torch.utils.data.DataLoader(sub_dataset, **sub_data_loader_params))
@@ -105,7 +105,7 @@ class SetDataset:
 class SubDataset:
     def __init__(self, sub_meta, cl, transform=transforms.ToTensor(), target_transform=identity):
         self.sub_meta = sub_meta
-        self.cl = cl 
+        self.cl = cl
         self.transform = transform
         self.target_transform = target_transform
 
@@ -133,13 +133,13 @@ class EpisodicBatchSampler(object):
 
 
 class TransformLoader:
-    def __init__(self, image_size, 
+    def __init__(self, image_size,
                  normalize_param = dict(mean= [0.485, 0.456, 0.406] , std=[0.229, 0.224, 0.225]),
                  jitter_param = dict(Brightness=0.4, Contrast=0.4, Color=0.4)):
         self.image_size = image_size
         self.normalize_param = normalize_param
         self.jitter_param = jitter_param
-    
+
     def parse_transform(self, transform_type):
         if transform_type=='ImageJitter':
             method = ImageJitter( self.jitter_param )
@@ -149,9 +149,9 @@ class TransformLoader:
             return method
         method = getattr(transforms, transform_type)
         if transform_type=='RandomSizedCrop':
-            return method(self.image_size) 
+            return method(self.image_size)
         elif transform_type=='CenterCrop':
-            return method(self.image_size) 
+            return method(self.image_size)
         elif transform_type=='Resize':
             return method([int(self.image_size*1.15), int(self.image_size*1.15)])
         elif transform_type=='Normalize':
@@ -188,7 +188,7 @@ class DataManager(object):
 
 
 class SetDataManager(DataManager):
-    def __init__(self, dset, root, num_classes, image_size, n_way=5, n_support=5, n_query=16, n_episode=100, seed=0):        
+    def __init__(self, dset, root, num_classes, image_size, n_way=5, n_support=5, n_query=16, n_episode=100, seed=0):
         super(SetDataManager, self).__init__()
         self.dset = dset
         self.root = root
@@ -207,8 +207,8 @@ class SetDataManager(DataManager):
         transform = self.trans_loader.get_composed_transform(aug, normalise, hist_norm)
         dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform)
         # Custom sampler that yields n_way random class indices each time it's called
-        sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )  
-        data_loader_params = dict(batch_sampler = sampler,  num_workers = 12, pin_memory = True)       
+        sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )
+        data_loader_params = dict(batch_sampler = sampler,  num_workers = 0, pin_memory = True)
         data_loader = torch.utils.data.DataLoader(dataset, **data_loader_params)
         return data_loader
 
