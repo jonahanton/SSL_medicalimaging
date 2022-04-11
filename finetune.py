@@ -100,6 +100,7 @@ class FinetuneModel(nn.Module):
                     running = False
                     break
 
+                targets = targets.type(torch.LongTensor)
                 data, targets = data.to(self.device), targets.to(self.device)
                 optimizer.zero_grad()
                 output = self.model(data)
@@ -123,19 +124,10 @@ class FinetuneModel(nn.Module):
                 if early_stopping:
                     # check every 100 steps
                     if step % 100 == 0:
-                        val_acc = 0
-                        c = 0
-                        for data, targets in val_loader:
-                            c += 1
-                            data, targets = data.to(self.device), targets.to(self.device)
-                            with torch.no_grad():
-                                output = self.model(data)
-                            output = output.argmax(dim=1)
-                            acc = 100. * count_acc(output, targets, "accuracy")
-                            val_acc += acc
-                        val_acc /= c
+                        val_loss, val_acc = self.test_classifier(val_loader)
                         if best_acc is None:
                             best_acc = val_acc
+                            best_state_dict = self.model.state_dict()
                         elif val_acc < best_acc:
                             early_stop_counter += 1
                             if early_stop_counter >= patience:
@@ -143,11 +135,13 @@ class FinetuneModel(nn.Module):
                         else:
                             best_acc = val_acc
                             early_stop_counter = 0
+                            best_state_dict = self.model.state_dict()
                 
                     if early_stop:
                         print(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
                         logging.info(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
                         running = False
+                        self.model.load_state_dict(best_state_dict)
                         break
 
 
@@ -165,6 +159,7 @@ class FinetuneModel(nn.Module):
         with torch.no_grad():
             for i, (data, targets) in enumerate(tqdm(data_loader, desc=' Testing')):
                 num_data_points += data.size(0)
+                targets = targets.type(torch.LongTensor)
                 data, targets = data.to(self.device), targets.to(self.device)
                 output = self.model(data)
                 tl = self.criterion(output, targets).item()

@@ -12,5 +12,6 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=montgomerycxr
-python saliency.py -d $dset -m mimic-cxr_r18_lr_1e-4
+# python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m mimic-cxr_r18_lr_1e-4
+# python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m supervised_r50
+python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m byol

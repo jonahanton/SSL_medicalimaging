@@ -247,6 +247,15 @@ if __name__ == "__main__":
     model = model.to(args.device)
 
 
+    # set-up logging
+    log_fname = f'{args.dataset}.log'
+    if not os.path.isdir(f'./logs/saliency'):
+        os.makedirs(f'./logs/saliency')
+    log_path = os.path.join(f'./logs/saliency', log_fname)
+    logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
+    logging.info(args)
+
+
     if args.datasets == '':
         print('No datasets specified!')
     else:
@@ -262,7 +271,7 @@ if __name__ == "__main__":
             out_heat = os.path.join(outpath_base, 'heatmap.png')
             out_super = os.path.join(outpath_base, 'superimposed.png')
 
-            img, normalized_img = obtain_and_pre_process_img(img_path, args.image_size, args.norm, hist_norm)
+            img, normalized_img = obtain_and_pre_process_img(image_path, args.image_size, args.norm, hist_norm)
             saliency_map = compute_saliency_map(normalized_img, model, args.device)
             
             cropped_img = crop(img, args.crop_size)
@@ -270,9 +279,18 @@ if __name__ == "__main__":
 
             superimposed_img = plt.imshow(permuted_img, cmap='gray')
             superimposed_img = plt.imshow(saliency_map, cmap='jet', alpha=0.6)
-            
+            plt.axis('off')
             plt.savefig(out_super)
+            
             plt.imsave(out_heat, saliency_map, cmap='jet')
+
+
+
+            # calculate attentative diffusion (percentage of attention map with values about its mean)
+            mean_attention = np.mean(saliency_map)
+            attentive_diffusion = 100 * (saliency_map > mean_attention).sum() / np.prod(salieny_map.size)
+            print(f'Attentive diffusion on dataset {dataset} with model {args.model}: {attentive_diffusion:.2f}%')
+            logging.info(f'Attentive diffusion on dataset {dataset} with model {args.model}: {attentive_diffusion:.2f}%')
 
     
     
