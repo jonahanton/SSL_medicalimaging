@@ -48,6 +48,8 @@ class CustomChexpertDataset(Dataset):
         return image, label
 
     def _clean_labels(self, dataframe):
+        # May need to adjust this depending on whether is few shot or not
+
         # Fill NaNs with 0s (nothing noted anywhere about it)
         filled_dataframe = dataframe.fillna(0.0)
         # Transform uncertainties (using label smoothing)
@@ -85,6 +87,11 @@ class CustomChexpertDataset(Dataset):
 def test_class():
     cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True)
     print(cid[5000])
+    print(type(cid[5000][1]))
+    print(len(cid))
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = False)
+    print(cid[5000])
+    print(len(cid))
 
 
 if __name__ == "__main__":

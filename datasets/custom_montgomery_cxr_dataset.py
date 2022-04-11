@@ -15,6 +15,12 @@ class CustomMontgomeryCXRDataset(Dataset):
         # Should probably change that in the future...
         csv_file = os.path.join(img_dir, "montgomery_metadata.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
+        #print(self.preclean_dataframe.columns)
+        split_index = int(math.floor(0.8*len(self.preclean_dataframe)))
+        if train: # Train data (110)
+            self.preclean_dataframe = self.preclean_dataframe.iloc[:split_index,:]
+        else: # Test Data (28)
+            self.preclean_dataframe = self.preclean_dataframe.iloc[split_index:,:]
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         self.img_paths, self.aux, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
@@ -29,6 +35,7 @@ class CustomMontgomeryCXRDataset(Dataset):
         img_path = os.path.join(os.path.join(self.img_dir, "MontgomerySet/CXR_png/"), self.img_paths.iloc[idx])
         image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
+        label = np.float32(label) # Converts Label
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -64,12 +71,17 @@ class CustomMontgomeryCXRDataset(Dataset):
 
 def test_class():
     # Loads in Correctly (Needs / for img_dir path)
-    cid = CustomMontgomeryCXRDataset('/vol/bitbucket/lrc121/MontgomeryCXR/', train = True)
-    print(cid[15])
+    cid = CustomMontgomeryCXRDataset('/vol/bitbucket/g21mscprj03/SSL/data/montgomerycxr', train = True)
+    print(cid[30])
     print(len(cid))
+    cid = CustomMontgomeryCXRDataset('/vol/bitbucket/g21mscprj03/SSL/data/montgomerycxr', train = False)
+    print(cid[25])
+    print(len(cid))
+    print(type(cid[25][1]))
     return None
 
 
 
 if __name__ == "__main__":
+    #test_class()
     pass

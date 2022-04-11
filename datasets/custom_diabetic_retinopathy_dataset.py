@@ -23,6 +23,7 @@ class CustomDiabeticRetinopathyDataset(Dataset):
             self.img_dir = os.path.join(img_dir, "test")
             csv_file = os.path.join(img_dir, "testLabels.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
+        #print(self.preclean_dataframe.columns)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         self.img_paths, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
@@ -38,6 +39,7 @@ class CustomDiabeticRetinopathyDataset(Dataset):
         img_path = os.path.join(self.img_dir, self.img_paths.iloc[idx]+".jpeg")
         image = Image.open(img_path)
         label = self.img_labels.iloc[idx]
+        label = np.float32(label)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -113,12 +115,16 @@ def test_class():
     with open('sub_meta_diabetic_retinopathy.pickle', 'wb') as handle:
         pickle.dump(sub_meta, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-
-
-
-
+def test_class_2():
+    # Loads in Correctly (Needs / for img_dir path)
+    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = True)
+    print(cid[30])
+    print(len(cid))
+    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = False)
+    print(cid[25])
+    print(len(cid))
+    print(type(cid[25][1]))
+    return None
 
 if __name__ == "__main__":
-
-    test_class()
+    #test_class_2()

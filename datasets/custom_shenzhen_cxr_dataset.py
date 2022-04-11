@@ -13,6 +13,12 @@ class CustomShenzhenCXRDataset(Dataset):
         # Note only exists train data!
         csv_file = os.path.join(img_dir, "shenzhen_metadata.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
+        #print(self.preclean_dataframe.columns)
+        split_index = int(math.floor(0.8*len(self.preclean_dataframe)))
+        if train: # Train data
+            self.preclean_dataframe = self.preclean_dataframe.iloc[:split_index,:]
+        else: # Test Data
+            self.preclean_dataframe = self.preclean_dataframe.iloc[split_index:,:]
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         self.img_paths, self.aux, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
@@ -27,6 +33,7 @@ class CustomShenzhenCXRDataset(Dataset):
         img_path = os.path.join(os.path.join(self.img_dir, "ChinaSet_AllFiles/CXR_png"), self.img_paths.iloc[idx])
         image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx]
+        label = np.float32(label) # Converts Label
         # print(img_path, label)
         if self.transform:
             image = self.transform(image)
@@ -63,13 +70,17 @@ class CustomShenzhenCXRDataset(Dataset):
 
 def test_class():
     # Loads in Correctly (Needs / for img_dir path)
-    cid = CustomShenzhenCXRDataset('/vol/bitbucket/lrc121/ShenzhenXray/', train = True)
+    cid = CustomShenzhenCXRDataset('/vol/bitbucket/g21mscprj03/SSL/data/shenzhencxr', train = True)
     print(cid[30])
     print(len(cid))
+    cid = CustomShenzhenCXRDataset('/vol/bitbucket/g21mscprj03/SSL/data/shenzhencxr', train = False)
+    print(cid[30])
+    print(len(cid))
+    print(type(cid[30][1]))
     return None
 
 
 
 if __name__ == "__main__":
-    # test_class()
+    #test_class()
     pass
