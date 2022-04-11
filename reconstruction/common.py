@@ -67,7 +67,6 @@ class GenNoise(nn.Module):
 class Swish(nn.Module):
     """
         https://arxiv.org/abs/1710.05941
-        The hype was so huge that I could not help but try it
     """
 
     def __init__(self):
