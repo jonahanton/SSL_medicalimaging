@@ -77,7 +77,7 @@ class FinetuneModel(nn.Module):
         self.model.train()
         self.criterion = nn.CrossEntropyLoss()
 
-    def tune(self, train_loader, test_loader, lr, wd, early_stopping=False, val_loader=None, patience=4):
+    def tune(self, train_loader, test_loader, lr, wd, early_stopping=False, val_loader=None, patience=6):
         # set up optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wd)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.steps)
@@ -145,8 +145,8 @@ class FinetuneModel(nn.Module):
                             early_stop_counter = 0
                 
                     if early_stop:
-                        print(f'Early stopping at step # {step} / 5000')
-                        logging.info(f'Early stopping at step # {step} / 5000')
+                        print(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
+                        logging.info(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
                         running = False
                         break
 
@@ -197,7 +197,7 @@ class FinetuneModel(nn.Module):
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
                  metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
-                 early_stopping=False, patience=4):
+                 early_stopping=False, patience=6):
         self.model_name = model_name
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -623,7 +623,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--search', action='store_true', default=False, help='whether to perform a hyperparameter search on the lr and wd')
     parser.add_argument('-g', '--grid-size', type=int, default=2, help='the number of learning rate values in the search grid')
     parser.add_argument('-e', '--early-stopping', action='store_true', default=False, help='whether to perform early stopping')
-    parser.add_argument('-p', '--patience', type=int, default=4, help='patience in units of 100 steps for early stopping')
+    parser.add_argument('-p', '--patience', type=int, default=6, help='patience in units of 100 steps for early stopping')
     parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--wd', type=float, default=1e-8, help='weight decay')
     parser.add_argument('--steps', type=int, default=5000, help='the number of finetuning steps')

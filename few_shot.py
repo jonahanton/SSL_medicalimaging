@@ -268,7 +268,7 @@ FEW_SHOT_DATASETS = {
     'chexpert' : [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
     'bach' : [CustomBachDataset, './data/bach', 4, 'accuracy'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2, 'accuracy'],
-    'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 3, 'accuracy'],
+    'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2, 'mean per-class accuracy'],
 }
 
 

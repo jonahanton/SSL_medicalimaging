@@ -32,6 +32,9 @@ class CustomiChallengePMDataset(Dataset):
     def __getitem__(self, idx):
         label = self.img_labels.iloc[idx] 
         label = np.float32(label) # Converts Label
+        # Combine labels for classes 1 and 2 together 
+        if label == 2:
+            label = np.float32(1)
         img_path = os.path.join(os.path.join(self.img_dir,"PALM-Training400/PALM-Training400/"),self.img_paths.iloc[idx])
         # print(img_path, label)
         image = Image.open(img_path) # RGB
