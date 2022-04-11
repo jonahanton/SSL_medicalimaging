@@ -12,7 +12,7 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=ichallenge_pm
-python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way 2 --n-support 20
+# python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way 2 --n-support 20
 python few_shot.py -d $dset -m swav --n-way 2 --n-support 20
 python few_shot.py -d $dset -m byol --n-way 2 --n-support 20
 python few_shot.py -d $dset -m pirl --n-way 2 --n-support 20
