@@ -395,9 +395,9 @@ if __name__ == "__main__":
 
     # set-up logging
     log_fname = f'{args.dataset}.log'
-    if not os.path.isdir(f'./logs/invariances/{args.model}'):
-        os.makedirs(f'./logs/invariances/{args.model}')
-    log_path = os.path.join(f'./logs/invariances/{args.model}', log_fname)
+    if not os.path.isdir(f'./logs/invariances/{args.model}/{args.transform}'):
+        os.makedirs(f'./logs/invariances/{args.model}/{args.transform}')
+    log_path = os.path.join(f'./logs/invariances/{args.model}/{args.transform}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
@@ -453,18 +453,18 @@ if __name__ == "__main__":
 
 
     if os.path.exists(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
-        print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it.')
-        logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it.')
+        print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
+        logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
     else:
-        print(f'Computing covariance matrix for {args.model} on dataset {args.dataset}.')
-        logging.info(f'Computing covariance matrix for {args.model} on dataset {args.dataset}.')
+        print(f'Computing covariance matrix for {args.model} on dataset {args.dataset}')
+        logging.info(f'Computing covariance matrix for {args.model} on dataset {args.dataset}')
 
         # Calculate (approx.) mean and covariance matrix, 
         # from > 1000 sampled images (10% of full dataset, or full dataset if contains < 1000 images)
         if len(clean_dataset) < 1000:
             clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size)
         else:
-            random_idx = np.random.choice(np.arange(len(clean_dataset)), np.floor(0.1*len(clean_dataset)))
+            random_idx = np.random.choice(np.arange(len(clean_dataset)), max(1000, np.floor(0.1*len(clean_dataset))))
             sub_sampler = SubsetRandomSampler(random_idx)
             clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size, sampler=sub_sampler)
 
@@ -481,16 +481,16 @@ if __name__ == "__main__":
         mean_feature = all_features.mean(dim=0)
         cov_matrix = np.cov(all_features, rowvar=False)
 
-        torch.save(mean_feature, open(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth', 'wb'))
-        torch.save(cov_matrix, open(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth', 'wb'))
+        torch.save(mean_feature, f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
+        torch.save(cov_matrix, f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
 
 
     # Calculate invariances
     L = torch.zeros((args.num_images, k))
     S = torch.zeros((args.num_images, k))
 
-    mean_feature = torch.load(open(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth', 'rb'))
-    cov_matrix = torch.load(open(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth', 'rb'))
+    mean_feature = torch.load(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
+    cov_matrix = torch.load(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
     
     # # ensure inv_cov_matrix is positive semi-definite (so can calculate Choleksy decomp.)
     # epsilon = 1e-10

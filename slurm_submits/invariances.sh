@@ -12,6 +12,7 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-model=byol
-dset=cifar10
+model=supervised_r50
+dset=ichallenge_amd
+
 python invariances.py --dataset $dset --model $model --transform rotation

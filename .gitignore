@@ -4,10 +4,12 @@ simclr-converter
 models
 data
 out
+invariances
 condor_submits
+misc
 test.py
 test_dataloading.py
-new_reconstruction
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__
