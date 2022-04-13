@@ -11,22 +11,19 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-input_dir = './data/diabetic_retinopathy/train/10_left.jpeg'
-max_iter = 50
-clip = true
+input_dir='sample_images/chexpert/patient00001_view1_frontal.jpg'
+max_iter=2
+clip=True
 
-python reconstruction -m swav --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m byol --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m pirl --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m moco-v2 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m mimic-chexpert_lr_0.01 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m mimic-chexpert_lr_0.1 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m mimic-chexpert_lr_1.0 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m mimic-cxr_r18_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m -m mimic-cxr_d121_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m supervised_r50 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m supervised_r18 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction -m supervised_d121 --input_dir $input_dir --max_iter $max_iter --clip $clip
-
-
-
+python reconstruction.py -m swav --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m byol --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m pirl --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m moco-v2 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m mimic-chexpert_lr_0.01 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m mimic-chexpert_lr_0.1 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m mimic-chexpert_lr_1.0 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m mimic-cxr_r18_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m -m mimic-cxr_d121_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m supervised_r50 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m supervised_r18 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m supervised_d121 --input_dir $input_dir --max_iter $max_iter --clip $clip
