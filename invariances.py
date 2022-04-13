@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, ConcatDataset
+from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, models, transforms
 import torchvision.transforms.functional as FT
 
@@ -189,7 +190,7 @@ class ManualTransform(object):
             pass
         else:
             image = eval(f'FT.{self.fn}(image, **params)')
-            
+
         if self.fn != 'resized_crop':
             image = FT.resize(image, self.resize)
             if self.fn == 'translation':
@@ -375,6 +376,7 @@ if __name__ == "__main__":
                         help='transform to evaluate invariance of (rotation/translation/colour jitter/blur etc.)')
     parser.add_argument('--device', default='cuda', type=str, help='GPU device')
     parser.add_argument('--num-images', default=100, type=int, help='number of images to evaluate invariance on.')
+    parser.add_argument('--batch-size', default=256, type=int, help='mini-batch size')
     parser.add_argument('--resize', default=256, type=int, help='resize')
     parser.add_argument('--crop-size', default=224, type=int, help='crop size')
     parser.add_argument('--k', default=None, type=int, help='number of transformations')
@@ -445,41 +447,76 @@ if __name__ == "__main__":
     dataset = get_train_valid_test_dset(dset, data_dir, normalise_dict, hist_norm, args.resize, args.crop_size,
                                          manual_transform=transform)
 
+    # set random seeds
     np.random.seed(0)
     torch.manual_seed(0)
-    sampler = np.random.choice(np.arange(len(dataset)), args.num_images)
+
+
+    if os.path.exists(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
+        print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it.')
+        logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it.')
+    else:
+        print(f'Computing covariance matrix for {args.model} on dataset {args.dataset}.')
+        logging.info(f'Computing covariance matrix for {args.model} on dataset {args.dataset}.')
+
+        # Calculate (approx.) mean and covariance matrix, 
+        # from > 1000 sampled images (10% of full dataset, or full dataset if contains < 1000 images)
+        if len(clean_dataset) < 1000:
+            clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size)
+        else:
+            random_idx = np.random.choice(np.arange(len(clean_dataset)), np.floor(0.1*len(clean_dataset)))
+            sub_sampler = SubsetRandomSampler(random_idx)
+            clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size, sampler=sub_sampler)
+
+
+        all_features = []
+        with torch.no_grad():
+            progress = tqdm(clean_dataloader)
+            for data, _ in progress:
+                data = data.to(args.device)
+                features = model(data).detach().cpu()
+                all_features.append(features)
+        all_features = torch.cat(all_features)
+
+        mean_feature = all_features.mean(dim=0)
+        cov_matrix = np.cov(all_features, rowvar=False)
+
+        torch.save(mean_feature, open(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth', 'wb'))
+        torch.save(cov_matrix, open(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth', 'wb'))
+
+
+    # Calculate invariances
+    L = torch.zeros((args.num_images, k))
+    S = torch.zeros((args.num_images, k))
+
+    mean_feature = torch.load(open(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth', 'rb'))
+    cov_matrix = torch.load(open(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth', 'rb'))
+    
+    # # ensure inv_cov_matrix is positive semi-definite (so can calculate Choleksy decomp.)
+    # epsilon = 1e-10
+    # while True:
+    #     inv_cov_matrix = np.linalg.inv(cov_matrix)
+    #     eig_vals = np.linalg.eigvalsh(inv_cov_matrix)
+    #     if len(eig_vals[eig_vals < 0]) > 0:
+    #         cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])
+    #         epsilon *= 10
+    #     else:
+    #         break
+    
+    epsilon = 1e-6
+    cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])
+    inv_cov_matrix = np.linalg.inv(cov_matrix)
+    cholesky_matrix = torch.linalg.cholesky(torch.from_numpy(inv_cov_matrix).to(torch.float32))
+
 
     def get_same_batch(sampler, d1, d2):
         for i in sampler:
             img1, _ = d1[i]
             img2, _ = d2[i]
             yield (torch.stack(img1), img2.unsqueeze(0))
-    
 
-    # Calculate (approx.) mean and covariance matrix (from 100 sampled images)
-    all_features = []
-    batch_generator = get_same_batch(sampler, dataset, clean_dataset)
-    with torch.no_grad():
-        for i in tqdm(range(args.num_images)):
-            _, clean_data = next(batch_generator)
-            feature = model(clean_data.to(args.device)).detach().cpu()
-            all_features.append(feature)
-    all_features = torch.cat(all_features)
-    mean_feature = all_features.mean(dim=0)
-    cov_matrix = np.cov(all_features, rowvar=False)
-    cov_matrix = cov_matrix + 1e-10 * np.eye(cov_matrix.shape[0])
-    eig_values = np.linalg.eigvalsh(cov_matrix)
-    print(eig_values[eig_values < 0])
-
-
-    inv_cov_matrix = np.linalg.inv(cov_matrix)
-    cholesky_matrix = torch.linalg.cholesky(torch.from_numpy(inv_cov_matrix).to(torch.float32))
-
-
-    # Calculate invariances
-    L = torch.zeros((args.num_images, k))
-    S = torch.zeros((args.num_images, k))
-    batch_generator = get_same_batch(sampler, dataset, clean_dataset)
+    sampler = np.random.choice(np.arange(len(dataset)), args.num_images)
+    batch_generator = get_same_batch(sampler, dataset, clean_dataset)    
     with torch.no_grad():
         for i in tqdm(range(args.num_images)):
             data, clean_data = next(batch_generator)
