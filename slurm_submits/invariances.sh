@@ -12,24 +12,74 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=shenzhencxr
-python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform h_flip
-python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform h_flip
-python invariances.py --dataset $dset --model moco-v2 --transform h_flip
-python invariances.py --dataset $dset --model simclr-v1 --transform h_flip --no-norm
-python invariances.py --dataset $dset --model pirl --transform h_flip
-python invariances.py --dataset $dset --model swav --transform h_flip
-python invariances.py --dataset $dset --model byol --transform h_flip
-python invariances.py --dataset $dset --model supervised_r18 --transform h_flip
-python invariances.py --dataset $dset --model supervised_d121 --transform h_flip
-
+transform=rotation
 dset=montgomerycxr
-python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform h_flip
-python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform h_flip
-python invariances.py --dataset $dset --model moco-v2 --transform h_flip
-python invariances.py --dataset $dset --model simclr-v1 --transform h_flip --no-norm
-python invariances.py --dataset $dset --model pirl --transform h_flip
-python invariances.py --dataset $dset --model swav --transform h_flip
-python invariances.py --dataset $dset --model byol --transform h_flip
-python invariances.py --dataset $dset --model supervised_r18 --transform h_flip
-python invariances.py --dataset $dset --model supervised_d121 --transform h_flip
+python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform $transform
+python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform $transform
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+transform=h_flip
+dset=montgomerycxr
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+transform=rotation
+dset=diabetic_retinopathy
+python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform $transform
+python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform $transform
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+transform=h_flip
+dset=diabetic_retinopathy
+python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform $transform
+python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform $transform
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+
+transform=rotation
+dset=ichallenge_pm
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+transform=h_flip
+dset=ichallenge_pm
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform
+
+transform=h_flip
+dset=ichallenge_amd
+python invariances.py --dataset $dset --model moco-v2 --transform $transform
+python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm
+python invariances.py --dataset $dset --model pirl --transform $transform
+python invariances.py --dataset $dset --model swav --transform $transform
+python invariances.py --dataset $dset --model byol --transform $transform
+python invariances.py --dataset $dset --model supervised_r18 --transform $transform
+python invariances.py --dataset $dset --model supervised_d121 --transform $transform

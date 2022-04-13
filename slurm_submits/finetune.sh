@@ -14,6 +14,6 @@ cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=chexpert
 # dset=diabetic_retinopathy
-# python finetune.py -d $dset -m mimic-chexpert_lr_0.1 --early-stopping -b 16
-python finetune.py -d $dset -m supervised d121 --early-stopping
+python finetune.py -d $dset -m mimic-cxr_r18 --early-stopping
+# python finetune.py -d $dset -m supervised d121 --early-stopping
 

@@ -316,6 +316,7 @@ if __name__ == "__main__":
     
     if args.dataset in ['chexpert', 'diabetic_retinopathy', 'stoic']:
         submeta_path = os.path.join('./misc/few_shot_submeta', f'{args.dataset}.pickle')
+        print(f'Loading sub meta dict from path {submeta_path}')
         dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm, hist_norm=hist_norm,
          load_submeta=True, submeta_path=submeta_path)
     else:

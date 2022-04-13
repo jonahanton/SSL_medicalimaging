@@ -49,11 +49,13 @@ def get_dataset(dset, root, split, transform):
 
 
 class SetDataset:
-    def __init__(self, dset, root, num_classes, batch_size, transform, load_submeta, submeta_path):
+    def __init__(self, dset, root, num_classes, batch_size, transform, load_submeta, submeta_path, normalise=False, hist_norm=False):
         self.cl_list = list(range(num_classes)) # changed this to list
 
         if load_submeta:
+            print(f'Loading sub meta dictionary')
             self.sub_meta = pickle.load(open(submeta_path, 'rb'))
+            print(f'Loaded')
         else:
 
             self.sub_meta = {}
@@ -81,10 +83,10 @@ class SetDataset:
             for i, (data, label) in enumerate(d):
                 self.sub_meta[label].append(data)
 
-        for label in self.sub_meta.copy(): # added copy
-            if len(self.sub_meta[label]) == 0:
-                del self.sub_meta[label]
-                del self.cl_list[label]
+        # for label in self.sub_meta.copy(): # added copy
+        #     if len(self.sub_meta[label]) == 0:
+        #         del self.sub_meta[label]
+        #         del self.cl_list[label]
 
         # print('Number of images per class')
         # for key, item in self.sub_meta.items():
@@ -95,8 +97,22 @@ class SetDataset:
                                   shuffle = True,
                                   num_workers = 0, #use main thread only or may receive multiple batches
                                   pin_memory = False)
+
         for cl in self.cl_list:
-            sub_dataset = SubDataset(self.sub_meta[cl], cl, transform=transform if dset in [datasets.CIFAR10, datasets.CIFAR100] else identity)
+
+            if dset in [datasets.CIFAR10, datasets.CIFAR100]:
+                transform_sub_dset = transform
+            elif load_submeta:
+                if hist_norm:
+                    transform_sub_dset = HistogramNormalize()
+                elif normalise:
+                    transform_sub_dset = transforms.Normalize(mean=[0.485, 0.456, 0.406] , std=[0.229, 0.224, 0.225])
+                else:
+                    transform_sub_dset = identity
+            else:
+                transform_sub_dset = identity
+
+            sub_dataset = SubDataset(self.sub_meta[cl], cl, transform=transform_sub_dset)
             self.sub_dataloader.append(torch.utils.data.DataLoader(sub_dataset, **sub_data_loader_params))
 
     def __getitem__(self, i):
@@ -210,7 +226,7 @@ class SetDataManager(DataManager):
 
     def get_data_loader(self, aug, normalise, hist_norm, load_submeta=False, submeta_path=None): #parameters that would change on train/val set
         transform = self.trans_loader.get_composed_transform(aug, normalise, hist_norm)
-        dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform, load_submeta, submeta_path)
+        dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform, load_submeta, submeta_path, normalise, hist_norm)
         # Custom sampler that yields n_way random class indices each time it's called
         sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )
         data_loader_params = dict(batch_sampler = sampler,  num_workers = 0, pin_memory = True)
