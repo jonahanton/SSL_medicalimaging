@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
 
     # set-up logging
-    log_fname = f'{args.dataset}.log'
+    log_fname = f'{args.model}.log'
     if not os.path.isdir(f'./logs/saliency'):
         os.makedirs(f'./logs/saliency')
     log_path = os.path.join(f'./logs/saliency', log_fname)
@@ -288,7 +288,7 @@ if __name__ == "__main__":
 
             # calculate attentative diffusion (percentage of attention map with values about its mean)
             mean_attention = np.mean(saliency_map)
-            attentive_diffusion = 100 * (saliency_map > mean_attention).sum() / np.prod(salieny_map.size)
+            attentive_diffusion = 100 * (saliency_map > mean_attention).sum() / np.prod(saliency_map.size)
             print(f'Attentive diffusion on dataset {dataset} with model {args.model}: {attentive_diffusion:.2f}%')
             logging.info(f'Attentive diffusion on dataset {dataset} with model {args.model}: {attentive_diffusion:.2f}%')
 

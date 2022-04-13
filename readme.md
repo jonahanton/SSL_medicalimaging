@@ -15,6 +15,19 @@ Much of the code is taken/adapted from the codebase for the CVPR 2021 paper [How
 }
 ```
 
+The code for the synthetic invariance evaluation is adapted from:
+
+```
+@misc{ericsson2021selfsupervised,
+      title={Why Do Self-Supervised Models Transfer? Investigating the Impact of Invariance on Downstream Tasks}, 
+      author={Linus Ericsson and Henry Gouk and Timothy M. Hospedales},
+      year={2021},
+      eprint={2111.11398},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
+
 Code for image reconstruction is adapted from: 
 
 ```
