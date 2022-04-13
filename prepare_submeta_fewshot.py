@@ -21,6 +21,8 @@ from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 from datasets.custom_bach_dataset import CustomBachDataset
 from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
 from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
+from datasets.custom_chestx_dataset import CustomChestXDataset
+from datasets.custom_stoic_dataset import CustomStoicDataset
 
 
 # Data classes and functions
@@ -62,6 +64,9 @@ DATASETS = {
     'bach' : [CustomBachDataset, './data/bach', 4],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2],
     'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2],
+    'chestx' : [CustomChestXDataset, './data/chestx', 7],
+    'stoic': [CustomStoicDataset, './data/stoic', 2],
+
 }
 
 
