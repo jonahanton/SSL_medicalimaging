@@ -12,6 +12,7 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
+model=supervised_r50
 # python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m mimic-cxr_r18_lr_1e-4
 # python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m supervised_r50
-python saliency.py -d montgomerycxr shenzhencxr chexpert chestx -m byol
+python saliency.py -d bach chestx chexpert diabetic_retinopathy ichallenge_amd ichallenge_pm montgomerycxr shenzhencxr -m $model
