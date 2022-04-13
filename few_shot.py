@@ -315,7 +315,7 @@ if __name__ == "__main__":
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     
     if args.dataset in ['chexpert', 'diabetic_retinopathy', 'stoic']:
-        submeta_path = os.path.join('./misc/fwe_shot_submeta', f'{args.dataset}.pickle')
+        submeta_path = os.path.join('./misc/few_shot_submeta', f'{args.dataset}.pickle')
         dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm, hist_norm=hist_norm,
          load_submeta=True, submeta_path=submeta_path)
     else:
