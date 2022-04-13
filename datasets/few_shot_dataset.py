@@ -8,6 +8,7 @@ import pandas as pd
 from torchvision import datasets, transforms
 from torch.utils.data import Dataset, ConcatDataset, DataLoader
 from abc import abstractmethod
+import pickle
 
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
@@ -48,33 +49,37 @@ def get_dataset(dset, root, split, transform):
 
 
 class SetDataset:
-    def __init__(self, dset, root, num_classes, batch_size, transform):
-        self.sub_meta = {}
+    def __init__(self, dset, root, num_classes, batch_size, transform, load_submeta, submeta_path):
         self.cl_list = list(range(num_classes)) # changed this to list
 
-        for cl in self.cl_list:
-            self.sub_meta[cl] = []
-
-
-        if dset in [datasets.CIFAR10, datasets.CIFAR100]:
-            trainval_dataset = get_dataset(dset, root, 'train', identity)
+        if load_submeta:
+            self.sub_meta = pickle.load(open(submeta_path, 'rb'))
         else:
-            trainval_dataset = get_dataset(dset, root, 'train', transform)
 
-        if dset in [datasets.CIFAR10, datasets.CIFAR100]:
-            test_dataset = get_dataset(dset, root, 'test', identity)
-        else:
-            test_dataset = get_dataset(dset, root, 'test', transform)
+            self.sub_meta = {}
+            for cl in self.cl_list:
+                self.sub_meta[cl] = []
 
-        if dset in [CustomMontgomeryCXRDataset, CustomShenzhenCXRDataset]:
-            d = trainval_dataset
-        else:
-            d = ConcatDataset([trainval_dataset, test_dataset])
 
-        print(f'Total dataset size: {len(d)}')
+            if dset in [datasets.CIFAR10, datasets.CIFAR100]:
+                trainval_dataset = get_dataset(dset, root, 'train', identity)
+            else:
+                trainval_dataset = get_dataset(dset, root, 'train', transform)
 
-        for i, (data, label) in enumerate(d):
-            self.sub_meta[label].append(data)
+            if dset in [datasets.CIFAR10, datasets.CIFAR100]:
+                test_dataset = get_dataset(dset, root, 'test', identity)
+            else:
+                test_dataset = get_dataset(dset, root, 'test', transform)
+
+            if dset in [CustomMontgomeryCXRDataset, CustomShenzhenCXRDataset]:
+                d = trainval_dataset
+            else:
+                d = ConcatDataset([trainval_dataset, test_dataset])
+
+            print(f'Total dataset size: {len(d)}')
+
+            for i, (data, label) in enumerate(d):
+                self.sub_meta[label].append(data)
 
         for label in self.sub_meta.copy(): # added copy
             if len(self.sub_meta[label]) == 0:
@@ -203,9 +208,9 @@ class SetDataManager(DataManager):
         np.random.seed(seed)
         torch.manual_seed(seed)
 
-    def get_data_loader(self, aug, normalise, hist_norm): #parameters that would change on train/val set
+    def get_data_loader(self, aug, normalise, hist_norm, load_submeta=False, submeta_path=None): #parameters that would change on train/val set
         transform = self.trans_loader.get_composed_transform(aug, normalise, hist_norm)
-        dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform)
+        dataset = SetDataset(self.dset, self.root, self.num_classes, self.batch_size, transform, load_submeta, submeta_path)
         # Custom sampler that yields n_way random class indices each time it's called
         sampler = EpisodicBatchSampler(len(dataset), self.n_way, self.n_episode )
         data_loader_params = dict(batch_sampler = sampler,  num_workers = 0, pin_memory = True)

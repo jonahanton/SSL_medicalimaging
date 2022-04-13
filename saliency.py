@@ -200,7 +200,9 @@ IMAGES = {
     'ichallenge_amd' : ['AMD_A0001.jpg', './sample_images/ichallenge_amd/AMD_A0001.jpg'],
     'ichallenge_pm' : ['H0009.jpg', './sample_images/ichallenge_pm/H0009.jpg'],
     'montgomerycxr' : ['MCUCXR_0001_0.png', './sample_images/montgomerycxr/MCUCXR_0001_0.png'],
-    'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png']
+    'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
+    'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],
+    'imagenet' : ['goldfish.jpeg', 'sample_images/imagenet/goldfish.jpeg'],
 }
 
 

@@ -12,7 +12,24 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-model=supervised_r50
-dset=ichallenge_amd
+dset=shenzhencxr
+python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform h_flip
+python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform h_flip
+python invariances.py --dataset $dset --model moco-v2 --transform h_flip
+python invariances.py --dataset $dset --model simclr-v1 --transform h_flip --no-norm
+python invariances.py --dataset $dset --model pirl --transform h_flip
+python invariances.py --dataset $dset --model swav --transform h_flip
+python invariances.py --dataset $dset --model byol --transform h_flip
+python invariances.py --dataset $dset --model supervised_r18 --transform h_flip
+python invariances.py --dataset $dset --model supervised_d121 --transform h_flip
 
-python invariances.py --dataset $dset --model $model --transform rotation
+dset=montgomerycxr
+python invariances.py --dataset $dset --model mimic-chexpert_lr_0.01 --transform h_flip
+python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform h_flip
+python invariances.py --dataset $dset --model moco-v2 --transform h_flip
+python invariances.py --dataset $dset --model simclr-v1 --transform h_flip --no-norm
+python invariances.py --dataset $dset --model pirl --transform h_flip
+python invariances.py --dataset $dset --model swav --transform h_flip
+python invariances.py --dataset $dset --model byol --transform h_flip
+python invariances.py --dataset $dset --model supervised_r18 --transform h_flip
+python invariances.py --dataset $dset --model supervised_d121 --transform h_flip

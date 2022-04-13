@@ -1,8 +1,3 @@
-### Other useful things
-# Include pretrained model into file name but NOT as new directory - DONE (but need to change)
-# Change how to structure directory
-# Include for loop for all the models - just use a shell script
-
 import numpy as np
 import argparse
 import os
@@ -24,7 +19,9 @@ from reconstruction.backbones import ResNetBackbone, ResNet18Backbone, DenseNetB
 parser = argparse.ArgumentParser(description='Deep Image Reconstruction')
 parser.add_argument('-m', '--model', type=str, default='supervised_d121',
                         help='name of the pretrained model to load and evaluate')
-parser.add_argument('--input_dir', default = 'sample_images/chexpert/patient00001_view1_frontal.jpg')
+
+# parser.add_argument('--input_dir', default = 'sample_images/chexpert/patient00001_view1_frontal.jpg')
+parser.add_argument('-d', '--datasets', nargs='+', type=str, default='', help='datasets to calculate reconstructions for', required=True)
 parser.add_argument('--clip', default = True, help = 'clip output image between 1 and 0')
 
 parser.add_argument('--output_dir', default='reconstructed_images/')
@@ -114,6 +111,18 @@ def get_params(opt_over, net, net_input, downsampler=None):
 
     return params
 
+IMAGES = {
+    'bach' : ['iv001.tif', './sample_images/bach/iv001.tif'],
+    'chestx' : ['00000001_000.png', './sample_images/chestx/00000001_000.png'],
+    'chexpert' : ['patient00001_view1_frontal.jpg','./sample_images/chexpert/patient00001_view1_frontal.jpg'],
+    'diabetic_retinopathy' : ['34680_left.jpeg', './sample_images/diabetic_retinopathy/34680_left.jpeg'],
+    'ichallenge_amd' : ['AMD_A0001.jpg', './sample_images/ichallenge_amd/AMD_A0001.jpg'],
+    'ichallenge_pm' : ['H0009.jpg', './sample_images/ichallenge_pm/H0009.jpg'],
+    'montgomerycxr' : ['MCUCXR_0001_0.png', './sample_images/montgomerycxr/MCUCXR_0001_0.png'],
+    'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
+    'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],
+    'imagenet' : ['goldfish.jpeg', 'sample_images/imagenet/goldfish.jpeg'],
+}
 
 def main():
     args = parser.parse_args()
@@ -144,110 +153,114 @@ def main():
 
     checkdir(args.output_dir)
 
-    img = Image.open(args.input_dir)
-
-    # Resize image
-    transform = transforms.Compose([
-            transforms.Resize(args.img_size, interpolation=PIL.Image.BICUBIC),
-            transforms.CenterCrop(args.img_size),
-            transforms.ToTensor()
-        ])
-    ### Normalise image?
-
-    img = transform(img)
-
-    print("Maximum tensor value of input image is: ", torch.max(img))
-    print("Minimum tensor value of input image is: ", torch.min(img))
-
-    img = torch.unsqueeze(img, 0) # each image is its own batch
-
-    print("Image size after transformation", img.shape) # ([1, 3, 224, 224])
-
-    filename = str(args.input_dir.split("/")[-1])
-    filename = str(args.model) + "_" + str(args.clip) + "_" + filename
-    print("Filename is: ", filename)
-
-    criterion = nn.MSELoss().to(args.device)
-    input_depth = 32
-    imsize_net = 256
-
-    target = model.forward(img, name = args.which_layer).detach()
-
-    print("Target shape", target.shape)
-    # [1, 2048, 7, 7]) for ResNet 50 where 2048 is feature dim of ResNet
-    # ([1, 512, 7, 7]) for ResNet 18 where 512 is feature dim of ResNet 18
-    # [1, 1024] for Densenet 121 - seems like wrong
-
-    out_path = os.path.join(args.output_dir, args.model, filename)
-    print("out_path is: ", out_path)
-
-    if not os.path.exists(out_path):
-        print(f"Reconstructing Image {filename}")
-
-        start=time.time()
-
-        pad = 'zero'  # 'refection'
-
-        # Encoder-decoder architecture
-        net = skip(input_depth, 3, num_channels_down=[16, 32, 64, 128, 128, 128],
-                    num_channels_up=[16, 32, 64, 128, 128, 128],
-                    num_channels_skip=[4, 4, 4, 4, 4, 4],
-                    filter_size_down=[7, 7, 5, 5, 3, 3], filter_size_up=[7, 7, 5, 5, 3, 3],
-                    upsample_mode='nearest', downsample_mode='avg',
-                    need_sigmoid=False, pad=pad, act_fun='LeakyReLU').type(img.type())
-
-        net = net.to(args.device)
-
-        net_input = get_noise(input_depth, imsize_net).type(img.type()).detach()
-        print("net input size", net_input.shape)
-
-        out = net(net_input)
-        print("Out shape without filtering", out.shape) # ([1, 3, 256, 256]) for ResNet 18
-
-        out = out[:, :, :224, :224]
-        print("Out shape after filtering", out.shape) # ([1, 3, 224, 224]) for ResNet 18
-
-        # Compute number of parameters
-        s = sum(np.prod(list(p.size())) for p in net.parameters())
-        print('Number of params: %d' % s)
-
-        # run style transfer
-        max_iter = args.max_iter
-        show_iter = 50
-        optimizer = optim.Adam(get_params('net', net, net_input), lr=args.lr)
-        n_iter = [0]
-
-        while n_iter[0] <= max_iter:
-
-            def closure():
-                optimizer.zero_grad()
-                out = model.forward(
-                    net(net_input)[:, :, :args.img_size, :args.img_size], name=args.which_layer)
-
-                # print("Out size", out.shape) # [1, 2048, 7, 7]) for ResNet 50
-                # out gives features from pretrained network when input is noise fed into encoder-decoder network
-                # target is features from pretrained network when input is original image
-
-                loss = criterion(out, target)
-                loss.backward()
-                n_iter[0] += 1
-                # print loss
-                if n_iter[0] % show_iter == (show_iter - 1):
-                    print('Iteration: %d, loss: %f' % (n_iter[0] + 1, loss.item()))
-                return loss
-
-            optimizer.step(closure)
-
-        out_img = postp(net(net_input)[:, :, :args.img_size, :args.img_size].data[0].cpu().squeeze(), args.clip)
-
-        end = time.time()
-        print('Time:'+str(end-start))
-
-        checkdir(os.path.dirname(out_path))
-        out_img.save(out_path)
-
+    if args.datasets == '':
+        print('No datasets specified!')
     else:
-        print("Reconstructed image already exists. Exiting.")
+        for dataset in args.datasets:
+            image_name, image_path = IMAGES[dataset]
+
+            img = Image.open(image_path).convert('RGB')
+
+            # Resize image
+            transform = transforms.Compose([
+                    transforms.Resize(args.img_size, interpolation=PIL.Image.BICUBIC),
+                    transforms.CenterCrop(args.img_size),
+                    transforms.ToTensor()
+                ])
+
+            img = transform(img)
+
+            print("Maximum tensor value of input image is: ", torch.max(img))
+            print("Minimum tensor value of input image is: ", torch.min(img))
+
+            img = torch.unsqueeze(img, 0) # each image is its own batch
+            img = img.to(args.device)
+
+            print("Image size after transformation", img.shape) # ([1, 3, 224, 224])
+
+            # filename = str(args.input_dir.split("/")[-1])
+            filename = str(args.model) + "_" + str(args.clip) + "_" + image_name
+            print("Filename is: ", filename)
+
+            criterion = nn.MSELoss().to(args.device)
+            input_depth = 32
+            imsize_net = 256
+
+            target = model.forward(img, name = args.which_layer).detach()
+
+            print("Target shape", target.shape)
+
+            out_path = os.path.join(args.output_dir, args.model, filename)
+            print("out_path is: ", out_path)
+
+            if not os.path.exists(out_path):
+                print(f"Reconstructing Image {filename}")
+
+                start=time.time()
+
+                pad = 'zero'  # 'refection'
+
+                # Encoder-decoder architecture
+                net = skip(input_depth, 3, num_channels_down=[16, 32, 64, 128, 128, 128],
+                            num_channels_up=[16, 32, 64, 128, 128, 128],
+                            num_channels_skip=[4, 4, 4, 4, 4, 4],
+                            filter_size_down=[7, 7, 5, 5, 3, 3], filter_size_up=[7, 7, 5, 5, 3, 3],
+                            upsample_mode='nearest', downsample_mode='avg',
+                            need_sigmoid=False, pad=pad, act_fun='LeakyReLU').type(img.type())
+
+                net = net.to(args.device)
+
+                net_input = get_noise(input_depth, imsize_net).type(img.type()).detach()
+                print("net input size", net_input.shape)
+
+                out = net(net_input)
+                print("Out shape without filtering", out.shape) # ([1, 3, 256, 256]) for ResNet 18
+
+                out = out[:, :, :224, :224]
+                print("Out shape after filtering", out.shape) # ([1, 3, 224, 224]) for ResNet 18
+
+                # Compute number of parameters
+                s = sum(np.prod(list(p.size())) for p in net.parameters())
+                print('Number of params: %d' % s)
+
+                # run style transfer
+                max_iter = args.max_iter
+                show_iter = 50
+                optimizer = optim.Adam(get_params('net', net, net_input), lr=args.lr)
+                n_iter = [0]
+
+                while n_iter[0] <= max_iter:
+
+                    def closure():
+                        optimizer.zero_grad()
+                        out = model.forward(
+                            net(net_input)[:, :, :args.img_size, :args.img_size], name=args.which_layer)
+
+                        # print("Out size", out.shape) # [1, 2048, 7, 7]) for ResNet 50
+                        # out gives features from pretrained network when input is noise fed into encoder-decoder network
+                        # target is features from pretrained network when input is original image
+
+                        loss = criterion(out, target)
+                        loss.backward()
+                        n_iter[0] += 1
+                        # print loss
+                        if n_iter[0] % show_iter == (show_iter - 1):
+                            print('Iteration: %d, loss: %f' % (n_iter[0] + 1, loss.item()))
+                        return loss
+
+                    optimizer.step(closure)
+
+                out_img = postp(net(net_input)[:, :, :args.img_size, :args.img_size].data[0].cpu().squeeze(), args.clip)
+
+                end = time.time()
+                print('Time:'+str(end-start))
+
+                checkdir(os.path.dirname(out_path))
+                out_img.save(out_path)
+
+            else:
+                print("Reconstructed image already exists. Exiting.")
+
 
 if __name__ == "__main__":
     main()

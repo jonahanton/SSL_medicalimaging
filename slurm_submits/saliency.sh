@@ -12,5 +12,8 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
+model=mimic-chexpert_lr_0.1
+python saliency.py -d bach chestx chexpert diabetic_retinopathy ichallenge_amd ichallenge_pm montgomerycxr shenzhencxr imagenet -m $model
+
 model=mimic-chexpert_lr_0.01
-python saliency.py -d bach chestx chexpert diabetic_retinopathy ichallenge_amd ichallenge_pm montgomerycxr shenzhencxr -m $model
+python saliency.py -d imagenet -m $model

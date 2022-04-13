@@ -23,7 +23,7 @@ python reconstruction.py -m mimic-chexpert_lr_0.01 --input_dir $input_dir --max_
 python reconstruction.py -m mimic-chexpert_lr_0.1 --input_dir $input_dir --max_iter $max_iter --clip $clip
 python reconstruction.py -m mimic-chexpert_lr_1.0 --input_dir $input_dir --max_iter $max_iter --clip $clip
 python reconstruction.py -m mimic-cxr_r18_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
-python reconstruction.py -m -m mimic-cxr_d121_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
+python reconstruction.py -m mimic-cxr_d121_lr_1e-4 --input_dir $input_dir --max_iter $max_iter --clip $clip
 python reconstruction.py -m supervised_r50 --input_dir $input_dir --max_iter $max_iter --clip $clip
 python reconstruction.py -m supervised_r18 --input_dir $input_dir --max_iter $max_iter --clip $clip
 python reconstruction.py -m supervised_d121 --input_dir $input_dir --max_iter $max_iter --clip $clip

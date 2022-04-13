@@ -22,6 +22,7 @@ from sklearn.metrics import confusion_matrix, precision_recall_curve
 
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
+from datasets.custom_stoic_dataset import CustomStoicDataset
 
 from datasets.transforms import HistogramNormalize
 
@@ -604,6 +605,7 @@ FINETUNE_DATASETS = {
     'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
     'chexpert': [CustomChexpertDataset, './data/chexpert', 2, 'accuracy'],
+    'stoic': [CustomStoicDataset, './data/stoic', 2, 'accuracy'],
 }
 
 

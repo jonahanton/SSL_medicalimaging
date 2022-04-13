@@ -128,3 +128,4 @@ def test_class_2():
 
 if __name__ == "__main__":
     #test_class_2()
+    pass

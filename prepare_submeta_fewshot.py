@@ -84,7 +84,9 @@ if __name__ == "__main__":
         sub_meta[cl] = []
 
     pbar = tqdm(range(len(d)), desc='Iterating through dataset')
-    for data, label in d:
+    for i, (data, label) in enumerate(d):
+        if i > 10000:
+            break
         sub_meta[label].append(data)
         pbar.update(1)
     pbar.close()

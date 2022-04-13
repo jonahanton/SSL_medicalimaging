@@ -33,6 +33,7 @@ from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 from datasets.custom_bach_dataset import CustomBachDataset
 from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
 from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
+from datasets.custom_stoic_dataset import CustomStoicDataset
 
 
 
@@ -363,6 +364,7 @@ DATASETS = {
     'bach' : [CustomBachDataset, './data/bach'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd'],
     'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm'],
+    'stoic': [CustomStoicDataset, './data/stoic', 2, 'accuracy'],
 }
 
 
