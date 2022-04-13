@@ -14,7 +14,6 @@
 # Customised forward function for ResNet 18 and Densenet 121 - DONE
 
 import numpy as np
-from transformers import ImageGPTConfig
 import argparse
 import os
 import torch
