@@ -4,7 +4,6 @@
 # Include for loop for all the models - just use a shell script
 
 import numpy as np
-from transformers import ImageGPTConfig
 import argparse
 import os
 import torch

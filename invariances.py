@@ -374,9 +374,6 @@ if __name__ == "__main__":
     parser.add_argument('--transform', default='rotation', type=str,
                         help='transform to evaluate invariance of (rotation/translation/colour jitter/blur etc.)')
     parser.add_argument('--device', default='cuda', type=str, help='GPU device')
-    parser.add_argument('--feature-layer', default='backbone', type=str,
-                        help='layer to extract features from (default: backbone)')
-    parser.add_argument('--batch-size', default=256, type=int, help='mini-batch size')
     parser.add_argument('--num-images', default=100, type=int, help='number of images to evaluate invariance on.')
     parser.add_argument('--resize', default=256, type=int, help='resize')
     parser.add_argument('--crop-size', default=224, type=int, help='crop size')
@@ -470,9 +467,10 @@ if __name__ == "__main__":
     all_features = torch.cat(all_features)
     mean_feature = all_features.mean(dim=0)
     cov_matrix = np.cov(all_features, rowvar=False)
-    
-    if args.model == 'random':
-        cov_matrix = cov_matrix + 1e-10 * np.eye(cov_matrix.shape[0])
+    cov_matrix = cov_matrix + 1e-10 * np.eye(cov_matrix.shape[0])
+    eig_values = np.linalg.eigvalsh(cov_matrix)
+    print(eig_values[eig_values < 0])
+
 
     inv_cov_matrix = np.linalg.inv(cov_matrix)
     cholesky_matrix = torch.linalg.cholesky(torch.from_numpy(inv_cov_matrix).to(torch.float32))

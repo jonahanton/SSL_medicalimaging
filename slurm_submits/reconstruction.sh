@@ -11,8 +11,8 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-input_dir='sample_images/chexpert/patient00001_view1_frontal.jpg'
-max_iter=2
+input_dir='./sample_images/diabetic_retinopathy/34680_left.jpeg'
+max_iter=1000
 clip=True
 
 python reconstruction.py -m swav --input_dir $input_dir --max_iter $max_iter --clip $clip
