@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import math
 from tqdm import tqdm
+from pprint import pprint
 
 import torch
 from torch.utils.data import Dataset, ConcatDataset, DataLoader
@@ -69,6 +70,8 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', default='cifar10', type=str,
                         help='name of the dataset to compute sub meta dict for')
     parser.add_argument('--image_size', default=224, type=int, help='image size')
+    args = parser.parse_args()
+    pprint(args)
 
     # load dataset
     dset, data_dir, num_classes = DATASETS[args.dataset]
