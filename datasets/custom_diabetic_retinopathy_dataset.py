@@ -13,7 +13,7 @@ from PIL import Image
 import pickle
 
 class CustomDiabeticRetinopathyDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, group_front_lateral = False):
         # Random seed
         random_state = 42
         if train:
@@ -24,6 +24,9 @@ class CustomDiabeticRetinopathyDataset(Dataset):
             csv_file = os.path.join(img_dir, "testLabels.csv")
         self.preclean_dataframe = pd.read_csv(csv_file)
         #print(self.preclean_dataframe.columns)
+        self.group_front_lateral = group_front_lateral
+        if self.group_front_lateral:
+            self.preclean_dataframe = self.return_only_right_views(self.preclean_dataframe)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
         self.img_paths, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
@@ -44,8 +47,27 @@ class CustomDiabeticRetinopathyDataset(Dataset):
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
-        # image is an Image object, label is a numpy int
+        if self.group_front_lateral:
+            image2 = self.group_additional_images(img_path)
+            image = (image,image2)
         return image, label
+    
+    def group_additional_images(self, img_path):
+        path_list = img_path.split("/")
+        number = path_list[-1][:-10]
+        path_list[-1] = number+"_right.jpeg"
+        img_path = "/".join(path_list)
+        image = Image.open(img_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+        return image
+
+    def return_only_right_views(self,dataframe):
+        dataframe_right = dataframe.iloc[::2,:].reset_index(drop=True)
+        dataframe_left = dataframe.iloc[1::2,:].reset_index(drop=True)
+        dataframe_right['bool_results'] = np.where(dataframe_right["level"] == dataframe_left["level"], True, False)
+        dataframe = dataframe_right[dataframe_right["bool_results"] == True].reset_index(drop=True)
+        return dataframe
 
     def _clean_labels(self, dataframe):
         # Not sure atm what dataframe looks like, and hence what it should be cleaned with
@@ -117,13 +139,10 @@ def test_class():
 
 def test_class_2():
     # Loads in Correctly (Needs / for img_dir path)
-    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = True)
-    print(cid[30])
-    print(len(cid))
-    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = False)
-    print(cid[25])
-    print(len(cid))
-    print(type(cid[25][1]))
+    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = True, group_front_lateral=True)
+    print(cid[15])
+    cid = CustomDiabeticRetinopathyDataset('/vol/bitbucket/g21mscprj03/SSL/data/diabetic_retinopathy', train = False, group_front_lateral=True)
+    print(cid[15])
     return None
 
 if __name__ == "__main__":
