@@ -28,11 +28,15 @@ from datasets.custom_stoic_dataset import CustomStoicDataset
 # Data classes and functions
 
 
-def get_dataset(dset, root, split, transform):
+def get_dataset(dset_name, dset, root, split, transform):
+    if dset_name == 'chexpert':
+        return dset(root, train=(split == 'train'), transform=transform, download=True, few_shot=True)
     return dset(root, train=(split == 'train'), transform=transform, download=True)
 
 
-def get_train_valid_test_dset(dset,
+
+def get_train_valid_test_dset(dset_name,
+                              dset,
                               data_dir,
                               image_size):
 
@@ -45,8 +49,8 @@ def get_train_valid_test_dset(dset,
             ])
 
     
-    train_valid_dataset = get_dataset(dset, data_dir, 'train', transform)
-    test_dataset = get_dataset(dset, data_dir, 'test', transform)
+    train_valid_dataset = get_dataset(dset_name, dset, data_dir, 'train', transform)
+    test_dataset = get_dataset(dset_name, dset, data_dir, 'test', transform)
     dataset = ConcatDataset([train_valid_dataset, test_dataset])
 
     return dataset
@@ -80,7 +84,7 @@ if __name__ == "__main__":
 
     # load dataset
     dset, data_dir, num_classes = DATASETS[args.dataset]
-    d = get_train_valid_test_dset(dset, data_dir, args.image_size)
+    d = get_train_valid_test_dset(args.dataset, dset, data_dir, args.image_size)
     print(f'Total dataset size: {len(d)}')
 
     cl_list = range(num_classes)
