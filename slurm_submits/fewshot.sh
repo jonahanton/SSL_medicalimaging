@@ -11,7 +11,7 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=diabetic_retinopathy
+dset=stoic
 python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way 5 --n-support 20
 python few_shot.py -d $dset -m swav --n-way 5 --n-support 20
 python few_shot.py -d $dset -m byol --n-way 5 --n-support 20

@@ -21,6 +21,7 @@ from datasets.custom_bach_dataset import CustomBachDataset
 from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
 from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
+from datasets.custom_chestx_dataset import CustomChestXDataset
 
 import numpy as np
 from tqdm import tqdm
@@ -270,7 +271,8 @@ FEW_SHOT_DATASETS = {
     'bach' : [CustomBachDataset, './data/bach', 4, 'accuracy'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2, 'accuracy'],
     'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2, 'mean per-class accuracy'],
-    'stoic': [CustomStoicDataset, './data/stoic', 2, 'accuracy'],
+    'stoic': [CustomStoicDataset, './data/stoic', 2, 'mean per-class accuracy'],
+    'chestx' : [CustomChestXDataset, './data/chestx', 7, 'accuracy'],
 }
 
 
@@ -314,7 +316,7 @@ if __name__ == "__main__":
     datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     
-    if args.dataset in ['chexpert', 'diabetic_retinopathy', 'stoic']:
+    if args.dataset in ['chexpert', 'chestx', 'diabetic_retinopathy', 'stoic']:
         submeta_path = os.path.join('./misc/few_shot_submeta', f'{args.dataset}.pickle')
         print(f'Loading sub meta dict from path {submeta_path}')
         dataloader = datamgr.get_data_loader(aug=False, normalise=args.norm, hist_norm=hist_norm,

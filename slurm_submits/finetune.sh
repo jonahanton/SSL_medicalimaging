@@ -12,8 +12,8 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=chexpert
-# dset=diabetic_retinopathy
-python finetune.py -d $dset -m mimic-cxr_r18 --early-stopping
+# dset=chexpert
+dset=diabetic_retinopathy
+python finetune.py -d $dset -m supervised_d121 --early-stopping
 # python finetune.py -d $dset -m supervised d121 --early-stopping
 
