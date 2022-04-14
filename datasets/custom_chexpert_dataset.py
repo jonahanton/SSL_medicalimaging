@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, focus = "Pleural Effusion"):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, focus = "Pleural Effusion",few_shot = False, group_front_lateral = False):
         # Random seed
         random_state = 42
         # Read in csv containing path information
@@ -21,6 +21,11 @@ class CustomChexpertDataset(Dataset):
             self.preclean_dataframe = self.preclean_dataframe.iloc[:134049,:]
         else: # Test Data
             self.preclean_dataframe = self.preclean_dataframe.iloc[134049:,:]
+        # Pick only the laterals
+        self.group_front_lateral = group_front_lateral
+        if self.group_front_lateral:
+            self.preclean_dataframe = self.find_only_laterals(self.preclean_dataframe)
+        self.few_shot = few_shot
         self.img_paths, self.img_aux, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
         self.img_dir = img_dir
         self.transform = transform
@@ -45,7 +50,20 @@ class CustomChexpertDataset(Dataset):
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
+        if self.group_front_lateral:
+            image2 = self.group_additional_images(img_path)
+            image = (image,image2)
         return image, label
+    
+    def group_additional_images(self, img_path):
+        path_list = img_path.split("/")
+        path_list[-1] = "view1_frontal.jpg"
+        img_path = "/".join(path_list)
+        image = Image.open(img_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+        return image
+
 
     def _clean_labels(self, dataframe):
         # May need to adjust this depending on whether is few shot or not
@@ -57,8 +75,11 @@ class CustomChexpertDataset(Dataset):
         # smoothing technique from (Pham et al. Interpreting chest 
         # x-rays via cnns that exploit hierarchical disease dependencies 
         # and uncertainty labels.)
-        vectorized_u_ones_lsr = np.vectorize(self._u_ones_lsr)
-        smoothed_dataframe = filled_dataframe.transform(vectorized_u_ones_lsr)
+        if self.few_shot:
+            vectorized_u_fn = np.vectorize(self._u_ones)
+        else:
+            vectorized_u_fn = np.vectorize(self._u_ones_lsr)
+        smoothed_dataframe = filled_dataframe.transform(vectorized_u_fn)
         return smoothed_dataframe
 
     def _u_ones_lsr(self, val):
@@ -69,10 +90,22 @@ class CustomChexpertDataset(Dataset):
             return float(val)
         else:
             return np.random.uniform(low, high)
+    
+    def _u_ones(self, val):
+        # From Pham et al. (pg 13)
+        if math.isclose(val, 1.0) or math.isclose(val, 0.0):
+            return float(val)
+        else:
+            return 1.0
+    
+    def find_only_laterals(self,dataframe):
+        dataframe = dataframe.loc[dataframe["Frontal/Lateral"] == "Lateral"]
+        return dataframe
 
     def _split_labels(self,dataframe):
         # Split CheXpert dataframe into path, aux and label dataframes
         path = dataframe.iloc[:,0]
+        view = dataframe.iloc[:,3]
         aux = dataframe.iloc[:,1:5]
         label = dataframe.iloc[:,6:]
         # Only take the 5 pathologies as specified in Azizi et al.
@@ -85,13 +118,8 @@ class CustomChexpertDataset(Dataset):
         return path, aux, label
 
 def test_class():
-    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True)
-    print(cid[5000])
-    print(type(cid[5000][1]))
-    print(len(cid))
-    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = False)
-    print(cid[5000])
-    print(len(cid))
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True, few_shot = True, group_front_lateral = True)
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = False, few_shot = True, group_front_lateral = True)
 
 
 if __name__ == "__main__":
