@@ -12,14 +12,7 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-
-transform=h_flip
-dset=montgomerycxr
-python invariances.py --dataset $dset --model supervised_r18 --transform $transform
-python invariances.py --dataset $dset --model supervised_d121 --transform $transform
-python invariances.py --dataset $dset --model mimic-cxr_d121_lr_1e-4 --transform $transform
-
-transform=rotation
+transform=translation
 dset=diabetic_retinopathy
 k=20
 python invariances.py --dataset $dset --model moco-v2 --transform $transform --k $k
@@ -29,14 +22,5 @@ python invariances.py --dataset $dset --model swav --transform $transform --k $k
 python invariances.py --dataset $dset --model byol --transform $transform --k $k
 python invariances.py --dataset $dset --model supervised_r18 --transform $transform --k $k
 python invariances.py --dataset $dset --model supervised_d121 --transform $transform --k $k
+python invariances.py --dataset $dset --model supervised_r50 --transform $transform --k $k
 
-transform=rotation
-dset=ichallenge_pm
-k=20
-python invariances.py --dataset $dset --model moco-v2 --transform $transform --k $k
-python invariances.py --dataset $dset --model simclr-v1 --transform $transform --no-norm --k $k
-python invariances.py --dataset $dset --model pirl --transform $transform --k $k
-python invariances.py --dataset $dset --model swav --transform $transform --k $k
-python invariances.py --dataset $dset --model byol --transform $transform --k $k
-python invariances.py --dataset $dset --model supervised_r18 --transform $transform --k $k
-python invariances.py --dataset $dset --model supervised_d121 --transform $transform --k $k
