@@ -7,7 +7,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 class CustomChexpertDataset(Dataset):
-    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, focus = "Pleural Effusion"):
+    def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False, focus = "Pleural Effusion",few_shot = False):
         # Random seed
         random_state = 42
         # Read in csv containing path information
@@ -21,6 +21,7 @@ class CustomChexpertDataset(Dataset):
             self.preclean_dataframe = self.preclean_dataframe.iloc[:134049,:]
         else: # Test Data
             self.preclean_dataframe = self.preclean_dataframe.iloc[134049:,:]
+        self.few_shot = few_shot
         self.img_paths, self.img_aux, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
         self.img_dir = img_dir
         self.transform = transform
@@ -57,8 +58,11 @@ class CustomChexpertDataset(Dataset):
         # smoothing technique from (Pham et al. Interpreting chest 
         # x-rays via cnns that exploit hierarchical disease dependencies 
         # and uncertainty labels.)
-        vectorized_u_ones_lsr = np.vectorize(self._u_ones_lsr)
-        smoothed_dataframe = filled_dataframe.transform(vectorized_u_ones_lsr)
+        if self.few_shot:
+            vectorized_u_fn = np.vectorize(self._u_ones)
+        else:
+            vectorized_u_fn = np.vectorize(self._u_ones_lsr)
+        smoothed_dataframe = filled_dataframe.transform(vectorized_u_fn)
         return smoothed_dataframe
 
     def _u_ones_lsr(self, val):
@@ -69,6 +73,14 @@ class CustomChexpertDataset(Dataset):
             return float(val)
         else:
             return np.random.uniform(low, high)
+    
+    def _u_ones(self, val):
+        # From Pham et al. (pg 13)
+        if math.isclose(val, 1.0) or math.isclose(val, 0.0):
+            return float(val)
+        else:
+            return 1.0
+    
 
     def _split_labels(self,dataframe):
         # Split CheXpert dataframe into path, aux and label dataframes
@@ -85,11 +97,11 @@ class CustomChexpertDataset(Dataset):
         return path, aux, label
 
 def test_class():
-    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True)
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = True, few_shot = True)
     print(cid[5000])
     print(type(cid[5000][1]))
     print(len(cid))
-    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = False)
+    cid = CustomChexpertDataset("/vol/bitbucket/g21mscprj03/SSL/data/chexpert", train = False, few_shot = True)
     print(cid[5000])
     print(len(cid))
 
