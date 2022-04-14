@@ -466,7 +466,7 @@ if __name__ == "__main__":
         if len(clean_dataset) < 1000:
             clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size)
         else:
-            random_idx = np.random.choice(np.arange(len(clean_dataset)), max(1000, np.floor(0.1*len(clean_dataset))))
+            random_idx = np.random.choice(np.arange(len(clean_dataset)), max(1000, int(0.1*len(clean_dataset))))
             sub_sampler = SubsetRandomSampler(random_idx)
             clean_dataloader = DataLoader(clean_dataset, batch_size=args.batch_size, sampler=sub_sampler)
 

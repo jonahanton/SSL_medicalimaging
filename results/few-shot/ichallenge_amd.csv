@@ -1,14 +1,14 @@
 model	acc
-simclr-v1	69.3
-moco-v2	71.1
-byol	74.3
-swav	75.3
-pirl	61.7
-supervised_r50	77.2
-supervised_r18	72.12
-densnet_121	74.98
-mimic_chexpert_lr_0.01
-mimic-chexpert_lr_0.1
-mimic-chexpert_lr_1.0
-moco-cxr_d_121
-moco-cxr_r18
+simclr-v1	74.90 
+moco-v2	74.91
+swav	70.94
+byol	74.58
+pirl	75.26	
+supervised r50	75.70 
+supervised r18	74.59 
+supervised d121	77.12	
+mimic-chexpert_lr_0.01	62.72 
+mimic-chexpert_lr_0.1	62.87
+mimic-chexpert_lr_1.0	65.05 
+moco-cxr_r18	60.08
+moco-cxr_d121	68.17 
