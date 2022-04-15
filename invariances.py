@@ -377,7 +377,7 @@ if __name__ == "__main__":
     parser.add_argument('--transform', default='rotation', type=str,
                         help='transform to evaluate invariance of (rotation/translation/colour jitter/blur etc.)')
     parser.add_argument('--device', default='cuda', type=str, help='GPU device')
-    parser.add_argument('--num-images', default=100, type=int, help='number of images to evaluate invariance on.')
+    parser.add_argument('--num-images', default=100, type=int, help='number of images to evaluate invariance on')
     parser.add_argument('--batch-size', default=256, type=int, help='mini-batch size')
     parser.add_argument('--resize', default=256, type=int, help='resize')
     parser.add_argument('--crop-size', default=224, type=int, help='crop size')
@@ -493,17 +493,6 @@ if __name__ == "__main__":
 
     mean_feature = torch.load(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
     cov_matrix = torch.load(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
-    
-    # # ensure inv_cov_matrix is positive semi-definite (so can calculate Choleksy decomp.)
-    # epsilon = 1e-10
-    # while True:
-    #     inv_cov_matrix = np.linalg.inv(cov_matrix)
-    #     eig_vals = np.linalg.eigvalsh(inv_cov_matrix)
-    #     if len(eig_vals[eig_vals < 0]) > 0:
-    #         cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])
-    #         epsilon *= 10
-    #     else:
-    #         break
     
     epsilon = 1e-6
     cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])
