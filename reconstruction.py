@@ -12,6 +12,7 @@ from torch import optim
 import torchvision.transforms as transforms
 from matplotlib import pyplot as plt
 import PIL
+import medpy.io as medpy
 
 from reconstruction.skip import skip
 from reconstruction.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
@@ -19,8 +20,6 @@ from reconstruction.backbones import ResNetBackbone, ResNet18Backbone, DenseNetB
 parser = argparse.ArgumentParser(description='Deep Image Reconstruction')
 parser.add_argument('-m', '--model', type=str, default='supervised_d121',
                         help='name of the pretrained model to load and evaluate')
-
-# parser.add_argument('--input_dir', default = 'sample_images/chexpert/patient00001_view1_frontal.jpg')
 parser.add_argument('-d', '--datasets', nargs='+', type=str, default='', help='datasets to calculate reconstructions for', required=True)
 parser.add_argument('--clip', default = True, help = 'clip output image between 1 and 0')
 
@@ -159,7 +158,14 @@ def main():
         for dataset in args.datasets:
             image_name, image_path = IMAGES[dataset]
 
-            img = Image.open(image_path).convert('RGB')
+            if dataset == "stoic":
+                n = 5
+                image, _ = medpy.load(image_path)
+                image = image[:,:,n]
+                image = Image.fromarray(image).convert("RGB")
+
+            else:
+                img = Image.open(image_path).convert('RGB')
 
             # Resize image
             transform = transforms.Compose([
