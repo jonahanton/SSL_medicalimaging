@@ -267,7 +267,7 @@ FEW_SHOT_DATASETS = {
     'shenzhencxr': [CustomShenzhenCXRDataset, './data/shenzhencxr', 2, 'accuracy'],
     'montgomerycxr': [CustomMontgomeryCXRDataset, './data/montgomerycxr', 2, 'accuracy'],
     'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
-    'chexpert' : [CustomChexpertDataset, './data/chexpert', 5, 'mean per-class accuracy'],
+    'chexpert' : [CustomChexpertDataset, './data/chexpert', 2, 'accuracy'],
     'bach' : [CustomBachDataset, './data/bach', 4, 'accuracy'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2, 'accuracy'],
     'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2, 'mean per-class accuracy'],

@@ -13,6 +13,6 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=diabetic_retinopathy
-model=pirl
+model=supervised_r18
 python finetune.py -d $dset -m $model --early-stopping
 
