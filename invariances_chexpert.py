@@ -307,8 +307,8 @@ if __name__ == "__main__":
             S[i] = D(a, b) # cosine similarity
             L[i] = mahalanobis(feature_1, feature_2, inv_cov_matrix) # mahalanobis distance
 
-    L = torch.from_numpy(np.nanmean(L, axis=0))
-    S = torch.from_numpy(np.nanmean(S, axis=0))
+    L = np.nanmean(L)
+    S = np.nanmean(S)
     print(f'{args.model} on {args.transform} with dataset {args.dataset}:')
     print(f'\t distance {L:.6f} and similarity {S:.6f}')
     logging.info(f'{args.model} on {args.transform} with dataset {args.dataset}:')
