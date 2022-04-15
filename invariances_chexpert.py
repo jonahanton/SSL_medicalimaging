@@ -243,7 +243,7 @@ if __name__ == "__main__":
     # load datasets
     dset, data_dir = DATASETS[args.dataset]
     clean_dataset = dataset = get_train_valid_test_dset(dset, data_dir, normalise_dict, hist_norm, args.image_size, group_front_lateral=False)
-    dataset = get_train_valid_test_dset(dset, data_dir, normalise_dict, hist_norm, args.image_size, group_front_lateral=True)
+    multi_views_dataset = get_train_valid_test_dset(dset, data_dir, normalise_dict, hist_norm, args.image_size, group_front_lateral=True)
 
     # set random seeds
     np.random.seed(0)
@@ -296,9 +296,7 @@ if __name__ == "__main__":
     cholesky_matrix = torch.linalg.cholesky(torch.from_numpy(inv_cov_matrix).to(torch.float32))
 
 
-
-    sampler = np.random.choice(np.arange(len(dataset)), args.num_images)
-    dataloader = DataLoader(dataset, batch_size=1) 
+    dataloader = DataLoader(multi_views_dataset, batch_size=1, shuffle=True) 
     with torch.no_grad():
         for i in tqdm(range(args.num_images)):
             (view_1, view_2), _ = next(iter(dataloader))
