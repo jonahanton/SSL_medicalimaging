@@ -18,7 +18,7 @@ import PIL
 import numpy as np
 from tqdm import tqdm
 
-from sklearn.metrics import confusion_matrix, precision_recall_curve
+from sklearn.metrics import confusion_matrix, roc_auc_score
 
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
@@ -61,6 +61,9 @@ def count_acc(pred, label, metric):
         cm = confusion_matrix(label.cpu(), pred.detach().cpu())
         cm = cm.diagonal() / cm.sum(axis=1)
         return cm.mean()
+    elif metric == "auc":
+        auc = roc_auc_score(label.cpu(),pred.detach().cpu())
+        return auc
 
 
 
@@ -175,6 +178,10 @@ class FinetuneModel(nn.Module):
                     pred = output.argmax(dim=1).detach()
                     preds.append(pred)
                     labels.append(targets)
+                elif self.metric == 'auc':
+                    pred = output.argmax(dim=1).detach()
+                    preds.append(pred)
+                    labels.append(targets)
 
 
         if self.metric == 'accuracy':
@@ -183,6 +190,10 @@ class FinetuneModel(nn.Module):
             preds = torch.cat(preds)
             labels = torch.cat(labels)
             test_acc = 100. * count_acc(preds, labels, self.metric)
+        elif self.metric == 'auc':
+            preds = torch.cat(preds)
+            labels = torch.cat(labels)
+            test_acc = count_acc(preds, labels, self.metric)
 
         test_loss /= num_data_points
 
