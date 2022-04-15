@@ -9,10 +9,10 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, ConcatDataset
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets, models, transforms
-import torchvision.transforms.functional as FT
 
 import os
 import PIL
+from PIL import Image
 import pickle
 import argparse
 import logging
@@ -22,7 +22,6 @@ from pathlib import Path
 from itertools import product
 
 import numpy as np
-import albumentations 
 from scipy.spatial.distance import mahalanobis
 
 from datasets.transforms import HistogramNormalize
@@ -58,15 +57,15 @@ def get_train_valid_test_dset(dset,
     # define transforms
     if hist_norm:
         transform = transforms.Compose([
-            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC)
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             HistogramNormalize(),
         ])
     else:
         transform = transforms.Compose([
-            transforms.Resize(resize),
-            transforms.CenterCrop(crop_size),
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             normalize,
         ])

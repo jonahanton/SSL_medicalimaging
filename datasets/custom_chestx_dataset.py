@@ -23,7 +23,8 @@ class CustomChestXDataset(Dataset):
         labels_set = []
 
         # Transforms
-        self.to_tensor = transforms.ToTensor()
+        self.transform = transform
+        self.target_transform = target_transform
         # Read the csv file
         self.data_info = pd.read_csv(self.csv_path, skiprows=[0], header=None)
         # Shuffle
@@ -58,16 +59,20 @@ class CustomChestXDataset(Dataset):
         # Get image name from the pandas df
         single_image_name = self.image_name[index]
         # Open image
-        img_as_img = Image.open(self.img_path +  single_image_name).resize((256, 256)).convert('RGB')
-        img_as_img.load()
+        img_path = os.path.join(self.img_path, single_image_name)
+        img = Image.open(img_path).convert('RGB')
 
-        # Transform image to tensor
-        #img_as_tensor = self.to_tensor(img_as_img)
+        # Transform
+        if self.transform:
+            img = self.transform(img)
 
         # Get label(class) of the image based on the cropped pandas column
         single_image_label = self.labels[index] # int64
         single_image_label = np.float32(single_image_label) #convert
-        return (img_as_img, single_image_label)
+        if self.target_transform:
+            single_image_label = self.target_transform(single_image_label)
+        
+        return img, single_image_label
 
     def __len__(self):
         return self.data_len
