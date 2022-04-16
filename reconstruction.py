@@ -146,7 +146,7 @@ def main():
         model = ResNetBackbone(args.model)
         feature_dim = 2048
 
-    print(f"Loaded pretrained model {model}")
+    # print(f"Loaded pretrained model {model}")
     model = model.to(args.device)
     model = model.eval()
 
