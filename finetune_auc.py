@@ -18,7 +18,7 @@ import PIL
 import numpy as np
 from tqdm import tqdm
 
-from sklearn.metrics import confusion_matrix, roc_auc_score
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
@@ -63,6 +63,9 @@ def count_acc(pred, label, metric):
         return cm.mean()
     elif metric == "auc":
         auc = roc_auc_score(label.cpu(),pred.detach().cpu())
+        fpr, tpr = roc_curve(label.cpu(),pred.detach().cpu())
+        fpr.save("results/chexpert_auc/fpr.npy")
+        tpr.save("results/chexpert_auc/tpr.npy")
         return auc
 
 
@@ -203,7 +206,7 @@ class FinetuneModel(nn.Module):
 
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
-                 metric, device, num_classes, feature_dim=2048, grid=None, steps=2, 
+                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
                  early_stopping=False, patience=3):
         self.model_name = model_name
         self.train_loader = train_loader
@@ -402,8 +405,8 @@ class DenseNetBackbone(nn.Module):
 
 # Data classes and functions
 
-def get_dataset(dset, root, split, transform):
-    return dset(root, train=(split == 'train'), transform=transform, download=True)
+def get_dataset(dset, root, split, transform): # Few shot is true! (used so labels are binary)
+    return dset(root, train=(split == 'train'), transform=transform, download=True, few_shot = True)
     # try:
     #     return dset(root, train=(split == 'train'), transform=transform, download=True)
     # except:
