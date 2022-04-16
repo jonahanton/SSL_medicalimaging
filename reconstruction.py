@@ -156,13 +156,14 @@ def main():
         print('No datasets specified!')
     else:
         for dataset in args.datasets:
-            image_name, image_path = IMAGES[dataset]
+            
+            _name, image_path = IMAGES[dataset]
 
             if dataset == "stoic":
                 n = 5
-                image, _ = medpy.load(image_path)
-                image = image[:,:,n]
-                image = Image.fromarray(image).convert("RGB")
+                img, _ = medpy.load(image_path)
+                img = img[:,:,n]
+                img = Image.fromarray(img).convert("RGB")
 
             else:
                 img = Image.open(image_path).convert('RGB')
