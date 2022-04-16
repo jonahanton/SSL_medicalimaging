@@ -196,8 +196,12 @@ def main():
             target = model.forward(img, name = args.which_layer).detach()
 
             print("Target shape", target.shape)
-
-            out_path = os.path.join(args.output_dir, args.model, filename)
+            
+            if dataset == "stoic":
+              filename_edited = "simclr-v1_True_8622.jpeg" 
+              out_path = os.path.join(args.output_dir, args.model, filename_edited) 
+            else: 
+              out_path = os.path.join(args.output_dir, args.model, filename)
             print("out_path is: ", out_path)
 
             if not os.path.exists(out_path):
