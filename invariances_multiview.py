@@ -26,6 +26,7 @@ from scipy.spatial.distance import mahalanobis
 
 from datasets.transforms import HistogramNormalize
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
+from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset 
 
 
 def D(a, b): # cosine similarity
@@ -174,16 +175,17 @@ class DenseNetBackbone(nn.Module):
 # name: {class, root}
 DATASETS = {
     'chexpert' : [CustomChexpertDataset, './data/chexpert'],
+    'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy'],
 }
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='cifar10', type=str,
+    parser.add_argument('--dataset', default='chexpert', type=str,
                         help='name of the dataset to evaluate on')
     parser.add_argument('--model', default='default', type=str,
                         help='model to evaluate invariance of')
-    parser.add_argument('--transform', default='chexpert_multi_views', type=str,
+    parser.add_argument('--transform', default='multi_view', type=str,
                         help='transform to evaluate invariance of')
     parser.add_argument('--device', default='cuda', type=str, help='GPU device')
     parser.add_argument('--num-images', default=100, type=int, help='number of images to evaluate invariance on')

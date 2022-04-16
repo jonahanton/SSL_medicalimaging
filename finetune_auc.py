@@ -203,7 +203,7 @@ class FinetuneModel(nn.Module):
 
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
-                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
+                 metric, device, num_classes, feature_dim=2048, grid=None, steps=2, 
                  early_stopping=False, patience=3):
         self.model_name = model_name
         self.train_loader = train_loader
@@ -654,10 +654,10 @@ if __name__ == "__main__":
 
 
     # set-up logging
-    log_fname = f'{args.dataset}.log'
-    if not os.path.isdir(f'./logs/finetune/{args.model}'):
-        os.makedirs(f'./logs/finetune/{args.model}')
-    log_path = os.path.join(f'./logs/finetune/{args.model}', log_fname)
+    log_fname = f'{args.dataset}_auc.log'
+    if not os.path.isdir(f'./logs/finetune_auc/{args.model}'):
+        os.makedirs(f'./logs/finetune_auc/{args.model}')
+    log_path = os.path.join(f'./logs/finetune_auc/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
