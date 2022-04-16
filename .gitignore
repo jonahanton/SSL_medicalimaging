@@ -7,6 +7,7 @@ out
 condor_submits
 misc
 test.py
+test.ipynb
 test_dataloading.py
 invariances
 sample_images
