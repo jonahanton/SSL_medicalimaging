@@ -35,20 +35,20 @@ class CustomStoicDataset(Dataset):
 
     def __getitem__(self, idx):
         # Load the nth frame
-        n = 5
+        n = 0.5
         label = self.img_labels.iloc[idx] 
         label = np.float32(label) # Converts Label
         img_path = os.path.join(self.img_dir,"data/mha/"+str(self.img_paths.iloc[idx])+".mha")
-        print(img_path)
         image, image_header = medpy.load(img_path)
-        image = image[:,:,n]
+        depth = math.floor(image.shape[2]*n)
+        image = image[:,:,depth]
         # # Not including atm as clipping was not done in all CT scan images: https://github.com/UCSD-AI4H/COVID-CT/blob/master/baseline%20methods/Self-Trans/CT-predict-pretrain.ipynb
         # # With clippings as in https://github.com/bkong999/COVNet/blob/master/dataset.py
         # print(np.max(image), np.min(image)) # 1586 -2048 (but have also seen 1246 -2048)
-        # min_value, max_value = -1250, 250
-        # np.clip(image, min_value, max_value, out=image)
-        # image = (image - min_value) / (max_value - min_value)
-        image = Image.fromarray(image).convert("RGB")
+        min_value, max_value = -1000, 250
+        np.clip(image, min_value, max_value, out=image)
+        image = (image - min_value) / (max_value - min_value)
+        image = Image.fromarray((image* 255).astype(np.uint8)).convert("RGB")
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -72,13 +72,13 @@ class CustomStoicDataset(Dataset):
 
 def test_class():
     cid = CustomStoicDataset("/vol/bitbucket/g21mscprj03/SSL/data/stoic", train = True)
-    print(cid[40])
-    print(cid[41])
-    print(cid[42])
-    print(len(cid))
-    cid = CustomStoicDataset("/vol/bitbucket/g21mscprj03/SSL/data/stoic", train = False)
-    print(cid[41])
-    print(len(cid))
+    print(cid[101])
+    # print(cid[41])
+    # print(cid[42])
+    # print(len(cid))
+    # cid = CustomStoicDataset("/vol/bitbucket/g21mscprj03/SSL/data/stoic", train = False)
+    # print(cid[41])
+    # print(len(cid))
 if __name__ == "__main__":
     #test_class()
     pass
