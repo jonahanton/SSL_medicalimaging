@@ -157,7 +157,7 @@ def main():
     else:
         for dataset in args.datasets:
             
-            _name, image_path = IMAGES[dataset]
+            image_name, image_path = IMAGES[dataset]
 
             if dataset == "stoic":
                 n = 5
