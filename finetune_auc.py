@@ -18,7 +18,7 @@ import PIL
 import numpy as np
 from tqdm import tqdm
 
-from sklearn.metrics import confusion_matrix, roc_auc_score
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
@@ -63,6 +63,9 @@ def count_acc(pred, label, metric):
         return cm.mean()
     elif metric == "auc":
         auc = roc_auc_score(label.cpu(),pred.detach().cpu())
+        fpr, tpr = roc_curve(label.cpu(),pred.detach().cpu())
+        fpr.save("results/chexpert_auc/fpr.npy")
+        tpr.save("results/chexpert_auc/tpr.npy")
         return auc
 
 
@@ -402,8 +405,8 @@ class DenseNetBackbone(nn.Module):
 
 # Data classes and functions
 
-def get_dataset(dset, root, split, transform):
-    return dset(root, train=(split == 'train'), transform=transform, download=True)
+def get_dataset(dset, root, split, transform): # Few shot is true! (used so labels are binary)
+    return dset(root, train=(split == 'train'), transform=transform, download=True, few_shot = True)
     # try:
     #     return dset(root, train=(split == 'train'), transform=transform, download=True)
     # except:
@@ -654,10 +657,10 @@ if __name__ == "__main__":
 
 
     # set-up logging
-    log_fname = f'{args.dataset}.log'
-    if not os.path.isdir(f'./logs/finetune/{args.model}'):
-        os.makedirs(f'./logs/finetune/{args.model}')
-    log_path = os.path.join(f'./logs/finetune/{args.model}', log_fname)
+    log_fname = f'{args.dataset}_auc.log'
+    if not os.path.isdir(f'./logs/finetune_auc/{args.model}'):
+        os.makedirs(f'./logs/finetune_auc/{args.model}')
+    log_path = os.path.join(f'./logs/finetune_auc/{args.model}', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
