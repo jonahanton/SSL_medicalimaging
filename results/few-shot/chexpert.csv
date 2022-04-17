@@ -1,0 +1,11 @@
+model,acc
+simclr-v1,75.01
+moco-v2,74.94
+swav,74.97
+byol,74.61
+pirl,74.20
+supervised_r50,73.47
+supervised_r18,71.43
+supervised_d121,72.50
+mimic-chexpert,77.28
+moco-cxr,74.76
