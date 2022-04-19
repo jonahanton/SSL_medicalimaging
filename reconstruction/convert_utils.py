@@ -66,7 +66,7 @@ def resize():
         temp_filename = ".".join(temp_filename)
 
         out_filename = str(temp_filename) + ".jpeg"
-
+        
         print(out_filename)
 
         # try:
