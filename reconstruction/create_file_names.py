@@ -21,6 +21,5 @@ for image in image_names:
         required_str += str("{" + model + "/" + model + "_" + image + "}" + ",")
 
 
-
 print(required_str)
 
