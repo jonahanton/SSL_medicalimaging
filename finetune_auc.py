@@ -64,8 +64,8 @@ def count_acc(pred, label, metric):
     elif metric == "auc":
         auc = roc_auc_score(label.cpu(),pred.detach().cpu())
         fpr, tpr = roc_curve(label.cpu(),pred.detach().cpu())
-        fpr.save("results/chexpert_auc/fpr.npy")
-        tpr.save("results/chexpert_auc/tpr.npy")
+        fpr.save("results/chexpert_auc/fpr_mimic-cxr_r18_lr_3e_5.npy")
+        tpr.save("results/chexpert_auc/tpr_mimic-cxr_r18_lr_3e_5.npy")
         return auc
 
 
