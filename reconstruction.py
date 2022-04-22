@@ -156,7 +156,7 @@ def main():
         print('No datasets specified!')
     else:
         for dataset in args.datasets:
-            
+
             image_name, image_path = IMAGES[dataset]
 
             if dataset == "stoic":
@@ -196,11 +196,11 @@ def main():
             target = model.forward(img, name = args.which_layer).detach()
 
             print("Target shape", target.shape)
-            
+
             if dataset == "stoic":
-              filename_edited = "simclr-v1_True_8622.jpeg" 
-              out_path = os.path.join(args.output_dir, args.model, filename_edited) 
-            else: 
+              filename_edited = "simclr-v1_True_8622.jpeg"
+              out_path = os.path.join(args.output_dir, args.model, filename_edited)
+            else:
               out_path = os.path.join(args.output_dir, args.model, filename)
             print("out_path is: ", out_path)
 

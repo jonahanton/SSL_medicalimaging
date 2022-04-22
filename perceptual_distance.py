@@ -199,32 +199,33 @@ reconstructed_images = {
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Compute and save perceptual distances between two images.')
-    # parser.add_argument('-im1', '--image-1', type=str, default='', help='path for image 1')
-    # parser.add_argument('-im2', '--image-2', type=str, default='', help='path for image 2')
+    parser.add_argument('-im1', '--image-1', type=str, default='', help='path for image 1')
+    parser.add_argument('-im2', '--image-2', type=str, default='', help='path for image 2')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
     parser.add_argument('--device', type=str, default='cuda', help='CUDA or CPU (cuda | cpu)')
     args = parser.parse_args()
     pprint(args)
     
-    results_dict = {}
+    # results_dict = {}
 
-    for dataset in original_images:
-        im1_name = original_images[dataset][0]
-        im1_path = original_images[dataset][1]
-        im1 = open_and_convert_image(im1_path, args.image_size)
-        results_dict[dataset] = {}
+    # for dataset in original_images:
+    #     im1_name = original_images[dataset][0]
+    #     im1_path = original_images[dataset][1]
+    #     im1 = open_and_convert_image(im1_path, args.image_size)
+    #     results_dict[dataset] = {}
         
-        for model in reconstructed_images[dataset]:
-            im2_path = reconstructed_images[dataset][model]
-            im2 = open_and_convert_image(im2_path, args.image_size)
+    # for model in reconstructed_images[dataset]:
+    # im2_path = reconstructed_images[dataset][model]
+    im1 = open_and_convert_image(args.image_1, args.image_size)
+    im2 = open_and_convert_image(args.image_2, args.image_size)
 
-            d_alex, d_vgg, d_squeeze = perceptual_distance(im1, im2, args.device)
-            
-            results_dict[dataset][model] = {
-                'AlexNet' : d_alex,
-                'VGG' : d_vgg,
-                'SqueezeNet' : d_squeeze,
-            }
-            print(f'Perceptual distance between images {im1_name} and {im2_path}:')
-            
-            pprint(results_dict[dataset][model])
+    d_alex, d_vgg, d_squeeze = perceptual_distance(im1, im2, args.device)
+    
+    results_dict = {
+        'AlexNet' : d_alex,
+        'VGG' : d_vgg,
+        'SqueezeNet' : d_squeeze,
+    }
+    print(f'Perceptual distance between images {args.image_1} and {args.image_2}:')
+    
+    pprint(results_dict)
