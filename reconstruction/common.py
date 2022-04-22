@@ -1,3 +1,5 @@
+"""Code from https://github.com/nanxuanzhao/Good_transfer """
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -7,9 +9,7 @@ from reconstruction.downsampler import Downsampler
 def add_module(self, module):
     self.add_module(str(len(self) + 1), module)
 
-
 torch.nn.Module.add = add_module
-
 
 class Concat(nn.Module):
     def __init__(self, dim, *args):
@@ -45,7 +45,6 @@ class Concat(nn.Module):
     def __len__(self):
         return len(self._modules)
 
-
 class GenNoise(nn.Module):
     def __init__(self, dim2):
         super(GenNoise, self).__init__()
@@ -62,7 +61,6 @@ class GenNoise(nn.Module):
         x = torch.autograd.Variable(b)
 
         return x
-
 
 class Swish(nn.Module):
     """

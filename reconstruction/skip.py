@@ -1,7 +1,11 @@
+"""Code from https://github.com/nanxuanzhao/Good_transfer
+
+Architecture of encoder-decoder network for Deep Image Prior
+"""
+
 import torch
 import torch.nn as nn
 from reconstruction.common import *
-
 
 def skip(
         num_input_channels=2, num_output_channels=3,
@@ -11,6 +15,7 @@ def skip(
         need_sigmoid=True, need_bias=True,
         pad='zero', upsample_mode='nearest', downsample_mode='stride', act_fun='LeakyReLU',
         need1x1_up=True):
+
     """Assembles encoder-decoder with skip connections.
     Arguments:
         act_fun: Either string 'LeakyReLU|Swish|ELU|none' or module (e.g. nn.ReLU)
@@ -18,6 +23,7 @@ def skip(
         upsample_mode (string): 'nearest|bilinear' (default: 'nearest')
         downsample_mode (string): 'stride|avg|max|lanczos2' (default: 'stride')
     """
+
     assert len(num_channels_down) == len(num_channels_up) == len(num_channels_skip)
 
     n_scales = len(num_channels_down)
@@ -59,8 +65,6 @@ def skip(
             skip.add(bn(num_channels_skip[i]))
             skip.add(act(act_fun))
 
-        # skip.add(Concat(2, GenNoise(nums_noise[i]), skip_part))
-
         deeper.add(conv(input_depth, num_channels_down[i], filter_size_down[i], 2, bias=need_bias, pad=pad,
                         downsample_mode=downsample_mode[i]))
         deeper.add(bn(num_channels_down[i]))
@@ -73,7 +77,6 @@ def skip(
         deeper_main = nn.Sequential()
 
         if i == len(num_channels_down) - 1:
-            # The deepest
             k = num_channels_down[i]
         else:
             deeper.add(deeper_main)

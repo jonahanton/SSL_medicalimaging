@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import os
 
-class ResNet18Backbone(nn.Module): # requires testing
+class ResNet18Backbone(nn.Module):
     def __init__(self, model_name):
         super().__init__()
         self.model_name = model_name
@@ -19,7 +19,6 @@ class ResNet18Backbone(nn.Module): # requires testing
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def _forward_impl(self, x, name='fc'):
-        # Copied from customized_resnet
         results = {}
         x = self.model.conv1(x)
         results['conv1'] = x
@@ -64,7 +63,6 @@ class ResNetBackbone(nn.Module):
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def _forward_impl(self, x, name='fc'):
-        # Copied from customized_resnet
         results = {}
         x = self.model.conv1(x)
         results['conv1'] = x
@@ -91,7 +89,6 @@ class ResNetBackbone(nn.Module):
         return results[name]
 
     def forward(self, x, name = 'fc'):
-
         return self._forward_impl(x, name=name)
 
 
@@ -110,18 +107,11 @@ class DenseNetBackbone(nn.Module):
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x, name = 'fc'):
-        # features = self.model.features(x)
-        # out = F.relu(features, inplace=True)
-        # out = F.adaptive_avg_pool2d(out, (1, 1))
-        # out = torch.flatten(out, 1)
-        # return out
-
         return self._forward_impl(x, name=name)
 
     def _forward_impl(self, x, name='fc'):
         results = {}
 
-        # Attempt to do all the layers individually
         x = self.model.features.conv0(x)
         results["conv0"] = x
         x = self.model.features.norm0(x)
@@ -150,8 +140,6 @@ class DenseNetBackbone(nn.Module):
         results["layer4"] = x
         x = self.model.features.norm5(x)
         results["norm5"] = x
-
-        # print("Shape of feature map after features layer", x.shape) # ([1, 1024, 7, 7])
 
         x = F.relu(x, inplace = True)
         results['relu1'] = x
