@@ -1,4 +1,4 @@
-# How Well (and Why) Do Self-Supervised Models Transfer to Medical Imaging? 
+# How Well (and Why) Do Self-Supervised Models Transfer to Medical Imaging?
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well (and Why) Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
 Authors: Jonah Anton, Liam Castelli, Wan Hee Tang, Venus Cheung, Mathilde Outters, Mun Fai Chan
 
@@ -19,7 +19,7 @@ The code for the synthetic invariance evaluation is adapted from:
 
 ```
 @misc{ericsson2021selfsupervised,
-      title={Why Do Self-Supervised Models Transfer? Investigating the Impact of Invariance on Downstream Tasks}, 
+      title={Why Do Self-Supervised Models Transfer? Investigating the Impact of Invariance on Downstream Tasks},
       author={Linus Ericsson and Henry Gouk and Timothy M. Hospedales},
       year={2021},
       eprint={2111.11398},
@@ -28,7 +28,7 @@ The code for the synthetic invariance evaluation is adapted from:
 }
 ```
 
-Code for image reconstruction is adapted from: 
+Code for image reconstruction is adapted from:
 
 ```
 @article{UlyanovVL17,
@@ -38,14 +38,24 @@ Code for image reconstruction is adapted from:
     year      = {2017}
 }
 
-@inproceedings{ZhaoICLR2021, 
-    author = {Nanxuan Zhao and Zhirong Wu and Rynson W.H. Lau and Stephen Lin}, 
-    title = {What Makes Instance Discrimination Good for Transfer Learning?}, 
-    booktitle = {ICLR}, 
-    year = {2021} 
+@inproceedings{ZhaoICLR2021,
+    author = {Nanxuan Zhao and Zhirong Wu and Rynson W.H. Lau and Stephen Lin},
+    title = {What Makes Instance Discrimination Good for Transfer Learning?},
+    booktitle = {ICLR},
+    year = {2021}
 }
 ```
 
+## Files
+
+    ├── data
+    ├── datasets
+    │   ├── .                    # Files to read datasets
+    ├── invariances              # Files to read datasets
+    ├── logs
+    ├── datasets                  # Files to read datasets
+    └── invariances
+...
 
 ## Pre-trained Models
 We evaluate the following pretrained ResNet50 models (with links)
@@ -65,3 +75,18 @@ We evaluate the following pretrained ResNet50 models (with links)
 ```
 pip install jax jaxlib dill git+https://github.com/deepmind/dm-haiku
 ```
+
+## Datasets
+...
+
+## Saliency Maps
+...
+
+## Deep Image Prior
+...
+
+## Perceptual Distance
+...
+
+## Invariances
+...
