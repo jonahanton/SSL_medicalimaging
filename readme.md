@@ -199,7 +199,17 @@ The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pi
 [To do - Jonah]
 
 ## Deep Image Prior
-[To do - Mun Fai, Mathilde]
+Using the methodology from the paper [What makes instance discrimination good for transfer learning?](https://arxiv.org/abs/2006.06606), relying on feature inversion algorithm [Deep Image Prior](https://arxiv.org/abs/1711.10925), we studied the ability to reconstruct RGB images from the features extracted by our pre-trained models. The code for such reconstructions can be found in reconstruction.py.
+
+For example, to reconstruct images from the XXX dataset using the XXX pre-trained model, run:
+``` 
+``` 
+
+To quantify the quality of these reconstructed images, we use the perceptual distance metric, as defined in [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924).
+
+Once the iamges have been reconstructed, run the following command to the perceptual distance score:
+``` 
+``` 
 
 ## Perceptual Distance
 [To do - Jonah]
