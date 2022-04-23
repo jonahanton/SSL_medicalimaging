@@ -203,17 +203,22 @@ Using the methodology from the paper [What makes instance discrimination good fo
 
 For example, to reconstruct images from BACH and CheXpert datasets using the BYOL pre-trained model, run:
 ``` 
-python reconstruction.py -m byol -d bach chexpert --max_iter 3000 --clip True
+python reconstruction.py -m byol -d bach chexpert
 ``` 
+**Note**: <br />
+The reconstructed images will by default be saved into a ```reconstructed_images/``` directory. A custom directory can be specify with the ```--output_dir``` argument.
+<br />
+The paths to the sample images to be reconstructed are defined whithin reconstruction.py as a dictionary with the structure ```dataset: [file_name, file_path]```.
+<br />
 
 To quantify the quality of these reconstructed images, we use the perceptual distance metric from [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924). A good reconstruction has low perceptual distance score.
 
 Once the iamges have been reconstructed, run the following command to compute the perceptual distance score between original images and reconstructions:
 ``` 
-python perceptual_distance.py
+TO DO
 ``` 
 **Note**: <br />
-Samples images in folder
+The code uses the same dictionary structure as described above for the sample images paths and the reconstructed images are stored in a nested dictionary, with structure ```dataset: {model: reconstructed_image_path}```
 <br />
 
 ## Perceptual Distance
