@@ -104,7 +104,65 @@ pip install jax jaxlib dill git+https://github.com/deepmind/dm-haiku
 ```
 
 ## Datasets
-[To do - Liam]
+The data directory should be set up with the following structure:
+
+    ├── data
+        ├── bach
+            ├── ICIAR2018_BACH_Challenge
+        ├── chestx
+            ├── Data_Entry_2017.csv
+            ├── images
+        ├── chexpert
+            ├── CheXpert-v1.0
+        ├── CIFAR10
+            ├── cifar-10-batches-py
+        ├── diabetic_retinopathy
+            ├── train
+            ├── trainLabels.csv
+            ├── test
+            ├── testLabels.csv
+        ├── ichallenge_amd
+            ├── Training400
+        ├── ichallenge_pm
+            ├── PALM-Training400
+        ├── montgomerycxr
+            ├── montgomery_metadata.csv
+            ├── MontgomerySet
+        ├── shenzhencxr
+            ├── shenzhencxr_metadata.csv
+            ├── ChinaSet_AllFiles
+        ├── stoic
+            ├── metadata
+            ├── data
+         
+    
+Links for where to download each dataset are given here:
+[BACH](https://iciar2018-challenge.grand-challenge.org/),
+[ChestX](https://www.kaggle.com/datasets/nih-chest-xrays/data),
+[CheXpert](https://stanfordmlgroup.github.io/competitions/chexpert/),
+[CIFAR10](https://pytorch.org/vision/stable/datasets.html),
+[Diabetic Retinopathy](https://iciar2018-challenge.grand-challenge.org/),
+[iChallenge-AMD](https://ai.baidu.com/broad/subordinate?dataset=amd),
+[iChallenge-PM](https://ai.baidu.com/broad/subordinate?dataset=pm),
+[Montgomery-CXR](https://openi.nlm.nih.gov/faq#faq-tb-coll),
+[Shenzhen-CXR](https://openi.nlm.nih.gov/faq#faq-tb-coll),
+[STOIC](https://registry.opendata.aws/stoic2021-training/)
+
+### Note:
+Downloading and unpacking the files above into the relevant directory should yield the structure above. A few of the above datasets need additional tinkering to get into the structure above. We give the instructions for those datasets here:
+
+**ChestX**: Unpacking into the chestx directory, the various image folders (images_001, images_002,...,images_012) were combined so that all image files were contained directly in a single images directory as in the above structure. This can be done by repeated usage of:
+```
+mv images_0XX/* images/
+```
+**Diabetic Retionpathy**: To unpack the various train.zip and test.zip files we used the following commands:
+```
+cat train.zip.* > train.zip
+unzip train.zip
+cat test.zip.* > test.zip
+unzip test.zip
+```
+Should you encounter problems, see the following discussion which we found was helpful to unpack the various zip files: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12545. If problems persist, check the MD5 hashes given here: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12543
 
 ## Few-shot
 We provide the code for few-shot evaluation in few_shot.py. We use the technique of Prototypical Networks [Prototypical Networks for Few-Shot Learning](https://arxiv.org/abs/1703.05175).
