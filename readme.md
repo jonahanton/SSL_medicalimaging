@@ -107,7 +107,25 @@ pip install jax jaxlib dill git+https://github.com/deepmind/dm-haiku
 [To do - Liam]
 
 ## Few-shot
-[To do - Jonah]
+We provide the code for few-shot evaluation in few_shot.py. We use the technique of Prototypical Networks [Prototypical Networks for Few-Shot Learning](https://arxiv.org/abs/1703.05175).
+
+For example, to evaluate MoCo-v2 on the dataset ShenzhenCXR in a 2-way 20-shot setup, run:
+```
+python few_shot.py --dataset shenzhen --model moco-v2 --n-way 2 --n-support 20
+```
+This will save a log of the run (with the results) in the filepath `logs/few-shot/moco-v2/shezhencxr.log`. The test accuracy should be close to 73.76% ± 0.66%. <br />
+
+Or, to evaluate the MIMIC-CheXpert (lr = 0.01) model on ChestX-ray8 in a 5-way 20-shot setup, run:
+```
+python few_shot.py --dataset chestx --model mimic-chexpert_lr_0.01 --n-way 5 --n-support 20
+```
+This will save a log of the run (with the results) in the filepath `logs/mimic-chexpert_lr_0.01/moco-v2/chestx.log`. The test accuracy should be close to 33.73% ± 0.45%. <br />
+
+**Note**: Within few_shot.py a dictionary is produced for the specified dataset where a list is created for each class containing all images for that class. This is neccessary in the random sampling of images during a few-shot episode. However, the creation of this dictionary, `sub_meta`, requires one complete pass over the entire dataset. For the larger datasets we use, namely CheXpert, ChestX-ray8 and EyePACS (diabetic retinopathy), we found that this process is extremely slow. Therefore, to prevent the creation of the sub_meta dict from stratch every time few_shot.py is called for these datasets, the script `datasets/prepare_submeta.py` will create the sub_meta dict (for a maximum of 10,000 images) and store it as a pickle file. This can then be re-loaded in when few_shot.py is called for these datasets. E.g., to run `datasets/prepare_submeta.py` for CheXpert:
+```
+python -m datasets.prepare_submeta --dataset chexpert
+``` 
+The pickle file will be saved in the path `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with -- dataset chexpert.
 
 ## Many-shot (Finetune)
 [To do - Jonah]
