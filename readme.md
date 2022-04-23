@@ -83,7 +83,8 @@ Note that for MIMIC-CheXpert we use the following model names (three different M
 1. mimic-chexpert_lr_0.01_bs_128_fd_128_qs_65536.pt 
 2. mimic-chexpert_lr_0.1_bs_128_fd_128_qs_65536.pt 
 3. mimic-chexpert_lr_1.0_bs_128_fd_128_qs_65536.pt 
-<br />All MIMIC-CheXpert models use a DenseNet121 backbone. <br />
+
+All MIMIC-CheXpert models use a DenseNet121 backbone. <br />
 
 Note that for MoCo-CXR we use both the ResNet18 and DenseNet121 pretrained models (both with learning rate 1e-4), found in URLs:
 1. https://storage.googleapis.com/moco-cxr/r8w-00001.pth.tar 
