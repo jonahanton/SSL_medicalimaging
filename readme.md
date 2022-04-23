@@ -137,7 +137,7 @@ The data directory should be set up with the following structure:
          
     
 Links for where to download each dataset are given here:
-[BACH](https://iciar2018-challenge.grand-challenge.org/),
+[BACH](https://zenodo.org/record/3632035),
 [ChestX](https://www.kaggle.com/datasets/nih-chest-xrays/data),
 [CheXpert](https://stanfordmlgroup.github.io/competitions/chexpert/),
 [CIFAR10](https://pytorch.org/vision/stable/datasets.html),
@@ -149,7 +149,7 @@ Links for where to download each dataset are given here:
 [STOIC](https://registry.opendata.aws/stoic2021-training/)
 
 ### Note:
-Downloading and unpacking the files above into the relevant directory should yield the structure above. A few of the above datasets need additional tinkering to get into the structure above. We give the instructions for those datasets here:
+Downloading and unpacking the files above into the relevant directory should yield the structure above. A few of the datasets need additional tinkering to get into the desired format, and we give the instructions for those datasets here:
 
 **ChestX**: Unpacking into the chestx directory, the various image folders (images_001, images_002,...,images_012) were combined so that all image files were contained directly in a single images directory as in the above structure. This can be done by repeated usage of:
 ```
