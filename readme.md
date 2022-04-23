@@ -141,7 +141,7 @@ Links for where to download each dataset are given here:
 [ChestX](https://www.kaggle.com/nih-chest-xrays/data),
 [CheXpert](https://stanfordmlgroup.github.io/competitions/chexpert/),
 [CIFAR10](https://pytorch.org/vision/stable/datasets.html),
-[Diabetic Retinopathy](https://iciar2018-challenge.grand-challenge.org/),
+[Diabetic Retinopathy](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data),
 [iChallenge-AMD](https://ai.baidu.com/broad/subordinate?dataset=amd),
 [iChallenge-PM](https://ai.baidu.com/broad/subordinate?dataset=pm),
 [Montgomery-CXR](https://openi.nlm.nih.gov/faq#faq-tb-coll),
