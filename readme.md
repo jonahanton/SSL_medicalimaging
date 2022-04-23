@@ -79,20 +79,20 @@ We also evaluate the following pretrained medical domain-specific SSL pretrained
 | MIMIC-CheXpert | Models found in github repo https://github.com/facebookresearch/CovidPrognosis, model URL https://dl.fbaipublicfiles.com/CovidPrognosis/pretrained_models/ |
 | MoCo-CXR | Models found in github repo https://github.com/stanfordmlgroup/MoCo-CXR  |
 
-Note that for MIMIC-CheXpert we use the following model names (three different MoCo pretraining learning rates: 0.01, 0.1, 1.0): 
+**Note 1**: For MIMIC-CheXpert we use the following model names (three different MoCo pretraining learning rates: 0.01, 0.1, 1.0): 
 1. mimic-chexpert_lr_0.01_bs_128_fd_128_qs_65536.pt 
 2. mimic-chexpert_lr_0.1_bs_128_fd_128_qs_65536.pt 
 3. mimic-chexpert_lr_1.0_bs_128_fd_128_qs_65536.pt 
 
 All MIMIC-CheXpert models use a DenseNet121 backbone. <br />
 
-Note that for MoCo-CXR we use both the ResNet18 and DenseNet121 pretrained models (both with learning rate 1e-4), found in URLs:
+**Note 2**: For MoCo-CXR we use both the ResNet18 and DenseNet121 pretrained models (both with learning rate 1e-4), found in URLs:
 1. https://storage.googleapis.com/moco-cxr/r8w-00001.pth.tar 
 2. https://storage.googleapis.com/moco-cxr/d1w-00001.pth.tar 
 
-**Note 1**: For SimCLR-v1, the TensorFlow checkpoints need to be downloaded manually and converted into PyTorch format (using https://github.com/tonylins/simclr-converter).
+**Note 3**: For SimCLR-v1, the TensorFlow checkpoints need to be downloaded manually and converted into PyTorch format (using https://github.com/tonylins/simclr-converter).
 
-**Note 2**: In order to convert BYOL, you may need to install some packages by running:
+**Note 4**: In order to convert BYOL, you may need to install some packages by running:
 ```
 pip install jax jaxlib dill git+https://github.com/deepmind/dm-haiku
 ```
