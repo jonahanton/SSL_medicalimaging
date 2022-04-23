@@ -64,7 +64,29 @@ We evaluate the following pretrained ResNet50 models (with links)
 | SimCLR-v1 | https://storage.cloud.google.com/simclr-gcs/checkpoints/ResNet50_1x.zip |
 | BYOL | https://storage.googleapis.com/deepmind-byol/checkpoints/pretrain_res50x1.pkl |
 | SwAV | https://dl.fbaipublicfiles.com/deepcluster/swav_800ep_pretrain.pth.tar |
-| Supervised | Weights from `torchvision.models.resnet50(pretrained=True)` |
+| Supervised_r50 | Weights from `torchvision.models.resnet50(pretrained=True)` |
+
+We also evaluate the supervised pretrained ResNet18 and DenseNet121 models
+
+| Model | URL |
+|-------|-----|
+| Supervised_r18 | Weights from `torchvision.models.resnet18(pretrained=True)` |
+| Supervised_d121 | Weights from `torchvision.models.densenet121(pretrained=True)` |
+
+We also evaluate the following pretrained medical domain-specific SSL pretrained models (with links to models provided in the linked github repos)
+| Model | URL |
+|-------|-----|
+| MIMIC-CheXpert | Models found in github repo https://github.com/facebookresearch/CovidPrognosis, model URL https://dl.fbaipublicfiles.com/CovidPrognosis/pretrained_models/ |
+| MoCo-CXR | Models found in github repo https://github.com/stanfordmlgroup/MoCo-CXR  |
+
+Note that for MIMIC-CheXpert we use the following model names (three different MoCo pretraining learning rates: 0.01, 0.1, 1.0):
+mimic-chexpert_lr_0.01_bs_128_fd_128_qs_65536.pt <br />
+mimic-chexpert_lr_0.1_bs_128_fd_128_qs_65536.pt <br />
+mimic-chexpert_lr_1.0_bs_128_fd_128_qs_65536.pt <br />
+All MIMIC-CheXpert models use a DenseNet121 backbone. <br />
+Note that for MoCo-CXR we use both the ResNet18 and DenseNet121 pretrained models (both with learning rate 1e-4), found in URLs:
+https://storage.googleapis.com/moco-cxr/r8w-00001.pth.tar <br />
+https://storage.googleapis.com/moco-cxr/d1w-00001.pth.tar <br />
 
 **Note 1**: For SimCLR-v1, the TensorFlow checkpoints need to be downloaded manually and converted into PyTorch format (using https://github.com/tonylins/simclr-converter).
 
