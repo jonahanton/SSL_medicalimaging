@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/finetune.py
+
 #!/usr/bin/env python
 # coding: utf-8
 

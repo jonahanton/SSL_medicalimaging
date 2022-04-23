@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/few_shot.py
+
 #!/usr/bin/env python
 # coding: utf-8
 

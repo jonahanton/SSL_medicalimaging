@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/linear.py
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -235,10 +237,6 @@ class DenseNetBackbone(nn.Module):
 
 def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
 
 
 def get_train_valid_loader(dset,

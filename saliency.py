@@ -191,7 +191,6 @@ def rescale(image_2d, percentile=99, minimum=0, maximum=255):
 
 
 # dataset: {image_name, image_path}
-
 IMAGES = {
     'bach' : ['iv001.tif', './sample_images/bach/iv001.tif'],
     'chestx' : ['00000001_000.png', './sample_images/chestx/00000001_000.png'],
