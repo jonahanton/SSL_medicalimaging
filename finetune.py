@@ -388,17 +388,10 @@ class DenseNetBackbone(nn.Module):
 
 
 
-
-
-
 # Data classes and functions
 
 def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
 
 
 def get_train_valid_loader(dset,
@@ -415,8 +408,7 @@ def get_train_valid_loader(dset,
                            data_augmentation=True):
     """
     Utility function for loading and returning train and valid
-    multi-process iterators over the CIFAR-10 dataset. A sample
-    9x9 grid of the images can be optionally displayed.
+    multi-process iterators.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -441,8 +433,6 @@ def get_train_valid_loader(dset,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Train normaliser:", normalize)
-
 
     # define transforms with augmentations
     if hist_norm:
@@ -528,7 +518,7 @@ def get_test_loader(dset,
                     pin_memory=True):
     """
     Utility function for loading and returning a multi-process
-    test iterator over the CIFAR-10 dataset.
+    test iterator.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -547,7 +537,6 @@ def get_test_loader(dset,
     """
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Test normaliser:", normalize)
 
     # define transform
     if hist_norm:              
@@ -590,10 +579,6 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_nor
     test_loader = get_test_loader(dset, data_dir, normalise_dict, hist_norm, batch_size, image_size, num_workers=num_workers,
                                                 pin_memory=False)
     return train_loader, val_loader, trainval_loader, test_loader
-
-
-
-
 
 
 

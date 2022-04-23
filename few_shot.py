@@ -279,9 +279,6 @@ FEW_SHOT_DATASETS = {
 
 
 
-
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Evaluate pretrained self-supervised model on few-shot recognition.')
@@ -318,6 +315,7 @@ if __name__ == "__main__":
     datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
     
+    # If performing few-shot on a large dataset, load in premade .pickle file
     if args.dataset in ['chexpert', 'chestx', 'diabetic_retinopathy', 'stoic']:
         submeta_path = os.path.join('./misc/few_shot_submeta', f'{args.dataset}.pickle')
         print(f'Loading sub meta dict from path {submeta_path}')

@@ -33,10 +33,7 @@ from datasets.custom_stoic_dataset import CustomStoicDataset
 from datasets.transforms import HistogramNormalize
 
 
-
-
-# Testing classes and functions
-
+# Lostic Regression class
 class LogisticRegression(nn.Module):
     def __init__(self, input_dim, num_classes, metric):
         super().__init__()
@@ -75,6 +72,7 @@ class LogisticRegression(nn.Module):
             raise Exception(f'Metric {self.metric} not implemented')
 
 
+# Class to extract frozen features from pretrained backbone and then fit logistic regression
 class LinearTester():
     def __init__(self, model, train_loader, val_loader, trainval_loader, test_loader, batch_size, metric,
                  device, num_classes, feature_dim=2048, wd_range=None):
@@ -98,6 +96,7 @@ class LinearTester():
         self.classifier = LogisticRegression(self.feature_dim, self.num_classes, self.metric).to(self.device)
 
     def get_features(self, train_loader, test_loader, model, test=True):
+        """Extract features from pretrained backbone."""
         X_train_feature, y_train = self._inference(train_loader, model, 'train')
         X_test_feature, y_test = self._inference(test_loader, model, 'test' if test else 'val')
         return X_train_feature, y_train, X_test_feature, y_test
@@ -120,6 +119,7 @@ class LinearTester():
         return feature_vector, labels_vector
 
     def validate(self):
+        """ Perform cross-validation to select value for l2 regularization constant C."""
         X_train_feature, y_train, X_val_feature, y_val = self.get_features(
             self.train_loader, self.val_loader, self.model, test=False
         )
@@ -136,6 +136,7 @@ class LinearTester():
                 self.best_params['C'] = C
 
     def evaluate(self):
+        """ Fit train+val set with found (/specified) l2 regularization and evaluate on test set."""
         print(f"Best hyperparameters {self.best_params}")
         X_trainval_feature, y_trainval, X_test_feature, y_test = self.get_features(
             self.trainval_loader, self.test_loader, self.model
@@ -146,6 +147,7 @@ class LinearTester():
         return test_score, self.best_params['C']
 
 
+# Classes to load in pretrained backbones
 class ResNet18Backbone(nn.Module):
     def __init__(self, model_name):
         super().__init__()
@@ -252,7 +254,7 @@ def get_train_valid_loader(dset,
                            pin_memory=True):
     """
     Utility function for loading and returning train and valid
-    multi-process iterators over the CIFAR-10 dataset.
+    multi-process iterators.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -278,7 +280,6 @@ def get_train_valid_loader(dset,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg
 
     normalize = transforms.Normalize(**normalise_dict)
-    # print("Train normaliser:", normalize)
 
     # define transforms
     if hist_norm:
@@ -340,7 +341,7 @@ def get_test_loader(dset,
                     pin_memory=True):
     """
     Utility function for loading and returning a multi-process
-    test iterator over the CIFAR-10 dataset.
+    test iterator.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -359,7 +360,6 @@ def get_test_loader(dset,
     """
 
     normalize = transforms.Normalize(**normalise_dict)
-    # print("Test normaliser:", normalize)
 
     # define transforms
     if hist_norm:
@@ -433,7 +433,7 @@ if __name__ == "__main__":
     args.norm = not args.no_norm
     print(args)
 
-    # histogram normalization
+    # histogram normalization (mimic-chexpert)
     hist_norm = False
     if 'mimic-chexpert' in args.model:
         hist_norm = True
