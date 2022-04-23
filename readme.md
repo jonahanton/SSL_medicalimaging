@@ -2,7 +2,7 @@
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
 Authors: Jonah Anton, Liam Castelli, Wan Hee Tang, Venus Cheung, Mathilde Outters, Mun Fai Chan
 
-Much of the code is taken/adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
+Much of the code is adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
 
 ```
 @inproceedings{Ericsson2021HowTransfer,
@@ -15,7 +15,7 @@ Much of the code is taken/adapted from the codebase for the CVPR 2021 paper [How
 }
 ```
 
-The code for the synthetic invariance evaluation is adapted from:
+The code for the invariance evaluation is adapted from the codebase for paper [Why Do Self-Supervised Models Transfer? Investigating the Impact of Invariance on Downstream Tasks](https://arxiv.org/abs/2111.11398):
 
 ```
 @misc{ericsson2021selfsupervised,
@@ -28,7 +28,7 @@ The code for the synthetic invariance evaluation is adapted from:
 }
 ```
 
-Code for the deep prior image reconstruction is adapted from the codebase (https://github.com/DmitryUlyanov/deep-image-prior) for the paper [Deep Image Prior](https://arxiv.org/abs/1711.10925):
+The code for the deep prior image reconstruction is adapted from the codebase (https://github.com/DmitryUlyanov/deep-image-prior) for the paper [Deep Image Prior](https://arxiv.org/abs/1711.10925):
 
 ```
 @article{UlyanovVL17,
@@ -39,7 +39,11 @@ Code for the deep prior image reconstruction is adapted from the codebase (https
 }
 ```
 
-## Files
+## Methods
+
+We evaluate the transfer peformance of several self-supervised pretrained models on medical image classification tasks. The pretrained models, datasets and evaulation methods are detailed in this readme.
+
+## Directory Structure
 
     ├── data
     ├── datasets
@@ -54,7 +58,7 @@ Code for the deep prior image reconstruction is adapted from the codebase (https
     ├── reconstructed_images         
 
 
-## Pre-trained Models
+## Pretrained Models
 We evaluate the following pretrained ResNet50 models (with links)
 
 | Model | URL |
@@ -65,6 +69,8 @@ We evaluate the following pretrained ResNet50 models (with links)
 | BYOL | https://storage.googleapis.com/deepmind-byol/checkpoints/pretrain_res50x1.pkl |
 | SwAV | https://dl.fbaipublicfiles.com/deepcluster/swav_800ep_pretrain.pth.tar |
 | Supervised_r50 | Weights from `torchvision.models.resnet50(pretrained=True)` |
+
+To download and prepare all the above models in the same format, run python download_and_prepare_models.py. This will save the prepared models in a directory `models/'. <br />
 
 We also evaluate the supervised pretrained ResNet18 and DenseNet121 models
 
