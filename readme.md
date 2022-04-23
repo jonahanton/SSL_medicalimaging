@@ -199,17 +199,22 @@ The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pi
 [To do - Jonah]
 
 ## Deep Image Prior
-Using the methodology from the paper [What makes instance discrimination good for transfer learning?](https://arxiv.org/abs/2006.06606), relying on feature inversion algorithm [Deep Image Prior](https://arxiv.org/abs/1711.10925), we studied the ability to reconstruct RGB images from the features extracted by our pre-trained models. The code for such reconstructions can be found in reconstruction.py.
+Using the methodology from the paper [What makes instance discrimination good for transfer learning?](https://arxiv.org/abs/2006.06606), which relies on the feature inversion algorithm [Deep Image Prior](https://arxiv.org/abs/1711.10925), we studied the ability to reconstruct RGB images from the features extracted by our pre-trained models. The code for such reconstructions can be found in reconstruction.py.
 
-For example, to reconstruct images from the XXX dataset using the XXX pre-trained model, run:
+For example, to reconstruct images from BACH and CheXpert datasets using the BYOL pre-trained model, run:
 ``` 
+python reconstruction.py -m byol -d bach chexpert --max_iter 3000 --clip True
 ``` 
 
-To quantify the quality of these reconstructed images, we use the perceptual distance metric, as defined in [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924).
+To quantify the quality of these reconstructed images, we use the perceptual distance metric from [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924). A good reconstruction has low perceptual distance score.
 
-Once the iamges have been reconstructed, run the following command to the perceptual distance score:
+Once the iamges have been reconstructed, run the following command to compute the perceptual distance score between original images and reconstructions:
 ``` 
+python perceptual_distance.py
 ``` 
+**Note**: <br />
+Samples images in folder
+<br />
 
 ## Perceptual Distance
 [To do - Jonah]
