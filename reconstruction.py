@@ -1,3 +1,5 @@
+"""Code adapted from https://github.com/nanxuanzhao/Good_transfer """
+
 import numpy as np
 import argparse
 import os
@@ -185,7 +187,6 @@ def main():
 
             print("Image size after transformation", img.shape) # ([1, 3, 224, 224])
 
-            # filename = str(args.input_dir.split("/")[-1])
             filename = str(args.model) + "_" + str(args.clip) + "_" + image_name
             print("Filename is: ", filename)
 
@@ -198,7 +199,7 @@ def main():
             print("Target shape", target.shape)
 
             if dataset == "stoic":
-              filename_edited = "simclr-v1_True_8622.jpeg"
+              filename_edited = str(args.model) + "_" + "True_8622.jpeg"
               out_path = os.path.join(args.output_dir, args.model, filename_edited)
             else:
               out_path = os.path.join(args.output_dir, args.model, filename)
@@ -209,7 +210,7 @@ def main():
 
                 start=time.time()
 
-                pad = 'zero'  # 'refection'
+                pad = 'zero'  # 'reflection'
 
                 # Encoder-decoder architecture
                 net = skip(input_depth, 3, num_channels_down=[16, 32, 64, 128, 128, 128],
@@ -244,13 +245,11 @@ def main():
 
                     def closure():
                         optimizer.zero_grad()
+                        # out is features from pretrained network when input is noise fed through encoder-decoder network
                         out = model.forward(
                             net(net_input)[:, :, :args.img_size, :args.img_size], name=args.which_layer)
 
-                        # print("Out size", out.shape) # [1, 2048, 7, 7]) for ResNet 50
-                        # out gives features from pretrained network when input is noise fed into encoder-decoder network
                         # target is features from pretrained network when input is original image
-
                         loss = criterion(out, target)
                         loss.backward()
                         n_iter[0] += 1

@@ -53,6 +53,7 @@ class CustomStoicDataset(Dataset):
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
+
         return image, label
 
     def _clean_labels(self, dataframe):
