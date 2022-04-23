@@ -13,13 +13,13 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=diabetic_retinopathy
-python invariances_multiview.py --dataset $dset --model moco-v2 
-python invariances_multiview.py --dataset $dset --model simclr-v1 --no-norm
-python invariances_multiview.py --dataset $dset --model pirl 
-python invariances_multiview.py --dataset $dset --model swav 
-python invariances_multiview.py --dataset $dset --model byol
-python invariances_multiview.py --dataset $dset --model supervised_r18 
-python invariances_multiview.py --dataset $dset --model supervised_d121 
-python invariances_multiview.py --dataset $dset --model supervised_r50
+python -m invariances.invariances_multiview --dataset $dset --model moco-v2 
+python -m invariances.invariances_multiview --dataset $dset --model simclr-v1 --no-norm
+python -m invariances.invariances_multiview --dataset $dset --model pirl 
+python -m invariances.invariances_multiview --dataset $dset --model swav 
+python -m invariances.invariances_multiview --dataset $dset --model byol
+python -m invariances.invariances_multiview --dataset $dset --model supervised_r18 
+python -m invariances.invariances_multiview --dataset $dset --model supervised_d121 
+python -m invariances.invariances_multiview --dataset $dset --model supervised_r50
 
 

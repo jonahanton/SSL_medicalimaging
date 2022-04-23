@@ -32,8 +32,6 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 def D(a, b): # cosine similarity
     return F.cosine_similarity(a, b, dim=-1).mean()
 
-
-
 # Data classes and functions
 
 
@@ -251,7 +249,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
 
 
-    if os.path.exists(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
+    if os.path.exists(f'./mics/invariances/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
         print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
         logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
     else:
@@ -280,16 +278,16 @@ if __name__ == "__main__":
         mean_feature = all_features.mean(dim=0)
         cov_matrix = np.cov(all_features, rowvar=False)
 
-        torch.save(mean_feature, f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
-        torch.save(cov_matrix, f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
+        torch.save(mean_feature, f'./misc/invariances/{args.model}_{args.dataset}_mean_feature.pth')
+        torch.save(cov_matrix, f'./misc/invariances/{args.model}_{args.dataset}_feature_cov_matrix.pth')
 
 
     # Calculate invariances
     L = torch.zeros((args.num_images,))
     S = torch.zeros((args.num_images,))
 
-    mean_feature = torch.load(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
-    cov_matrix = torch.load(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
+    mean_feature = torch.load(f'./misc/invariances/{args.model}_{args.dataset}_mean_feature.pth')
+    cov_matrix = torch.load(f'./misc/invariances/{args.model}_{args.dataset}_feature_cov_matrix.pth')
     
     epsilon = 1e-6
     cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])

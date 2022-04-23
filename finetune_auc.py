@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/finetune.py
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -63,9 +65,6 @@ def count_acc(pred, label, metric):
         return cm.mean()
     elif metric == "auc":
         auc = roc_auc_score(label.cpu(),pred.detach().cpu())
-        fpr, tpr = roc_curve(label.cpu(),pred.detach().cpu())
-        fpr.save("results/chexpert_auc/fpr_mimic-cxr_r18_lr_3e_5.npy")
-        tpr.save("results/chexpert_auc/tpr_mimic-cxr_r18_lr_3e_5.npy")
         return auc
 
 
@@ -399,19 +398,10 @@ class DenseNetBackbone(nn.Module):
 
 
 
-
-
-
-
 # Data classes and functions
 
 def get_dataset(dset, root, split, transform): # Few shot is true! (used so labels are binary)
     return dset(root, train=(split == 'train'), transform=transform, download=True, few_shot = True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
-
 
 def get_train_valid_loader(dset,
                            data_dir,
@@ -427,8 +417,7 @@ def get_train_valid_loader(dset,
                            data_augmentation=True):
     """
     Utility function for loading and returning train and valid
-    multi-process iterators over the CIFAR-10 dataset. A sample
-    9x9 grid of the images can be optionally displayed.
+    multi-process iterators.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -453,7 +442,6 @@ def get_train_valid_loader(dset,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Train normaliser:", normalize)
 
 
     # define transforms with augmentations
@@ -540,7 +528,7 @@ def get_test_loader(dset,
                     pin_memory=True):
     """
     Utility function for loading and returning a multi-process
-    test iterator over the CIFAR-10 dataset.
+    test iterator.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -559,7 +547,6 @@ def get_test_loader(dset,
     """
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Test normaliser:", normalize)
 
     # define transform
     if hist_norm:              
@@ -605,21 +592,9 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_nor
 
 
 
-
-
-
-
-
-
-
-
 # name: {class, root, num_classes, metric}
 FINETUNE_DATASETS = {
-    'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
-    'cifar100': [datasets.CIFAR100, './data/CIFAR100', 100, 'accuracy'],
-    'diabetic_retinopathy' : [CustomDiabeticRetinopathyDataset, './data/diabetic_retinopathy', 5, 'mean per-class accuracy'],
     'chexpert': [CustomChexpertDataset, './data/chexpert', 2, 'auc'],
-    'stoic': [CustomStoicDataset, './data/stoic', 2, 'mean per-class accuracy'],
 }
 
 
@@ -627,7 +602,7 @@ FINETUNE_DATASETS = {
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Evaluate pretrained self-supervised model via finetuning.')
     parser.add_argument('-m', '--model', type=str, default='moco-v2', help='name of the pretrained model to load and evaluate')
-    parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='name of the dataset to evaluate on')
+    parser.add_argument('-d', '--dataset', type=str, default='chexpert', help='name of the dataset to evaluate on')
     parser.add_argument('-b', '--batch-size', type=int, default=64, help='the size of the mini-batches when inferring features')
     parser.add_argument('-i', '--image-size', type=int, default=224, help='the size of the input images')
     parser.add_argument('-w', '--workers', type=int, default=4, help='the number of workers for loading the data')

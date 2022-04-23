@@ -35,7 +35,7 @@ def get_dataset(dset_name, dset, root, split, transform):
 
 
 
-def get_train_valid_test_dset(dset_name,
+def get_train_val_test_dset(dset_name,
                               dset,
                               data_dir,
                               image_size):
@@ -49,9 +49,9 @@ def get_train_valid_test_dset(dset_name,
             ])
 
     
-    train_valid_dataset = get_dataset(dset_name, dset, data_dir, 'train', transform)
+    train_val_dataset = get_dataset(dset_name, dset, data_dir, 'train', transform)
     test_dataset = get_dataset(dset_name, dset, data_dir, 'test', transform)
-    dataset = ConcatDataset([train_valid_dataset, test_dataset])
+    dataset = ConcatDataset([train_val_dataset, test_dataset])
 
     return dataset
 
@@ -93,6 +93,7 @@ if __name__ == "__main__":
         sub_meta[cl] = []
 
     pbar = tqdm(range(len(d)), desc='Iterating through dataset')
+    # For maximum 10,000 images in dataset, hash each image in a dictionary dependent on its class label
     for i, (data, label) in enumerate(d):
         if i > 10000:
             break
@@ -104,5 +105,6 @@ if __name__ == "__main__":
     for key, item in sub_meta.items():
         print(len(sub_meta[key]))
     
+    # Save sub_meta dictionary in pickle file
     with open(f'misc/few_shot_submeta/{args.dataset}.pickle', 'wb') as handle:
         pickle.dump(sub_meta, handle, protocol=pickle.HIGHEST_PROTOCOL)

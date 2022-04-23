@@ -31,12 +31,5 @@ class HistogramNormalize(object):
         return image
 
 
-
-
-
 if __name__ == "__main__":
-
-    img = torch.randn(size=(1, 1, 224, 224))
-    histogram_normalize = HistogramNormalize()
-    out = histogram_normalize(img)
-    print(out.dtype)
+    pass

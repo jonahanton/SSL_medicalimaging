@@ -49,6 +49,10 @@ def perceptual_distance(im1, im2, device):
 
     return d_alex.cpu().detach().numpy().item(), d_vgg.cpu().detach().numpy().item(), d_squeeze.cpu().detach().numpy().item()
 
+
+
+
+
 original_images = {
     'bach' : ['iv001.tif', './sample_images/bach/iv001.tif'],
     'chestx' : ['00000001_000.png', './sample_images/chestx/00000001_000.png'],
@@ -206,16 +210,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     pprint(args)
     
-    # results_dict = {}
 
-    # for dataset in original_images:
-    #     im1_name = original_images[dataset][0]
-    #     im1_path = original_images[dataset][1]
-    #     im1 = open_and_convert_image(im1_path, args.image_size)
-    #     results_dict[dataset] = {}
-        
-    # for model in reconstructed_images[dataset]:
-    # im2_path = reconstructed_images[dataset][model]
     im1 = open_and_convert_image(args.image_1, args.image_size)
     im2 = open_and_convert_image(args.image_2, args.image_size)
 
@@ -227,5 +222,4 @@ if __name__ == "__main__":
         'SqueezeNet' : d_squeeze,
     }
     print(f'Perceptual distance between images {args.image_1} and {args.image_2}:')
-    
     pprint(results_dict)

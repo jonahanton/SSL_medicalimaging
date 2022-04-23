@@ -42,10 +42,6 @@ class ImageJitter(object):
 
 def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
 
 
 class SetDataset:
@@ -55,7 +51,7 @@ class SetDataset:
         if load_submeta:
             print(f'Loading sub meta dictionary')
             self.sub_meta = pickle.load(open(submeta_path, 'rb'))
-            print(f'Loaded')
+            print(f'Finished loading')
         else:
 
             self.sub_meta = {}
@@ -73,24 +69,13 @@ class SetDataset:
             else:
                 test_dataset = get_dataset(dset, root, 'test', transform)
 
-            if dset in [CustomMontgomeryCXRDataset, CustomShenzhenCXRDataset]:
-                d = trainval_dataset
-            else:
-                d = ConcatDataset([trainval_dataset, test_dataset])
+
+            d = ConcatDataset([trainval_dataset, test_dataset])
 
             print(f'Total dataset size: {len(d)}')
 
             for i, (data, label) in enumerate(d):
                 self.sub_meta[label].append(data)
-
-        # for label in self.sub_meta.copy(): # added copy
-        #     if len(self.sub_meta[label]) == 0:
-        #         del self.sub_meta[label]
-        #         del self.cl_list[label]
-
-        # print('Number of images per class')
-        # for key, item in self.sub_meta.items():
-        #     print(len(self.sub_meta[key]))
 
         self.sub_dataloader = []
         sub_data_loader_params = dict(batch_size = batch_size,

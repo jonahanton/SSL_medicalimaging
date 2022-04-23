@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 import os
 import argparse
 from pprint import pprint
@@ -24,6 +27,7 @@ from datasets.transforms import HistogramNormalize
 
 
 
+# Compute an occlusion-based saliency map for a given image and model
 def compute_saliency_map(img, model, device, size=10, value=0):
     img = img.to(device)
 
@@ -174,18 +178,9 @@ def obtain_and_pre_process_img(img_path, img_size, normalisation, hist_norm):
 
 
 def crop(img, img_size):
-
+    """ Apply center crop."""
     crop = transforms.CenterCrop(img_size)
     return crop(img)
-
-
-def rescale(image_2d, percentile=99, minimum=0, maximum=255):
-
-    image_2d = image_2d.numpy()
-    vmax = np.percentile(image_2d, percentile)
-    vmin = np.min(image_2d)
-
-    return np.clip((image_2d - vmin) / (vmax - vmin), minimum, maximum)
 
 
 
@@ -203,9 +198,6 @@ IMAGES = {
     'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],
     'imagenet' : ['goldfish.jpeg', 'sample_images/imagenet/goldfish.jpeg'],
 }
-
-
-
 
 if __name__ == "__main__":
     
@@ -284,8 +276,6 @@ if __name__ == "__main__":
             plt.savefig(out_super)
             
             plt.imsave(out_heat, saliency_map, cmap='jet')
-
-
 
             # calculate attentative diffusion (percentage of attention map with values about its mean)
             mean_attention = np.mean(saliency_map)
