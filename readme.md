@@ -121,11 +121,13 @@ python few_shot.py --dataset chestx --model mimic-chexpert_lr_0.01 --n-way 5 --n
 ```
 This will save a log of the run (with the results) in the filepath `logs/mimic-chexpert_lr_0.01/moco-v2/chestx.log`. The test accuracy should be close to 33.73% ± 0.45%. <br />
 
-**Note**: Within few_shot.py a dictionary is produced for the specified dataset where a list is created for each class containing all images for that class. This is neccessary in the random sampling of images during a few-shot episode. However, the creation of this dictionary, `sub_meta`, requires one complete pass over the entire dataset. For the larger datasets we use, namely CheXpert, ChestX-ray8 and EyePACS (diabetic retinopathy), we found that this process is extremely slow. Therefore, to prevent the creation of the sub_meta dict from stratch every time few_shot.py is called for these datasets, the script `datasets/prepare_submeta.py` will create the sub_meta dict (for a maximum of 10,000 images) and store it as a pickle file. This can then be re-loaded in when few_shot.py is called for these datasets. E.g., to run `datasets/prepare_submeta.py` for CheXpert:
+**Note**: <br />
+Within few_shot.py a dictionary is produced for the specified dataset where a list is created for each class containing all images for that class. This is neccessary for the random sampling of images during a few-shot episode. However, the creation of this dictionary, `sub_meta`, requires one complete pass over the entire dataset. For the larger datasets we use, namely CheXpert, ChestX-ray8 and EyePACS (diabetic retinopathy), we found that this process is extremely slow. Therefore, to prevent the creation of the sub_meta dict from stratch every time few_shot.py is called for these datasets, the script `datasets/prepare_submeta.py` will create the sub_meta dict (for a maximum of 10,000 images) and store it as a pickle file. This can then be re-loaded in when few_shot.py is called for these datasets.<br />
+E.g., to run `datasets/prepare_submeta.py` for CheXpert:
 ```
 python -m datasets.prepare_submeta --dataset chexpert
 ``` 
-The pickle file will be saved in the path `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with -- dataset chexpert.
+The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with `--dataset chexpert`.
 
 ## Many-shot (Finetune)
 [To do - Jonah]
