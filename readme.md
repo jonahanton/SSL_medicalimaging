@@ -164,6 +164,8 @@ unzip test.zip
 ```
 Should you encounter problems, see the following discussion which we found was helpful to unpack the various zip files: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12545. If problems persist, check the MD5 hashes given here: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12543
 
+**Montgomery-CXR/Shenzhen-CXR**:  The links are under the "I have heard about the Tuberculosis collection. Where can I get those images ?" section
+
 ## Few-shot
 We provide the code for few-shot evaluation in few_shot.py. We use the technique of Prototypical Networks [Prototypical Networks for Few-Shot Learning](https://arxiv.org/abs/1703.05175).
 
