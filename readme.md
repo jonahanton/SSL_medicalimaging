@@ -41,7 +41,7 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
 
 ## Methods
 
-We evaluate the transfer peformance of several self-supervised pretrained models on medical image classification tasks. The pretrained models, datasets and evaulation methods are detailed in this readme.
+We evaluate the transfer peformance of several self-supervised pretrained models on medical image classification tasks. We also perform the same evaluation on a selection of supervised pretrained models and self-supervised medical domain-specific pretrained models (both pretrained on X-ray datasets). The pretrained models, datasets and evaulation methods are detailed in this readme.
 
 ## Directory Structure
 
