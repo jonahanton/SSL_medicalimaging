@@ -1,7 +1,7 @@
-"""Code from https://github.com/nanxuanzhao/Good_transfer
+# This code is modified from: https://github.com/nanxuanzhao/Good_transfer
 
-Architecture of encoder-decoder network for Deep Image Prior
-"""
+#!/usr/bin/env python
+# coding: utf-8
 
 import torch
 import torch.nn as nn
@@ -41,8 +41,6 @@ def skip(
         filter_size_up = [filter_size_up] * n_scales
 
     last_scale = n_scales - 1
-
-    cur_depth = None
 
     model = nn.Sequential()
     model_tmp = model
