@@ -1,5 +1,4 @@
 import os
-import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -18,7 +17,6 @@ class ResNet18Backbone(nn.Module):
 
         self.model.train()
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -50,7 +48,6 @@ class ResNetBackbone(nn.Module):
 
         self.model.train()
         print("num parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -82,7 +79,6 @@ class DenseNetBackbone(nn.Module):
 
         self.model.train()
         print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
 
     def forward(self, x):
         features = self.model.features(x)
