@@ -214,13 +214,13 @@ python finetune.py --dataset chexpert --model moco-v2 --early-stopping
 This will save a log of the run (with the results on the test set) in the filepath `logs/finetune/moco-v2/chexpert.log`. With early stopping implemented, the test accuracy (pleural effusion, many-to-one) should be close to 79.96%.
 
 ## Many-shot(Linear)
-We provide the code for linear evaluation in linear.py. This will train linear regression on top of the features from the specified frozen model backbone. By default a hyperparameter search is first performed to find the l2 regularisation constant (`C` in sklearn), evaulating 45 logarithmically spaced points between 1e-6 and 1e5. To instead specify a C value directly, use the input flag --C.
+We provide the code for linear evaluation in linear.py. This will train linear regression on top of the features from the specified frozen model backbone. By default a hyperparameter search is first performed to find the l2 regularisation constant (`C` in sklearn), choosing between 45 logarithmically spaced points between 1e-6 and 1e5. To instead specify a C value directly, use the input flag --C.
 
 For example, to evaluate PIRL on the dataset EyePACS (diabetic retinopathy), run:
 ```
 python linear.py --dataset diabetic_retinopathy --model pirl 
 ```
-This will save a log of the run (with the results on the test set) in the filepath `logs/linear/pirl/diabetic_retinopathy.log`. The test accuracy should be close to 31.51%, using selected C value 5623.413.
+This will save a log of the run (with the results on the test set) in the filepath `logs/linear/pirl/diabetic_retinopathy.log`. The test accuracy should be close to 31.51%, using C value 5623.413.
 
 ## Saliency Maps
 [To do - Jonah]
