@@ -204,7 +204,7 @@ python -m datasets.prepare_submeta --dataset chexpert
 ``` 
 The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with `--dataset chexpert`.
 
-## Many-shot(Finetune)
+## Many-shot (Finetune)
 We provide the code for finetuning in finetune.py. By default, the pretrained model will be finetuned (with a linear classification head attached on) for 5000 steps with a batch size of 64, using SGD with Nesterov Momentum = 0.9 and a Cosine Annealing learning rate. The flat --early-stopping implements early stopping (with a patience = 3 by default (checked every 200 steps)). By default, the learning rate is set to 1e-2 and the weight decay to 1e-8, although a hyperparamter search can be initiated using the flat --search. By default random resized crop and random horizontal flip data augmentations will be applied for finetuning. 
 
 For example, to evaluate MoCo-v2 on the dataset CheXpert (with early stopping), run:
@@ -213,7 +213,7 @@ python finetune.py --dataset chexpert --model moco-v2 --early-stopping
 ```
 This will save a log of the run (with the results on the test set) in the filepath `logs/finetune/moco-v2/chexpert.log`. With early stopping implemented, the test accuracy (pleural effusion, many-to-one) should be close to 79.96%.
 
-## Many-shot(Linear)
+## Many-shot (Linear)
 We provide the code for linear evaluation in linear.py. This will train linear regression on top of the features from the specified frozen model backbone. By default a hyperparameter search is first performed to find the l2 regularisation constant (`C` in sklearn), choosing between 45 logarithmically spaced points between 1e-6 and 1e5. To instead specify a C value directly, use the input flag --C.
 
 For example, to evaluate PIRL on the dataset EyePACS (diabetic retinopathy), run:
