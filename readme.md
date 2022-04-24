@@ -1,6 +1,6 @@
 # How Well Do Self-Supervised Models Transfer to Medical Imaging?
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
-Authors: Jonah Anton, Liam Castelli, Wan Hee Tang, Venus Cheung, Mathilde Outters, Mun Fai Chan
+Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), Wan Hee Tang, Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
 
 Much of the code is adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
 
