@@ -42,7 +42,7 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
 # Table of Contents 
 
    * [Methods](#Methods)
-   * [Directory Structure](#Directory Structure)
+   * [Directory Structure](##Directory Structure)
       * [Methods](#Methods)
       
 
