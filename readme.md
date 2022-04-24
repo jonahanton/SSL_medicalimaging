@@ -42,14 +42,14 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
 # Table of Contents 
    * [Directory Structure](#Directory-Structure)
    * [Methods](#Methods)
-      * [Pretrained Models](##Pretrained-Models)
+      * [Pretrained Models](#Pretrained-Models)
       * [Datasets](#Datasets)
    * [Training](#Training)
       * [Few Shot](##Few-shot) 
       * [Many-shot(Finetune)](##Many-shot(Finetune))
       * [Many-shot(Linear)](##Many-shot(Linear))
   * [Deep Image Prior](##Deep-Image-Prior)
-      * [Perceptual Distance](###Perceptual-Distance)
+      * [Perceptual Distance](#Perceptual-Distance)
   * [Invariances](##Invariances)
       
 
