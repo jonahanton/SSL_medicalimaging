@@ -216,6 +216,11 @@ The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pi
 ## Deep Image Prior
 Using the methodology from the paper [What makes instance discrimination good for transfer learning?](https://arxiv.org/abs/2006.06606), which relies on the feature inversion algorithm [Deep Image Prior](https://arxiv.org/abs/1711.10925), we studied the ability to **reconstruct RGB images** from the features extracted by our pre-trained models. The code for such reconstructions can be found in ```reconstruction.py```.
 
+For example, to perform feature inversion using MoCo on a sample image from Imagenet, run:
+```
+python reconstruction.py -m moco-v2 -d imagenet
+```
+
 **Note**: <br />
 The reconstructed images will by default be saved into a ```reconstructed_images/``` directory. 
 <br />
@@ -226,9 +231,11 @@ The paths to the sample images to be reconstructed are defined whithin ```recons
 To quantify the quality of the reconstructed images, we use the **perceptual distance** metric from [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924). A good reconstruction has low perceptual distance score.
 
 Once the images have been reconstructed, run the following command to compute the perceptual distance score between original images and reconstructions:
-``` 
-TO DO
-``` 
+
+```
+python perceptual_distance.py 
+```
+
 **Note**: <br />
 The code uses the same dictionary structure as described above for the sample images paths and the reconstructed images are stored in a nested dictionary, with structure ```{dataset_name: {model_name: reconstructed_image_path}}```.
 <br />
