@@ -29,8 +29,8 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
 from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
-
 from datasets.transforms import HistogramNormalize
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 
 # Lostic Regression class
@@ -63,7 +63,7 @@ class LogisticRegression(nn.Module):
 
             #Get the confusion matrix
             cm = confusion_matrix(y_test, pred_test)
-            cm = cm.diagonal() / cm.sum(axis=1) 
+            cm = cm.diagonal() / cm.sum(axis=1)
             test_score = 100. * cm.mean()
 
             return test_score
@@ -145,94 +145,6 @@ class LinearTester():
         test_score = self.classifier.fit_logistic_regression(X_trainval_feature, y_trainval, X_test_feature, y_test)
 
         return test_score, self.best_params['C']
-
-
-# Classes to load in pretrained backbones
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
-
 
 
 # Data classes and functions
@@ -416,7 +328,7 @@ LINEAR_DATASETS = {
 
 
 if __name__ == "__main__":
-    
+
 
     parser = argparse.ArgumentParser(description='Evaluate pretrained self-supervised model via logistic regression.')
     parser.add_argument('-m', '--model', type=str, default='byol',
@@ -451,7 +363,7 @@ if __name__ == "__main__":
     dset, data_dir, num_classes, metric = LINEAR_DATASETS[args.dataset]
     # prepare data loaders
     train_loader, val_loader, trainval_loader, test_loader = prepare_data(
-        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm, 
+        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm,
         hist_norm=hist_norm)
 
 
@@ -472,7 +384,7 @@ if __name__ == "__main__":
     else:
         model = ResNetBackbone(args.model)
         feature_dim = 2048
-    
+
     model = model.to(args.device)
 
 
