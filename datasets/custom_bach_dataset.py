@@ -16,17 +16,15 @@ class CustomBachDataset(Dataset):
         # Read in csv containing path information
         csv_file = os.path.join(img_dir, "ICIAR2018_BACH_Challenge/Photos/microscopy_ground_truth.csv")
         self.preclean_dataframe = pd.read_csv(csv_file,header= None)
-        #print(self.preclean_dataframe.columns)
-        split_index = int(math.floor(0.8*len(self.preclean_dataframe)))
-        if train: # Train data (110)
-            self.preclean_dataframe = self.preclean_dataframe.iloc[:split_index,:]
-        else: # Test Data (28)
-            self.preclean_dataframe = self.preclean_dataframe.iloc[split_index:,:]
-        
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
-        # Add a bit to split dataframe to train and test
-
+        # Split into train and test (80:20)
+        split_index = int(math.floor(0.8*len(self.preclean_dataframe)))
+        if train: # Train data length: 110
+            self.preclean_dataframe = self.preclean_dataframe.iloc[:split_index,:]
+        else: # Test data length: 28
+            self.preclean_dataframe = self.preclean_dataframe.iloc[split_index:,:]
+        # Extract image paths and labels
         self.img_paths, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
         self.img_dir = img_dir
         self.transform = transform
@@ -36,58 +34,49 @@ class CustomBachDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        label = self.img_labels.iloc[idx] # Is a numpy array!
-        if np.array_equal(label, np.array([1,0,0,0])):
+        # Extract label
+        label_name = self.img_labels.iloc[idx] 
+        # Convert to numerical
+        if label_name == "Normal":
             label = 0
-            label_name = "Normal"
-        elif np.array_equal(label, np.array([0,1,0,0])):
+        elif label_name == "Benign":
             label = 1
-            label_name = "Benign"
-        elif np.array_equal(label, np.array([0,0,1,0])):
+        elif label_name == "InSitu":
             label = 2
-            label_name = "InSitu"
-        elif np.array_equal(label, np.array([0,0,0,1])):
+        elif label_name == "Invasive":
             label = 3
-            label_name = "Invasive"
         else:
             raise ValueError
+        # Get full image path
         img_path = os.path.join(os.path.join(self.img_dir,"ICIAR2018_BACH_Challenge/Photos/"+label_name),self.img_paths.iloc[idx])
-        image = Image.open(img_path) #RGB
+        # Load in RGB image
+        image = Image.open(img_path)
+        # Convert to appropriate format
         label = np.float32(label)
+        # Apply transformations
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
 
-    def _clean_labels(self, dataframe):
-        vectorized_convert_to_numerical = np.vectorize(self.convert_to_numerical)
-        smoothed_dataframe = dataframe.transform(vectorized_convert_to_numerical)
-        return smoothed_dataframe
-    
-    def convert_to_numerical(self,val):
-        if val == "Normal":
-            val = [1,0,0,0]
-        elif val == "Benign":
-            val = [0,1,0,0]
-        elif val == "InSitu":
-            val = [0,0,1,0]
-        elif val == "Invasive":
-            val = [0,0,0,1]
-        else:
-            raise ValueError
-        return val
-
-
     def _split_labels(self,dataframe):
-        # Split CheXpert dataframe into path, aux and label dataframes
+        """Split Ch dataframe into path, aux and label dataframes"""
         path = dataframe.iloc[:,0]
         label = dataframe.iloc[:,1]
         return path, label
 
     def _basic_preclean(self, dataframe):
+        """ Converts dataframe to desired format
+
+        Args:
+            dataframe (pandas.Dataframe) : original dataframe object with no transformations
+
+        Returns:
+            path (pandas.Dataframe) : dataframe object containing path information
+            label (pandas.Dataframe) : dataframe object with label information
+        """
         path, label = self._split_labels(dataframe)
-        label = self._clean_labels(label)
         return path, label
 
 def test_class():
