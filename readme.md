@@ -48,6 +48,9 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
       * [Few Shot](##Few-shot) 
       * [Many-shot(Finetune)](##Many-shot(Finetune))
       * [Many-shot(Linear)](##Many-shot(Linear))
+  * [Deep Image Prior](##Deep-Image-Prior)
+      * [Perceptual Distance](###Perceptual-Distance)
+  * [Invariances](##Invariances)
       
 
 # Directory Structure
@@ -219,6 +222,7 @@ The reconstructed images will by default be saved into a ```reconstructed_images
 The paths to the sample images to be reconstructed are defined whithin ```reconstruction.py``` as a dictionary with structure ```{dataset_name: [file_name, file_path]}```.
 <br />
 
+### Perceptual Distance 
 To quantify the quality of the reconstructed images, we use the **perceptual distance** metric from [The Unreasonable Effectiveness of Deep Features as a Perceptual Metric](https://arxiv.org/abs/1801.03924). A good reconstruction has low perceptual distance score.
 
 Once the images have been reconstructed, run the following command to compute the perceptual distance score between original images and reconstructions:
@@ -228,9 +232,6 @@ TO DO
 **Note**: <br />
 The code uses the same dictionary structure as described above for the sample images paths and the reconstructed images are stored in a nested dictionary, with structure ```{dataset_name: {model_name: reconstructed_image_path}}```.
 <br />
-
-## Perceptual Distance
-[To do - Jonah]
 
 ## Invariances
 [To do - Jonah]
