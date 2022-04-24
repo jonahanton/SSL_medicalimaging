@@ -1,17 +1,20 @@
 import argparse
-import os
-import logging
+# import os
+# import logging
 from pprint import pprint
-# import csv
+import csv
+from collections import defaultdict
 
-import lpips
-import torch
+# We use the Perceptual Similarity Metric library, 
+# from the paper "The Unreasonable Effectiveness of Deep Features as a Perceptual Metric" (Zhang et al., 2018)
+import lpips   
+# import torch
 from torchvision import transforms
 
 import PIL
 from PIL import Image
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 import medpy.io as medpy
 
 
@@ -66,8 +69,8 @@ original_images = {
     # 'ichallenge_amd' : ['AMD_A0001.jpg', './sample_images/ichallenge_amd/AMD_A0001.jpg'],
     # 'ichallenge_pm' : ['H0009.jpg', './sample_images/ichallenge_pm/H0009.jpg'],
     # 'montgomerycxr' : ['MCUCXR_0001_0.png', './sample_images/montgomerycxr/MCUCXR_0001_0.png'],
-    # 'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
-    #'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],  
+    #'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
+    'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],  
     'imagenet' : ['goldfish.jpeg', 'sample_images/imagenet/goldfish.jpeg']
 }
 
@@ -225,14 +228,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     pprint(args)
     
-    results_dict = {}
-    csv_columns = []
+    results_dict_alex = {}
+    results_dict_vgg = {}
+    results_dict_squeezenet = {}
+    csv_columns = ['model']
 
     for dataset in original_images:
-        im1_name = original_images[dataset][0]
+        #im1_name = original_images[dataset][0]
         im1_path = original_images[dataset][1]
         im1 = open_and_convert_image(im1_path, args.image_size)
-        results_dict[dataset] = {}
+        results_dict_alex[dataset] = {}
+        results_dict_vgg[dataset] = {}
+        results_dict_squeezenet[dataset] = {}
 
         csv_columns.append(dataset)
         
@@ -242,21 +249,58 @@ if __name__ == "__main__":
 
             d_alex, d_vgg, d_squeeze = perceptual_distance(im1, im2, args.device)
             
-            results_dict[dataset][model] = {
-                'AlexNet' : d_alex,
-                'VGG' : d_vgg,
-                'SqueezeNet' : d_squeeze,
-            }
-            print(f'Perceptual distance between images {im1_name} and {im2_path}:')
+            # results_dict[dataset][model] = {
+            #     'AlexNet' : d_alex,
+            #     'VGG' : d_vgg,
+            #     'SqueezeNet' : d_squeeze,
+            # }
+            # print(f'Perceptual distance between images {im1_name} and {im2_path}:')
             
-            pprint(results_dict[dataset][model])
-   
-    # try:
-    #     with open('./perceptual_distance_results.csv', 'w') as csvfile:
-    #         writer = csv.DictWriter(csvfile)
-    #         writer.writeheader()
-    #         for dataset in results_dict:
-    #             for model in dataset:
-    #                 writer.writerow(model)
-    # except IOError:
-    #     print("I/O error")
+            # pprint(results_dict[dataset][model])
+
+            results_dict_alex[dataset][model] = d_alex
+            results_dict_vgg[dataset][model] = d_vgg
+            results_dict_squeezenet[dataset][model] = d_squeeze
+    
+    # Flip the nested structure on the results for csv saving
+    flipped = defaultdict(dict)
+    for key, val in results_dict_alex.items():
+        for subkey, subval in val.items():
+            flipped[subkey][key] = subval
+    results_dict_alex = dict(flipped)
+
+    flipped = defaultdict(dict)
+    for key, val in results_dict_vgg.items():
+        for subkey, subval in val.items():
+            flipped[subkey][key] = subval
+    results_dict_vgg = dict(flipped)
+
+    flipped = defaultdict(dict)
+    for key, val in results_dict_squeezenet.items():
+        for subkey, subval in val.items():
+            flipped[subkey][key] = subval
+    results_dict_squeezenet = dict(flipped)
+
+    try:
+        with open('./results/perceptual-distance/alexnet_distances.csv', 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for model in results_dict_alex:
+                row = dict({'model': model}, **results_dict_alex[model])
+                writer.writerow(row)
+        
+        with open('./results/perceptual-distance/vgg_distances.csv', 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for model in results_dict_vgg:
+                row = dict({'model': model}, **results_dict_vgg[model])
+                writer.writerow(row)
+        
+        with open('./results/perceptual-distance/squeezenet_distances.csv', 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for model in results_dict_squeezenet:
+                row = dict({'model': model}, **results_dict_squeezenet[model])
+                writer.writerow(row)
+    except IOError:
+        print("I/O error")
