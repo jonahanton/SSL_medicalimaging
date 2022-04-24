@@ -1,19 +1,20 @@
-"""Code adapted from https://github.com/nanxuanzhao/Good_transfer """
+# This code is modified from: https://github.com/nanxuanzhao/Good_transfer
 
-import numpy as np
+#!/usr/bin/env python
+# coding: utf-8
+
 import argparse
 import os
-import torch
-import torch.nn as nn
-
 import time
-from PIL import Image
-from torch.autograd import Variable
-import torch.nn.functional as F
+
+import torch
 from torch import optim
+import torch.nn as nn
 import torchvision.transforms as transforms
-from matplotlib import pyplot as plt
+
+import numpy as np
 import PIL
+from PIL import Image
 import medpy.io as medpy
 
 from reconstruction.skip import skip
@@ -24,9 +25,7 @@ parser.add_argument('-m', '--model', type=str, default='supervised_d121',
                         help='name of the pretrained model to load and evaluate')
 parser.add_argument('-d', '--datasets', nargs='+', type=str, default='', help='datasets to calculate reconstructions for', required=True)
 parser.add_argument('--clip', default = True, help = 'clip output image between 1 and 0')
-
 parser.add_argument('--output_dir', default='reconstructed_images/')
-
 parser.add_argument('--which_layer', default='layer4')
 parser.add_argument('--lr', default=0.001, type=float)
 parser.add_argument('--initial_size', default=256, type=int)
@@ -77,7 +76,11 @@ def get_noise(input_depth, spatial_size, noise_type='u', var=1. / 10):
 
     return net_input
 
-def postp(tensor, clip): # to clip results in the range [0,1]
+def postp(tensor, clip):
+    '''Transforms tensor to image.
+
+    Clips image between 1 and 0
+    '''
     postpb = transforms.Compose([transforms.ToPILImage()])
 
     if clip:
@@ -131,22 +134,18 @@ def main():
         args.device = "cpu"
 
     ## load pretrained model
-    if args.model in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01', 'mimic-chexpert_lr_1.0', 'supervised_d121']:
+    if args.model in ['mimic-chexpert_lr_0.1', 'mimic-chexpert_lr_0.01',
+                    'mimic-chexpert_lr_1.0', 'supervised_d121']:
         model = DenseNetBackbone(args.model)
-        feature_dim = 1024
     elif 'mimic-cxr' in args.model:
         if 'r18' in args.model:
             model = ResNet18Backbone(args.model)
-            feature_dim = 512
         else:
             model = DenseNetBackbone(args.model)
-            feature_dim = 1024
     elif args.model == 'supervised_r18':
         model = ResNet18Backbone(args.model)
-        feature_dim = 512
     else:
         model = ResNetBackbone(args.model)
-        feature_dim = 2048
 
     # print(f"Loaded pretrained model {model}")
     model = model.to(args.device)
@@ -179,13 +178,8 @@ def main():
 
             img = transform(img)
 
-            print("Maximum tensor value of input image is: ", torch.max(img))
-            print("Minimum tensor value of input image is: ", torch.min(img))
-
             img = torch.unsqueeze(img, 0) # each image is its own batch
             img = img.to(args.device)
-
-            print("Image size after transformation", img.shape) # ([1, 3, 224, 224])
 
             filename = str(args.model) + "_" + str(args.clip) + "_" + image_name
             print("Filename is: ", filename)
@@ -199,10 +193,10 @@ def main():
             print("Target shape", target.shape)
 
             if dataset == "stoic":
-              filename_edited = str(args.model) + "_" + "True_8622.jpeg"
-              out_path = os.path.join(args.output_dir, args.model, filename_edited)
+                filename_edited = str(args.model) + "_" + "True_8622.jpeg"
+                out_path = os.path.join(args.output_dir, args.model, filename_edited)
             else:
-              out_path = os.path.join(args.output_dir, args.model, filename)
+                out_path = os.path.join(args.output_dir, args.model, filename)
             print("out_path is: ", out_path)
 
             if not os.path.exists(out_path):
@@ -223,17 +217,12 @@ def main():
                 net = net.to(args.device)
 
                 net_input = get_noise(input_depth, imsize_net).type(img.type()).detach()
-                print("net input size", net_input.shape)
-
                 out = net(net_input)
-                print("Out shape without filtering", out.shape) # ([1, 3, 256, 256]) for ResNet 18
-
                 out = out[:, :, :224, :224]
-                print("Out shape after filtering", out.shape) # ([1, 3, 224, 224]) for ResNet 18
 
                 # Compute number of parameters
-                s = sum(np.prod(list(p.size())) for p in net.parameters())
-                print('Number of params: %d' % s)
+                num_params = sum(np.prod(list(p.size())) for p in net.parameters())
+                print('Number of params: %d' % num_params)
 
                 # run style transfer
                 max_iter = args.max_iter
@@ -247,13 +236,14 @@ def main():
                         optimizer.zero_grad()
                         # out is features from pretrained network when input is noise fed through encoder-decoder network
                         out = model.forward(
-                            net(net_input)[:, :, :args.img_size, :args.img_size], name=args.which_layer)
+                            net(net_input)[:, :, :args.img_size, :args.img_size],
+                            name=args.which_layer)
 
                         # target is features from pretrained network when input is original image
                         loss = criterion(out, target)
                         loss.backward()
                         n_iter[0] += 1
-                        # print loss
+
                         if n_iter[0] % show_iter == (show_iter - 1):
                             print('Iteration: %d, loss: %f' % (n_iter[0] + 1, loss.item()))
                         return loss
