@@ -40,21 +40,20 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
 ```
 
 # Table of Contents 
-
+   * [Directory Structure](#Directory-Structure)
    * [Methods](#Methods)
-      * [Directory Structure](##Directory-Structure)
-      * [Methods](#Methods)
+      * [Pretrained Models](##Pretrained-Models)
+      * [Datasets](#Datasets)
+   * [Training](#Training)
+      * [Few Shot](##Few-shot) 
+      * [Many-shot(Finetune)](##Many-shot(Finetune))
+      * [Many-shot(Linear)](##Many-shot(Linear))
       
 
-## Methods
-
-We evaluate the transfer peformance of several self-supervised pretrained models on medical image classification tasks. We also perform the same evaluation on a selection of supervised pretrained models and self-supervised medical domain-specific pretrained models (both pretrained on X-ray datasets). The pretrained models, datasets and evaulation methods are detailed in this readme.
-
-## Directory Structure
+# Directory Structure
 
     ├── data
-    ├── datasets
-    │   ├── .                   
+    ├── datasets                  
     ├── invariances
     ├── logs
     ├── models
@@ -62,9 +61,13 @@ We evaluate the transfer peformance of several self-supervised pretrained models
     ├── sample_images
     ├── saliency_maps
     ├── reconstruction
-    ├── reconstructed_images         
+    ├── reconstructed_images  
 
+# Methods
 
+We evaluate the transfer peformance of several self-supervised pretrained models on medical image classification tasks. We also perform the same evaluation on a selection of supervised pretrained models and self-supervised medical domain-specific pretrained models (both pretrained on X-ray datasets). The pretrained models, datasets and evaulation methods are detailed in this readme.
+
+       
 ## Pretrained Models
 We evaluate the following pretrained ResNet50 models (with links)
 
@@ -173,6 +176,8 @@ Should you encounter problems, see the following discussion which we found was h
 
 **Montgomery-CXR/Shenzhen-CXR**:  The links are under the "I have heard about the Tuberculosis collection. Where can I get those images ?" section
 
+# Training 
+
 ## Few-shot
 We provide the code for few-shot evaluation in few_shot.py. We use the technique of Prototypical Networks [Prototypical Networks for Few-Shot Learning](https://arxiv.org/abs/1703.05175).
 
@@ -196,10 +201,10 @@ python -m datasets.prepare_submeta --dataset chexpert
 ``` 
 The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with `--dataset chexpert`.
 
-## Many-shot (Finetune)
+## Many-shot(Finetune)
 [To do - Jonah]
 
-## Many-shot (Linear)
+## Many-shot(Linear)
 [To do - Jonah]
 
 ## Saliency Maps
