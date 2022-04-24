@@ -154,7 +154,7 @@ Links for where to download each dataset are given here:
 [ChestX](https://www.kaggle.com/nih-chest-xrays/data),
 [CheXpert](https://stanfordmlgroup.github.io/competitions/chexpert/),
 [CIFAR10](https://pytorch.org/vision/stable/datasets.html),
-[Diabetic Retinopathy](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data),
+[EyePACS (Diabetic Retinopathy)](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data),
 [iChallenge-AMD](https://ai.baidu.com/broad/subordinate?dataset=amd),
 [iChallenge-PM](https://ai.baidu.com/broad/subordinate?dataset=pm),
 [Montgomery-CXR](https://openi.nlm.nih.gov/faq#faq-tb-coll),
@@ -168,7 +168,7 @@ Downloading and unpacking the files above into the relevant directory should yie
 ```
 mv images_0XX/* images/
 ```
-**Diabetic Retionpathy**: To unpack the various train.zip and test.zip files we used the following commands:
+**EyePACS (Diabetic Retionpathy)**: To unpack the various train.zip and test.zip files we used the following commands:
 ```
 cat train.zip.* > train.zip
 unzip train.zip
@@ -194,7 +194,7 @@ Or, to evaluate the MIMIC-CheXpert (lr = 0.01) model on ChestX-ray8 in a 5-way 2
 ```
 python few_shot.py --dataset chestx --model mimic-chexpert_lr_0.01 --n-way 5 --n-support 20
 ```
-This will save a log of the run (with the results) in the filepath `logs/mimic-chexpert_lr_0.01/moco-v2/chestx.log`. The test accuracy should be close to 33.73% ± 0.45%. <br />
+This will save a log of the run (with the results) in the filepath `logs/few-shot/mimic-chexpert_lr_0.01/chestx.log`. The test accuracy should be close to 33.73% ± 0.45%. <br />
 
 **Note**: <br />
 Within few_shot.py a dictionary is produced for the specified dataset where a list is created for each class containing all images for that class. This is neccessary for the random sampling of images during a few-shot episode. However, the creation of this dictionary, `sub_meta`, requires one complete pass over the entire dataset. For the larger datasets we use, namely CheXpert, ChestX-ray8 and EyePACS (diabetic retinopathy), we found that this process is extremely slow. Therefore, to prevent the creation of the sub_meta dict from stratch every time few_shot.py is called for these datasets, the script `datasets/prepare_submeta.py` will create the sub_meta dict (for a maximum of 10,000 images) and store it as a pickle file. This can then be re-loaded in when few_shot.py is called for these datasets.<br />
@@ -205,10 +205,22 @@ python -m datasets.prepare_submeta --dataset chexpert
 The pickle file will be saved in the filepath `misc/few_shot_submeta/chexpert.pickle` and will be automatically loaded by few_shot.py when called with `--dataset chexpert`.
 
 ## Many-shot(Finetune)
-[To do - Jonah]
+We provide the code for finetuning in finetune.py. By default, the pretrained model will be finetuned (with a linear classification head attached on) for 5000 steps with a batch size of 64, using SGD with Nesterov Momentum = 0.9 and a Cosine Annealing learning rate. The flat --early-stopping implements early stopping (with a patience = 3 by default (checked every 200 steps)). By default, the learning rate is set to 1e-2 and the weight decay to 1e-8, although a hyperparamter search can be initiated using the flat --search. By default random resized crop and random horizontal flip data augmentations will be applied for finetuning. 
+
+For example, to evaluate MoCo-v2 on the dataset CheXpert (with early stopping), run:
+```
+python finetune.py --dataset chexpert --model moco-v2 --early-stopping
+```
+This will save a log of the run (with the results on the test set) in the filepath `logs/finetune/moco-v2/chexpert.log`. With early stopping implemented, the test accuracy (pleural effusion, many-to-one) should be close to 79.96%.
 
 ## Many-shot(Linear)
-[To do - Jonah]
+We provide the code for linear evaluation in linear.py. This will train linear regression on top of the features from the specified frozen model backbone. By default a hyperparameter search is first performed to find the l2 regularisation constant (`C` in sklearn), evaulating 45 logarithmically spaced points between 1e-6 and 1e5. To instead specify a C value directly, use the input flag --C.
+
+For example, to evaluate PIRL on the dataset EyePACS (diabetic retinopathy), run:
+```
+python linear.py --dataset diabetic_retinopathy --model pirl 
+```
+This will save a log of the run (with the results on the test set) in the filepath `logs/linear/pirl/diabetic_retinopathy.log`. The test accuracy should be close to 31.51%, using selected C value 5623.413.
 
 ## Saliency Maps
 [To do - Jonah]
