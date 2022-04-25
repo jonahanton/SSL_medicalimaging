@@ -12,6 +12,18 @@ dict_full_data = df_full_data.set_index('Models').to_dict()
 # 2. plot for transfer_setting in ['few shot', 'finetune', 'linear'] - DONE
 # 3. plot for transfer_setting == 'average' (i.e average across settings)
 # 4. save plots in relevant directory
+# 5. boxplot ? average over SSL models or datasets?
+
+def mkdir_p(new_path):
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(new_path)
+    except OSError as exc:
+        if exc.errno == EEXIST and path.isdir(new_path):
+            pass
+        else: raise
 
 def plot_dset_acc_vs_pd(transfer_setting, dset_name):
     '''
@@ -60,7 +72,10 @@ def plot_dset_acc_vs_pd(transfer_setting, dset_name):
         plt.ylabel(f"Perceptual Distance ({architecture})")
         plt.xlabel(f"{transfer_setting.title()} Accuracy")
         plt.title(dset_name)
-        plt.show()
+        #plt.show()
+        save_results_to = f'acc_vs_perceptual_dist/{dset_name}/{transfer_setting}/'
+        mkdir_p(save_results_to)
+        plt.savefig(save_results_to + f'acc_vs_PD_{architecture}.jpg', bbox_inches = "tight")
 
 
-plot_dset_acc_vs_pd('few shot', 'shenzhencxr')
+plot_dset_acc_vs_pd('linear', 'chexpert')
