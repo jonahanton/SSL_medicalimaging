@@ -1,6 +1,6 @@
 # How Well Do Self-Supervised Models Transfer to Medical Imaging?
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
-Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), Wan Hee Tang, Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
+Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), [Wan Hee Tang](https://github.com/wh-tang), Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
 
 Much of the code is adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
 
@@ -178,6 +178,11 @@ unzip test.zip
 Should you encounter problems, see the following discussion which we found was helpful to unpack the various zip files: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12545. If problems persist, check the MD5 hashes given here: https://www.kaggle.com/competitions/diabetic-retinopathy-detection/discussion/12543
 
 **Montgomery-CXR/Shenzhen-CXR**:  The links are under the "I have heard about the Tuberculosis collection. Where can I get those images ?" section
+
+
+### Additional information:
+For all datasets, the labels are converted to binary where possible. For CheXpert, this is done through many-to-one. All other pathologies are labelled as negative, and only the most common pathology, which for both datasets is Pleural Effusion, is assigned a positive label. For datasets with textual labels, like Montgomery and Shenzhen, we treat any abnormal X-ray as a positive label. A similar approach was taken with the iChallenge-PM dataset, combining the high myopia and pathological myopia into a single positive label. The datasets BACH and ChestX-ray8, which have multiclass categorical labels, are treated as ordinal.
+
 
 # Training 
 
