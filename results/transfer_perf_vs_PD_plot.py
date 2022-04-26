@@ -52,9 +52,12 @@ def plot_dset_acc_vs_pd(transfer_setting, dset_name):
 
     else:
         acc_column_name = transfer_setting + ' ' + dset_name
+        if dset_name in ['diabetic retinopathy','chestx']:
+            acc_column_name += ' (5way)'
+        
         dset_acc_dict = dict_full_data[acc_column_name]
 
-    for architecture in ['AlexNet', 'VGG', 'SqueezeNet']:
+    for architecture in ['AlexNet', 'VGG', 'SqueezeNet', 'Average']:
 
         PD_column_name = f'perceptual distance {architecture.lower()} {dset_name}'
         architecture_dict = dict_full_data[PD_column_name]
@@ -63,13 +66,19 @@ def plot_dset_acc_vs_pd(transfer_setting, dset_name):
         dict_intersection = {k: (dset_acc_dict[k], architecture_dict[k]) for k in shared_models}
         new_df = pd.DataFrame.from_dict(dict_intersection, orient='index')
         new_df = new_df.reset_index(level=0)
-        new_df.columns = ['model', f'{transfer_setting}', 'perceptual_distance']
+        new_df.columns = ['Models', f'{transfer_setting}', 'perceptual_distance']
 
-        sns.set_style("darkgrid")
-        markers=['o', 'x', 'D', 's', '<', '>', 'v', 'X', '+', 'P', '4', 'p', '|']  # added 'o' to plot simclr-v1
-        g = sns.lmplot(x=f'{transfer_setting}', y="perceptual_distance", hue="model", data=new_df, fit_reg=False, markers=markers, palette="tab10", scatter_kws={"s": 150})
+        sns.set_style("whitegrid")
+        markers=['P', 'P', 'P','P', 'P', 'H', 'H', 'H', 'P', 'P', 'P', 'P', 'P']  
+        colors = ['cornflowerblue', 'royalblue', 'lightskyblue', 'deepskyblue', 'steelblue',
+                'orangered', 'lightcoral', 'firebrick',
+                'limegreen', 'forestgreen', 'darkgreen', 'springgreen', 'seagreen']
+        g = sns.lmplot(x=f'{transfer_setting}', y="perceptual_distance", hue="Models", data=new_df, fit_reg=False, markers=markers, palette=colors, scatter_kws={"s": 150})
         sns.regplot(x=f'{transfer_setting}', y="perceptual_distance", data=new_df, scatter=False, ax=g.axes[0, 0])
-        plt.ylabel(f"Perceptual Distance ({architecture})")
+        if architecture == 'Average':
+            plt.ylabel("Perceptual Distance")
+        else:
+            plt.ylabel(f"Perceptual Distance ({architecture})")
         plt.xlabel(f"{transfer_setting.title()} Accuracy")
         plt.title(dset_name)
         #plt.show()
@@ -78,4 +87,7 @@ def plot_dset_acc_vs_pd(transfer_setting, dset_name):
         plt.savefig(save_results_to + f'acc_vs_PD_{architecture}.jpg', bbox_inches = "tight")
 
 
-plot_dset_acc_vs_pd('linear', 'chexpert')
+
+for dset_name in ['shenzhencxr','montgomerycxr', 'diabetic retinopathy', 'chestx','bach',
+                  'iChallengeAMD', 'iChallengePM','chexpert','stoic']:
+    plot_dset_acc_vs_pd('few shot', dset_name)

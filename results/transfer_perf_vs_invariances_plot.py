@@ -43,11 +43,19 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
                 dict_intersection = {k: (dset_acc_dict[k], invariance_dict[k]) for k in shared_models}
                 new_df = pd.DataFrame.from_dict(dict_intersection, orient='index')
                 new_df = new_df.reset_index(level=0)
-                new_df.columns = ['model', 'acc', 'invariance']
+                new_df.columns = ['Models', 'acc', 'invariance']
 
-                sns.set_style("darkgrid")
-                markers=['o', 'x', 'D', 's', '<', '>', 'v', 'X', '+', 'P', '4', 'p', '|']  # added 'o' to plot simclr-v1
-                g = sns.lmplot(x='acc', y="invariance", hue="model", data=new_df, fit_reg=False, markers=markers, palette="tab10", scatter_kws={"s": 150})
+                sns.set_style("whitegrid")
+                # markers=['o', 'h', 'p','s', 'H', 'X', '*', 'P', '>', 'v', '^', '<', 'd'] 
+                # models = ["simclrv1","mocov2","swav","byol","pirl","supervised r50",
+                        # "supervised r18","supervised d121","mimic-chexpert lr=0.01",
+                        # "mimic-chexpert lr=0.1","mimic-chexpert lr=1.0","mimic-cxr r18",
+                        # "mimic-cxr d121"] 
+                markers=['P', 'P', 'P','P', 'P', 'H', 'H', 'H', 'P', 'P', 'P', 'P', 'P']  
+                colors = ['cornflowerblue', 'royalblue', 'lightskyblue', 'deepskyblue', 'steelblue',
+                        'orangered', 'lightcoral', 'firebrick',
+                        'limegreen', 'forestgreen', 'darkgreen', 'springgreen', 'seagreen']
+                g = sns.lmplot(x='acc', y="invariance", hue="Models", data=new_df, fit_reg=False, markers=markers, palette=colors, scatter_kws={"s": 150})
                 sns.regplot(x='acc', y="invariance", data=new_df, scatter=False, ax=g.axes[0, 0])
                 plt.ylabel(f"{invariance_type.title()} Invariance")
                 plt.xlabel(f"{transfer_setting.title()} Accuracy")
@@ -62,4 +70,4 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
         print(f'No data for {setting_dset}.')
 
 
-plot_dset_acc_vs_invariance('few shot', 'bach')
+plot_dset_acc_vs_invariance('few shot', 'chexpert')

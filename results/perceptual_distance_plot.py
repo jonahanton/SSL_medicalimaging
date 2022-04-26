@@ -63,13 +63,16 @@ def plot_perceptual_distance(dataset):
     for i, dict in enumerate([dset_pd_alexnet, dset_pd_vgg, dset_pd_squeezenet]): 
         architecture = retrieve_architecture(i)
         for model in models:
-            rows.append({'model': model, 'architecture': architecture, 'perceptual_distance':dict[model]})
+            rows.append({'Model': model, 'architecture': architecture, 'perceptual_distance':dict[model]})
     new_df = pd.DataFrame.from_dict(rows, orient='columns')
 
 
-    sns.set_style("darkgrid")
-    #markers=['o', 'x', 'D', 's', '<', '>', 'v', 'X', '+', 'P', '4', 'p', '|']  # added 'o' to plot simclr-v1
-    g = sns.catplot(x='architecture', y="perceptual_distance", data=new_df, hue='model', palette="tab10")
+    sns.set_style("whitegrid")
+    markers=['P', 'P', 'P','P', 'P', 'H', 'H', 'H', 'P', 'P', 'P', 'P', 'P']  
+    colors = ['cornflowerblue', 'royalblue', 'lightskyblue', 'deepskyblue', 'steelblue',
+            'orangered', 'lightcoral', 'firebrick',
+            'limegreen', 'forestgreen', 'darkgreen', 'springgreen', 'seagreen']
+    g = sns.catplot(x='architecture', y="perceptual_distance", data=new_df, hue='Model', palette=colors)
     plt.ylabel(f"Perceptual Distance")
     plt.title(f'{dataset.capitalize()} reconstruction')
     #plt.show()
@@ -77,5 +80,5 @@ def plot_perceptual_distance(dataset):
     mkdir_p(save_results_to)
     plt.savefig(save_results_to + f'{dataset}_pd_plot.jpg', bbox_inches = "tight")
 
-
-plot_perceptual_distance('chexpert')
+for dataset in ['shenzhen-cxr','montgomery-cxr','diabetic_retinopathy','chestx','bach','iChallenge-AMD','iChallenge-PM','chexpert']: #Need to change files to adapt to stoic and imagenet
+    plot_perceptual_distance(dataset)
