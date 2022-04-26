@@ -181,7 +181,7 @@ Should you encounter problems, see the following discussion which we found was h
 
 
 ### Additional information:
-For all datasets, the labels are converted to binary where possible. For the CheXpert, this is done through many-to-one. All other pathologies are labelled as negative, and only the most common pathology, which for both datasets is Pleural Effusion, is assigned a positive label. For datasets with textual labels, like Montgomery and Shenzhen, we treat any abnormal X-ray as a positive label. A similar approach was taken with the iChallenge-PM dataset, combining the high myopia and pathological myopia into a single positive label. The datasets BACH and ChestX-ray8, which have multiclass categorical labels, are treated as ordinal.
+For all datasets, the labels are converted to binary where possible. For CheXpert, this is done through many-to-one. All other pathologies are labelled as negative, and only the most common pathology, which for both datasets is Pleural Effusion, is assigned a positive label. For datasets with textual labels, like Montgomery and Shenzhen, we treat any abnormal X-ray as a positive label. A similar approach was taken with the iChallenge-PM dataset, combining the high myopia and pathological myopia into a single positive label. The datasets BACH and ChestX-ray8, which have multiclass categorical labels, are treated as ordinal.
 
 
 # Training 
