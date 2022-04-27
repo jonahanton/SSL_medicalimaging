@@ -28,7 +28,8 @@ import torchvision.transforms as transforms
 from matplotlib import pyplot as plt
 import PIL
 
-from reconstruction.skip import skip
+# from reconstruction.skip import skip
+from skip import *
 from reconstruction.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 parser = argparse.ArgumentParser(description='Deep Image Reconstruction')
