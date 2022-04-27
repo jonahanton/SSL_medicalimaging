@@ -25,8 +25,8 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
     transfer_setting in ['few shot', 'finetune', 'linear']
     dset_name in ['shenzhencxr','montgomerycxr','bach',
                   'iChallengeAMD', 'iChallengePM','chexpert',
-                  'stoic','diabetic retinopathy (5way)', 
-                  'chestx (5way)', 'cifar10 (2way)']
+                  'stoic','diabetic retinopathy', 
+                  'chestx']
     '''
     
     setting_dset = transfer_setting + ' ' + dset
@@ -69,5 +69,7 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
     except KeyError:
         print(f'No data for {setting_dset}.')
 
-
-plot_dset_acc_vs_invariance('few shot', 'chexpert')
+for dset_name in ['shenzhencxr','montgomerycxr','bach','iChallengeAMD', 'iChallengePM','chexpert',
+                  'stoic','diabetic retinopathy', 'chestx']:
+    for transfer_setting in ['few shot', 'finetune', 'linear']:
+        plot_dset_acc_vs_invariance(transfer_setting, dset_name)
