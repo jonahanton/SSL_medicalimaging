@@ -258,7 +258,7 @@ python perceptual_distance.py
 **Note**: <br />
 The code uses the same dictionary structure as described above and the reconstructed image paths are stored in a nested dictionary, with structure ```{dataset_name: {model_name: reconstructed_image_path}}```.
 <br />
-The perceptual distances will be computed by three different networks (AlexNet, VGG, SqueezeNet) and saved in three corresponding csv files under ```results/perceptual-distance```.
+The perceptual distances will be computed by three different networks (AlexNet, VGG, SqueezeNet) and saved in three corresponding .csv files under ```results/perceptual-distance```.
 <br />
 
 ## Invariances
