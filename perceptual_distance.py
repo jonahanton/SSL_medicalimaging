@@ -1,20 +1,14 @@
 import argparse
-# import os
-# import logging
 from pprint import pprint
 import csv
 from collections import defaultdict
 
-# We use the Perceptual Similarity Metric library, 
-# from the paper "The Unreasonable Effectiveness of Deep Features as a Perceptual Metric" (Zhang et al., 2018)
 import lpips   
-# import torch
 from torchvision import transforms
 
 import PIL
 from PIL import Image
 import numpy as np
-# from tqdm import tqdm
 import medpy.io as medpy
 
 
@@ -45,6 +39,8 @@ def open_and_convert_image(impath, image_size):
 
     return im_torch
 
+# We use the Perceptual Similarity Metric library, 
+# from the paper "The Unreasonable Effectiveness of Deep Features as a Perceptual Metric" (Zhang et al., 2018)
     
 def perceptual_distance(im1, im2, device):
 
@@ -62,14 +58,14 @@ def perceptual_distance(im1, im2, device):
     return d_alex.cpu().detach().numpy().item(), d_vgg.cpu().detach().numpy().item(), d_squeeze.cpu().detach().numpy().item()
 
 original_images = {
-    # 'bach' : ['iv001.tif', './sample_images/bach/iv001.tif'],
-    # 'chestx' : ['00000001_000.png', './sample_images/chestx/00000001_000.png'],
-    # 'chexpert' : ['patient00001_view1_frontal.jpg','./sample_images/chexpert/patient00001_view1_frontal.jpg'],
-    # 'diabetic_retinopathy' : ['34680_left.jpeg', './sample_images/diabetic_retinopathy/34680_left.jpeg'],
-    # 'ichallenge_amd' : ['AMD_A0001.jpg', './sample_images/ichallenge_amd/AMD_A0001.jpg'],
-    # 'ichallenge_pm' : ['H0009.jpg', './sample_images/ichallenge_pm/H0009.jpg'],
-    # 'montgomerycxr' : ['MCUCXR_0001_0.png', './sample_images/montgomerycxr/MCUCXR_0001_0.png'],
-    #'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
+    'bach' : ['iv001.tif', './sample_images/bach/iv001.tif'],
+    'chestx' : ['00000001_000.png', './sample_images/chestx/00000001_000.png'],
+    'chexpert' : ['patient00001_view1_frontal.jpg','./sample_images/chexpert/patient00001_view1_frontal.jpg'],
+    'diabetic_retinopathy' : ['34680_left.jpeg', './sample_images/diabetic_retinopathy/34680_left.jpeg'],
+    'ichallenge_amd' : ['AMD_A0001.jpg', './sample_images/ichallenge_amd/AMD_A0001.jpg'],
+    'ichallenge_pm' : ['H0009.jpg', './sample_images/ichallenge_pm/H0009.jpg'],
+    'montgomerycxr' : ['MCUCXR_0001_0.png', './sample_images/montgomerycxr/MCUCXR_0001_0.png'],
+    'shenzhencxr' : ['CHNCXR_0076_0.png', './sample_images/shenzhencxr/CHNCXR_0076_0.png'],
     'stoic' : ['8622.mha', 'sample_images/stoic/8622.mha'],  
     'imagenet' : ['goldfish.jpeg', 'sample_images/imagenet/goldfish.jpeg']
 }
