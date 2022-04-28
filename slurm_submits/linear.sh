@@ -12,5 +12,5 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=diabetic_retinopathy
-python linear.py -d $dset -m simclr-v1 --no-norm
+dset=chexpert
+python linear.py -d $dset -m mimic-chexpert_lr_1.0 --batch-size 16

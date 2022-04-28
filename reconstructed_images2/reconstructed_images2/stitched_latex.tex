@@ -1,0 +1,74 @@
+
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{caption,subcaption}
+\usepackage{graphicx}
+\usepackage{pgffor}
+\usepackage{grffile}
+
+\begin{document}
+
+\def
+\names{
+{sample_images/chestx/00000001_000.png},
+{byol/byol_True_00000001_000.png},{moco-v2/moco-v2_True_00000001_000.png},
+{simclr-v1/simclr-v1_True_00000001_000.png}, 
+{swav/swav_True_00000001_000.png},{pirl/pirl_True_00000001_000.png},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_00000001_000.png},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_00000001_000.png},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_00000001_000.png},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_00000001_000.png},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_00000001_000.png},{supervised_r18/supervised_r18_True_00000001_000.png},{supervised_r50/supervised_r50_True_00000001_000.png},{supervised_d121/supervised_d121_True_00000001_000.png},
+%%%%%%%%%%%%%
+{sample_images/chexpert/patient00001_view1_frontal.jpeg},
+{byol/byol_True_patient00001_view1_frontal.jpg},{moco-v2/moco-v2_True_patient00001_view1_frontal.jpg},
+{simclr-v1/simclr-v1_True_patient00001_view1_frontal.jpg},
+{swav/swav_True_patient00001_view1_frontal.jpg},{pirl/pirl_True_patient00001_view1_frontal.jpg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_patient00001_view1_frontal.jpg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_patient00001_view1_frontal.jpg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_patient00001_view1_frontal.jpg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_patient00001_view1_frontal.jpg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_patient00001_view1_frontal.jpg},{supervised_r18/supervised_r18_True_patient00001_view1_frontal.jpg},{supervised_r50/supervised_r50_True_patient00001_view1_frontal.jpg},{supervised_d121/supervised_d121_True_patient00001_view1_frontal.jpg},
+%%%%%%%%%%%%%%%%
+{sample_images/montgomerycxr/MCUCXR_0001_0.jpeg},
+{byol/byol_True_MCUCXR_0001_0.png},{moco-v2/moco-v2_True_MCUCXR_0001_0.png},
+{simclr-v1/simclr-v1_True_MCUCXR_0001_0.png},
+{swav/swav_True_MCUCXR_0001_0.png},{pirl/pirl_True_MCUCXR_0001_0.png},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_MCUCXR_0001_0.png},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_MCUCXR_0001_0.png},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_MCUCXR_0001_0.png},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_MCUCXR_0001_0.png},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_MCUCXR_0001_0.png},{supervised_r18/supervised_r18_True_MCUCXR_0001_0.png},{supervised_r50/supervised_r50_True_MCUCXR_0001_0.png},{supervised_d121/supervised_d121_True_MCUCXR_0001_0.png},
+%%%%%%%%%%%%%
+{sample_images/shenzhencxr/CHNCXR_0076_0.jpeg},
+{byol/byol_True_CHNCXR_0076_0.png},{moco-v2/moco-v2_True_CHNCXR_0076_0.png},
+{simclr-v1/simclr-v1_True_CHNCXR_0076_0.png},
+{swav/swav_True_CHNCXR_0076_0.png},{pirl/pirl_True_CHNCXR_0076_0.png},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_CHNCXR_0076_0.png},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_CHNCXR_0076_0.png},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_CHNCXR_0076_0.png},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_CHNCXR_0076_0.png},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_CHNCXR_0076_0.png},{supervised_r18/supervised_r18_True_CHNCXR_0076_0.png},{supervised_r50/supervised_r50_True_CHNCXR_0076_0.png},{supervised_d121/supervised_d121_True_CHNCXR_0076_0.png}, 
+%%%%%%%%%%%%%
+{sample_images/bach/iv001.jpeg},
+{byol/byol_True_iv001.jpeg},{moco-v2/moco-v2_True_iv001.jpeg},
+{simclr-v1/simclr-v1_True_iv001.jpeg}, 
+{swav/swav_True_iv001.jpeg},{pirl/pirl_True_iv001.jpeg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_iv001.jpeg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_iv001.jpeg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_iv001.jpeg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_iv001.jpeg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_iv001.jpeg},{supervised_r18/supervised_r18_True_iv001.jpeg},{supervised_r50/supervised_r50_True_iv001.jpeg},{supervised_d121/supervised_d121_True_iv001.jpeg},
+%%%%%%%%%
+{sample_images/diabetic_retinopathy/34680_left.jpeg},
+{byol/byol_True_34680_left.jpeg},{moco-v2/moco-v2_True_34680_left.jpeg},
+{simclr-v1/simclr-v1_True_34680_left.jpeg}, 
+{swav/swav_True_34680_left.jpeg},{pirl/pirl_True_34680_left.jpeg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_34680_left.jpeg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_34680_left.jpeg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_34680_left.jpeg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_34680_left.jpeg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_34680_left.jpeg},{supervised_r18/supervised_r18_True_34680_left.jpeg},{supervised_r50/supervised_r50_True_34680_left.jpeg},{supervised_d121/supervised_d121_True_34680_left.jpeg},
+%%%%%%%%%%
+{sample_images/ichallenge_amd/AMD_A0001.jpeg},
+{byol/byol_True_AMD_A0001.jpg},{moco-v2/moco-v2_True_AMD_A0001.jpg},
+{simclr-v1/simclr-v1_True_AMD_A0001.jpg},
+{swav/swav_True_AMD_A0001.jpg},{pirl/pirl_True_AMD_A0001.jpg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_AMD_A0001.jpg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_AMD_A0001.jpg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_AMD_A0001.jpg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_AMD_A0001.jpg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_AMD_A0001.jpg},{supervised_r18/supervised_r18_True_AMD_A0001.jpg},{supervised_r50/supervised_r50_True_AMD_A0001.jpg},{supervised_d121/supervised_d121_True_AMD_A0001.jpg},
+%%%%%%%%%%%
+{sample_images/ichallenge_pm/H0009.jpg},
+{byol/byol_True_H0009.jpg},{moco-v2/moco-v2_True_H0009.jpg},
+{simclr-v1/simclr-v1_True_H0009.jpg},
+{swav/swav_True_H0009.jpg},{pirl/pirl_True_H0009.jpg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_H0009.jpg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_H0009.jpg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_H0009.jpg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_H0009.jpg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_H0009.jpg},{supervised_r18/supervised_r18_True_H0009.jpg},{supervised_r50/supervised_r50_True_H0009.jpg},{supervised_d121/supervised_d121_True_H0009.jpg},
+%%%%%%%%%
+{sample_images/stoic/8622.jpeg},
+{byol/byol_True_8622.jpeg},{moco-v2/moco-v2_True_8622.jpeg},
+{simclr-v1/simclr-v1_True_8622.jpeg},
+{swav/swav_True_8622.jpeg},{pirl/pirl_True_8622.jpeg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_8622.jpeg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_8622.jpeg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_8622.jpeg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_8622.jpeg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_8622.jpeg},{supervised_r18/supervised_r18_True_8622.jpeg},{supervised_r50/supervised_r50_True_8622.jpeg},{supervised_d121/supervised_d121_True_8622.jpeg},
+%%%%%%%%%%%
+{sample_images/imagenet/goldfish.jpeg},
+{byol/byol_True_goldfish.jpeg},{moco-v2/moco-v2_True_goldfish.jpeg},
+{simclr-v1/simclr-v1_True_goldfish.jpeg},
+{swav/swav_True_goldfish.jpeg},{pirl/pirl_True_goldfish.jpeg},{mimic-chexpert_lr_0.01/mimic-chexpert_lr_0.01_True_goldfish.jpeg},{mimic-chexpert_lr_0.1/mimic-chexpert_lr_0.1_True_goldfish.jpeg},{mimic-chexpert_lr_1.0/mimic-chexpert_lr_1.0_True_goldfish.jpeg},{mimic-cxr_d121_lr_1e-4/mimic-cxr_d121_lr_1e-4_True_goldfish.jpeg},{mimic-cxr_r18_lr_1e-4/mimic-cxr_r18_lr_1e-4_True_goldfish.jpeg},{supervised_r18/supervised_r18_True_goldfish.jpeg},{supervised_r50/supervised_r50_True_goldfish.jpeg},{supervised_d121/supervised_d121_True_goldfish.jpeg},
+%%%%%%%%%%
+{sample_images/white_patch.jpeg}} % just for formatting
+
+\begin{figure}
+\foreach \name in \names {%
+	\begin{subfigure}[p]{0.062\textwidth}
+		\includegraphics[width=\linewidth]{\name}
+	\end{subfigure}
+ }
+\caption{Main figure caption}\label{fig:subfig}
+\end{figure}
+
+\end{document}

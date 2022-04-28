@@ -6,6 +6,9 @@ import argparse
 from pprint import pprint
 import logging
 import copy
+import math
+
+import medpy.io as medpy
 
 import torch
 import torch.nn as nn
@@ -20,8 +23,11 @@ import matplotlib.cm as cm
 
 
 from torchvision import datasets, transforms, models
+from torchvision.io import read_image
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import RandomSampler
+
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 from datasets.transforms import HistogramNormalize
 
@@ -67,92 +73,7 @@ def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
 
 
-
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
-def obtain_and_pre_process_img(img_path, img_size, normalisation, hist_norm):
+def obtain_and_pre_process_img(img_path, img_size, normalisation, hist_norm, stoic=False):
     
     if normalisation:
         normalise_dict = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
@@ -166,7 +87,23 @@ def obtain_and_pre_process_img(img_path, img_size, normalisation, hist_norm):
         transforms.ToTensor(),
     ])
 
-    img = Image.open(img_path).convert('RGB')
+    if stoic:
+        # Load in mha style image using medpy library
+        img, _ = medpy.load(img_path)
+        # Extract a slice at a given depth
+        depth = math.floor(img.shape[2]*0.5)
+        img = img[:,:,depth]
+        # Clip the pixel values
+        min_value, max_value = -1000, 250
+        np.clip(img, min_value, max_value, out=img)
+        # Rescale to [0,1]
+        img = (img - min_value) / (max_value - min_value)
+        # Rescale to [0,255] and uint8 (as needed for loading L) 
+        # Then convert to RGB
+        img = Image.fromarray((img* 255).astype(np.uint8)).convert("RGB")
+    else:
+        img = Image.open(img_path).convert('RGB')
+
     img = transform(img)
     if hist_norm:
         histnorm = HistogramNormalize()
@@ -232,6 +169,7 @@ if __name__ == "__main__":
             model = DenseNetBackbone(args.model)
             feature_dim = 1024
     elif args.model == 'supervised_r18':
+        model = ResNet18Backbone(args.model)
         feature_dim = 512
     else:
         model = ResNetBackbone(args.model)
@@ -242,9 +180,9 @@ if __name__ == "__main__":
 
     # set-up logging
     log_fname = f'{args.model}.log'
-    if not os.path.isdir(f'./logs/saliency'):
-        os.makedirs(f'./logs/saliency')
-    log_path = os.path.join(f'./logs/saliency', log_fname)
+    if not os.path.isdir(f'./logs/saliency/stoic'):
+        os.makedirs(f'./logs/saliency/stoic')
+    log_path = os.path.join(f'./logs/saliency/stoic', log_fname)
     logging.basicConfig(filename=log_path, filemode='w', level=logging.INFO)
     logging.info(args)
 
@@ -255,7 +193,10 @@ if __name__ == "__main__":
 
         for dataset in args.datasets:
 
+            stoic = dataset == 'stoic'
+
             image_name, image_path = IMAGES[dataset]
+
 
             # set-up output path
             outpath_base = f'saliency_maps/{args.model}/{dataset}'
@@ -264,7 +205,7 @@ if __name__ == "__main__":
             out_heat = os.path.join(outpath_base, 'heatmap.png')
             out_super = os.path.join(outpath_base, 'superimposed.png')
 
-            img, normalized_img = obtain_and_pre_process_img(image_path, args.image_size, args.norm, hist_norm)
+            img, normalized_img = obtain_and_pre_process_img(image_path, args.image_size, args.norm, hist_norm, stoic)
             saliency_map = compute_saliency_map(normalized_img, model, args.device)
             
             cropped_img = crop(img, args.crop_size)

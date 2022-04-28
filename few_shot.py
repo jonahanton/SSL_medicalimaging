@@ -180,7 +180,7 @@ FEW_SHOT_DATASETS = {
     'chexpert' : [CustomChexpertDataset, './data/chexpert', 2, 'accuracy'],
     'bach' : [CustomBachDataset, './data/bach', 4, 'accuracy'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd', 2, 'accuracy'],
-    'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2, 'mean per-class accuracy'],
+    'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm', 2, 'accuracy'],
     'stoic': [CustomStoicDataset, './data/stoic', 2, 'mean per-class accuracy'],
     'chestx' : [CustomChestXDataset, './data/chestx', 7, 'accuracy'],
 }

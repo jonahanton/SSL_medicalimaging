@@ -11,20 +11,29 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
-dset=ichallenge_pm
+# dset=ichallenge_pm
+# n=2
+# python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way $n --n-support 20
+# python few_shot.py -d $dset -m swav --n-way $n --n-support 20
+# python few_shot.py -d $dset -m byol --n-way $n --n-support 20
+# python few_shot.py -d $dset -m pirl --n-way $n --n-support 20
+# python few_shot.py -d $dset -m moco-v2 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m mimic-chexpert_lr_0.01 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m mimic-chexpert_lr_0.1 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m mimic-chexpert_lr_1.0 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m mimic-cxr_r18_lr_1e-4 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m mimic-cxr_d121_lr_1e-4 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m supervised_r50 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m supervised_r18 --n-way $n --n-support 20
+# python few_shot.py -d $dset -m supervised_d121 --n-way $n --n-support 20
+
+
+dset=chexpert
 n=2
-python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way $n --n-support 20
-python few_shot.py -d $dset -m swav --n-way $n --n-support 20
-python few_shot.py -d $dset -m byol --n-way $n --n-support 20
-python few_shot.py -d $dset -m pirl --n-way $n --n-support 20
-python few_shot.py -d $dset -m moco-v2 --n-way $n --n-support 20
-python few_shot.py -d $dset -m mimic-chexpert_lr_0.01 --n-way $n --n-support 20
-python few_shot.py -d $dset -m mimic-chexpert_lr_0.1 --n-way $n --n-support 20
-python few_shot.py -d $dset -m mimic-chexpert_lr_1.0 --n-way $n --n-support 20
-python few_shot.py -d $dset -m mimic-cxr_r18_lr_1e-4 --n-way $n --n-support 20
-python few_shot.py -d $dset -m mimic-cxr_d121_lr_1e-4 --n-way $n --n-support 20
-python few_shot.py -d $dset -m supervised_r50 --n-way $n --n-support 20
-python few_shot.py -d $dset -m supervised_r18 --n-way $n --n-support 20
-python few_shot.py -d $dset -m supervised_d121 --n-way $n --n-support 20
-
-
+python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20
+dset=diabetic_retinopathy
+n=5
+python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20
+dset=chestx
+n=5
+python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20
