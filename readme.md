@@ -1,6 +1,6 @@
 # How Well Do Self-Supervised Models Transfer to Medical Imaging?
 This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
-Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), Wan Hee Tang, Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
+Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), [Wan Hee Tang](https://github.com/wh-tang), Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
 
 Much of the code is adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
 
@@ -179,6 +179,11 @@ Should you encounter problems, see the following discussion which we found was h
 
 **Montgomery-CXR/Shenzhen-CXR**:  The links are under the "I have heard about the Tuberculosis collection. Where can I get those images ?" section
 
+
+### Additional information:
+For all datasets, the labels are converted to binary where possible. For CheXpert, this is done through many-to-one. All other pathologies are labelled as negative, and only the most common pathology, which for both datasets is Pleural Effusion, is assigned a positive label. For datasets with textual labels, like Montgomery and Shenzhen, we treat any abnormal X-ray as a positive label. A similar approach was taken with the iChallenge-PM dataset, combining the high myopia and pathological myopia into a single positive label. The datasets BACH and ChestX-ray8, which have multiclass categorical labels, are treated as ordinal.
+
+
 # Training 
 
 ## Few-shot
@@ -223,11 +228,13 @@ python linear.py --dataset diabetic_retinopathy --model pirl
 This will save a log of the run (with the results on the test set) in the filepath `logs/linear/pirl/diabetic_retinopathy.log`. The test accuracy should be close to 31.51%, using C value 5623.413.
 
 ## Saliency Maps
-We use the task-agnostic occlusion-based saliency method proposed in the paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377) [Erricson et al., 2021]. A 10x10 occlusion mask is passed over the input image and the average feature distance is computed for each pixel. To compute the saliency maps for the sample image from CheXpert, where the sample image is stored in the filepath `sample_images/chexpert/patient00001_view1_frontal.jpg`, with the model MoCo-v2, run:
+We use the task-agnostic occlusion-based saliency method proposed in the paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377) [Erricson et al., 2021]. A 10x10 occlusion mask is passed over the input image and the average feature distance is computed for each pixel. 
+
+For example, to compute the saliency maps for the sample image `/patient00001_view1_frontal.jpg` from CheXpert, where this image is stored in the directory  `sample_images/chexpert/`, with the model MoCo-v2, run:
 ```
 python saliency.py --dataset chexpert --model moco-v2 
 ```
-This will save a log of the run in the filepath `logs/saliency/moco-v2.log`, which contains the attentive diffusion value for the produced saliency map. For the sample image from CheXpert with MoCo-v2, this value should be close to 48.64%. The produced saliency map (and figure with saliency map superimposed on the original image) will be saved in the directory `saliency_maps/moco-v2/chexpert`.
+This will save a log of the run in the filepath `logs/saliency/moco-v2.log`, which contains the attentive diffusion value for the produced saliency map. For the sample image from CheXpert with MoCo-v2, the attentive diffusion should be close to 48.64%. The produced saliency map (and the figure with the saliency map superimposed on top of the original image) will be saved in the directory `saliency_maps/moco-v2/chexpert`.
 
 ## Deep Image Prior
 Using the methodology from the paper [What makes instance discrimination good for transfer learning?](https://arxiv.org/abs/2006.06606), which relies on the feature inversion algorithm [Deep Image Prior](https://arxiv.org/abs/1711.10925), we studied the ability to **reconstruct RGB images** from the features extracted by our pre-trained models. The code for such reconstructions can be found in ```reconstruction.py```.
@@ -251,7 +258,7 @@ python perceptual_distance.py
 **Note**: <br />
 The code uses the same dictionary structure as described above and the reconstructed image paths are stored in a nested dictionary, with structure ```{dataset_name: {model_name: reconstructed_image_path}}```.
 <br />
-The perceptual distances will be computed by three different networks (AlexNet, VGG, SqueezeNet) and saved in three corresponding csv files under ```results/perceptual-distance```.
+The perceptual distances will be computed by three different networks (AlexNet, VGG, SqueezeNet) and saved in three corresponding .csv files under ```results/perceptual-distance```.
 <br />
 
 ## Invariances

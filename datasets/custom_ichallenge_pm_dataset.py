@@ -35,8 +35,10 @@ class CustomiChallengePMDataset(Dataset):
         label = self.img_labels.iloc[idx] 
         # Converts label into appropriate format
         label = np.float32(label) 
-        # Combine labels for classes 1 and 2 together
-        if label == 2:
+        # Combine labels for classes 1 and 0 together
+        if label == 1:
+            label = np.float32(0)
+        elif label == 2:
             label = np.float32(1)
         # Create full path
         img_path = os.path.join(os.path.join(self.img_dir,"PALM-Training400/PALM-Training400/"),self.img_paths.iloc[idx])
