@@ -162,6 +162,7 @@ python finetune.py -d chexpert -m byol --early-stopping
 python finetune.py -d diabetic_retinopathy -m byol --early-stopping
 
 python finetune.py -d chexpert -m mimic-chexpert_lr_0.1 --early-stopping
+
 python finetune.py -d chexpert -m mimic-chexpert_lr_1.0 --early-stopping
 
 python finetune.py -d chexpert -m mimic-cxr_d121_lr_1e-4 --early-stopping

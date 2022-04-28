@@ -1,4 +1,4 @@
-#!/bin/bash
+.#!/bin/bash
 #SBATCH --gres=gpu:1
 #SBATCH --output=/vol/bitbucket/g21mscprj03/SSL/out/saliency/%j.out
 
