@@ -1,5 +1,5 @@
 ### fewshot ###
-from multiprocessing.reduction import DupFd
+from multiprocessing.reduction import DupFd, sendfds
 from socket import send_fds
 
 
