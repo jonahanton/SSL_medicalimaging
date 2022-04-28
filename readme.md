@@ -272,7 +272,7 @@ python -m invariances.invariances --dataset chexpert --model moco-v2 --transform
 ```
 This will save a log of the run in the filepath `logs/invariances/moco-v2/rotation/chexpert.log`, containing the cosine similarity and Mahalonobis distance. Note that the files do not already exist (from previous ones), this will compute the covariance matrix and mean feature for the dataset CheXpert with MoCo-v2 and save it to the filepaths `misc/invariances/covmatrices/moco-v2_chexpert_feature_cov_matrix.pth`, `misc/invariances/covmatrices/moco-v2_chexpert_mean_feature.pth` respectively.
 
-B. Compute invariances to different views of the same image. This is only compatible with the CheXpert and EyePACS datasets, which both contain multiple images from different views of the same patient. For example, to compute the multi-view invariance of EyePACS, with the model SwAV, run:
+B. Compute invariances to different views of the same patient. This is only compatible with the CheXpert and EyePACS datasets, which both contain multiple images from different views of the same patient. For example, to compute the multi-view invariance of EyePACS, with the model SwAV, run:
 ```
 python -m invariances.invariances_multiview --dataset diabetic_retinopathy --model swav
 ```
