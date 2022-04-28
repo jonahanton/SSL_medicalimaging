@@ -15,12 +15,13 @@ class CustomiChallengeAMDDataset(Dataset):
         self.preclean_dataframe = pd.read_csv(csv_file)
         # Shuffle dataframe
         self.preclean_dataframe = self.preclean_dataframe.sample(frac=1, random_state = random_state).reset_index(drop=True)
-        # Add a bit to split dataframe to train and test (80:20)
+        # Split dataframe to train and test (80:20)
         split_index = int(math.floor(0.8*len(self.preclean_dataframe)))
-        if train: # Train data
+        if train: 
             self.preclean_dataframe = self.preclean_dataframe.iloc[:split_index,:]
-        else: # Test Data
+        else: 
             self.preclean_dataframe = self.preclean_dataframe.iloc[split_index:,:]
+        # Extract image paths and labels
         self.img_paths, self.img_labels = self._basic_preclean(self.preclean_dataframe) 
         self.img_dir = img_dir
         self.transform = transform
@@ -30,33 +31,42 @@ class CustomiChallengeAMDDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        label = self.img_labels.iloc[idx] 
-        label = np.float32(label) # Converts Label
+        # Get associated label 
+        label = self.img_labels.iloc[idx]
+        # Convert to correct form 
+        label = np.float32(label)
+        # Get image path
         if math.isclose(label, 1.0):
             img_path = os.path.join(self.img_dir,"Training400/AMD/")
         else:
             img_path = os.path.join(self.img_dir,"Training400/Non-AMD/")
         img_path = os.path.join(img_path,self.img_paths.iloc[idx]+".jpg")
-        # print(img_path, label)
-        image = Image.open(img_path) # RGB
+        # Load in RGB image
+        image = Image.open(img_path)
+        # Apply transformations
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
-
-    def _clean_labels(self, dataframe):
-        return dataframe
     
     def _split_labels(self,dataframe):
-        # Split CheXpert dataframe into path, aux and label dataframes
+        """Split dataframe into path, aux and label dataframes"""
         path = dataframe.iloc[:,0]
         label = dataframe.iloc[:,1]
         return path, label
 
     def _basic_preclean(self, dataframe):
+        """ Converts dataframe to desired format
+
+        Args:
+            dataframe (pandas.Dataframe) : original dataframe object with no transformations
+
+        Returns:
+            path (pandas.Dataframe) : dataframe object containing path information
+            label (pandas.Dataframe) : dataframe object with label information
+        """
         path, label = self._split_labels(dataframe)
-        label = self._clean_labels(label)
         return path, label
 
 def test_class():
@@ -68,6 +78,7 @@ def test_class():
     cid = CustomiChallengeAMDDataset("/vol/bitbucket/g21mscprj03/SSL/data/ichallenge_amd", train = False)
     print(cid[41])
     print(len(cid))
+    
 if __name__ == "__main__":
     # test_class()
     pass

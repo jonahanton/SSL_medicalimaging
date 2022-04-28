@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/few_shot.py
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -22,10 +24,10 @@ from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
 from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
 from datasets.custom_chestx_dataset import CustomChestXDataset
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 import numpy as np
 from tqdm import tqdm
-
 
 
 class FewShotTester():
@@ -113,12 +115,12 @@ class Flatten(nn.Module):
 class ProtoNet(nn.Module):
     def __init__(self, encoder):
         super(ProtoNet, self).__init__()
-        
+
         self.encoder = encoder
 
     def loss(self, sample):
         with torch.no_grad():
-            # [xs] = [n_class, n_support, 3, 224, 224]  # 224 = image_size 
+            # [xs] = [n_class, n_support, 3, 224, 224]  # 224 = image_size
             # note that n_class == n_way (number of classes sampled per episode)
             xs = Variable(sample['xs']) # support
             # [xq] = [n_class, n_query, 3, 224, 224]
@@ -132,7 +134,7 @@ class ProtoNet(nn.Module):
             target_inds = torch.arange(0, n_class).view(n_class, 1, 1).expand(n_class, n_query, 1).long()
             target_inds = Variable(target_inds, requires_grad=False)
             # [target_inds] = [n_class, n_query, 1]
-            # e.g. for n_class = 2, n_query = 5, 
+            # e.g. for n_class = 2, n_query = 5,
             # target_inds = [[[0 0 0 0 0]]
             #                [[1 1 1 1 1]]]
 
@@ -149,7 +151,7 @@ class ProtoNet(nn.Module):
             # for resnet50 backbone, z_dim = 2048
             # for resnet18 backbone, z_dim = 512
             # for densenet backbone, z_dim = 1024
-            
+
 
             # compute prototypes for each class from support examples
             z_proto = z[:n_class*n_support].view(n_class, n_support, z_dim).mean(1)
@@ -168,98 +170,6 @@ class ProtoNet(nn.Module):
         return loss_val, acc_val
 
 
-
-
-
-# Model classes and functions
-
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("num parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
 # name: {class, root, num_classes (not necessary here), metric}
 FEW_SHOT_DATASETS = {
     'cifar10': [datasets.CIFAR10, './data/CIFAR10', 10, 'accuracy'],
@@ -274,9 +184,6 @@ FEW_SHOT_DATASETS = {
     'stoic': [CustomStoicDataset, './data/stoic', 2, 'mean per-class accuracy'],
     'chestx' : [CustomChestXDataset, './data/chestx', 7, 'accuracy'],
 }
-
-
-
 
 
 
@@ -315,7 +222,8 @@ if __name__ == "__main__":
     dset, data_dir, num_classes, metric = FEW_SHOT_DATASETS[args.dataset]
     datamgr = few_shot_dataset.SetDataManager(dset, data_dir, num_classes, args.image_size, n_episode=args.iter_num,
                                       n_way=args.n_way, n_support=args.n_support, n_query=args.n_query)
-    
+
+    # If performing few-shot on a large dataset, load in premade .pickle file
     if args.dataset in ['chexpert', 'chestx', 'diabetic_retinopathy', 'stoic']:
         submeta_path = os.path.join('./misc/few_shot_submeta', f'{args.dataset}.pickle')
         print(f'Loading sub meta dict from path {submeta_path}')
@@ -337,7 +245,7 @@ if __name__ == "__main__":
         model = ResNet18Backbone(args.model)
     else:
         model = ResNetBackbone(args.model)
-    
+
     model = model.to(args.device)
 
 

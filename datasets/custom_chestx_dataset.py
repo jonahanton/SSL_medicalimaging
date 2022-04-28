@@ -7,11 +7,14 @@ from torchvision.io import read_image
 import torchvision.transforms as transforms
 from PIL import Image
 
+# Most of this class has been taken from https://github.com/linusericsson/ssl-transfer/tree/main/datasets/chestx.py
+# We change the arguments to match with the rest of our datasets and
+# add a train/test split
 class CustomChestXDataset(Dataset):
     def __init__(self, img_dir, train = False, transform=None, target_transform=None, download=False):
         """
         Args:
-            root (string): path to dataset
+            img_dir (string): path to dataset
         """
         self.root = img_dir
         self.img_path = self.root + "/images/"
@@ -30,6 +33,7 @@ class CustomChestXDataset(Dataset):
         # Shuffle
         random_state = 42
         self.data_info = self.data_info.sample(frac=1, random_state = random_state).reset_index(drop=True)
+        # Split into train and test
         split_index = int(math.floor(0.8*len(self.data_info)))
         if train: # Train data
             self.data_info = self.data_info.iloc[:split_index,:]

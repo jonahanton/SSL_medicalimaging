@@ -1,10 +1,12 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/finetune.py
+
 #!/usr/bin/env python
 # coding: utf-8
 
 import os
 import argparse
 from pprint import pprint
-import logging 
+import logging
 
 import torch
 import torch.nn as nn
@@ -23,10 +25,8 @@ from sklearn.metrics import confusion_matrix, roc_auc_score
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
-
 from datasets.transforms import HistogramNormalize
-
-
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 
 class AverageMeter(object):
@@ -120,7 +120,7 @@ class FinetuneModel(nn.Module):
                 scheduler.step()
 
                 step += 1
-            
+
                 # early stopping
                 if early_stopping:
                     # check every 200 steps
@@ -137,7 +137,7 @@ class FinetuneModel(nn.Module):
                             best_acc = val_acc
                             early_stop_counter = 0
                             best_state_dict = self.model.state_dict()
-                
+
                     if early_stop:
                         print(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
                         logging.info(f'Early stopping at step # {step} / 5000, best acc on val set {best_acc:.2f}%')
@@ -192,7 +192,7 @@ class FinetuneModel(nn.Module):
 
 class FinetuneTester():
     def __init__(self, model_name, train_loader, val_loader, trainval_loader, test_loader,
-                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000, 
+                 metric, device, num_classes, feature_dim=2048, grid=None, steps=5000,
                  early_stopping=False, patience=3):
         self.model_name = model_name
         self.train_loader = train_loader
@@ -217,7 +217,7 @@ class FinetuneTester():
             print(f'lr={lr}, wd={wd}')
             logging.info(f'lr={lr}, wd={wd}')
 
-            
+
             # load pretrained model
             if 'mimic-chexpert' in self.model_name:
                 self.model = DenseNetBackbone(self.model_name)
@@ -232,7 +232,7 @@ class FinetuneTester():
             else:
                 self.model = ResNetBackbone(self.model_name)
                 self.feature_dim = 2048
-            
+
             self.model = self.model.to(args.device)
 
 
@@ -275,128 +275,30 @@ class FinetuneTester():
         else:
             self.model = ResNetBackbone(self.model_name)
             self.feature_dim = 2048
-        
+
         self.model = self.model.to(args.device)
 
-        
+
         self.finetuner = FinetuneModel(self.model, self.num_classes, self.steps,
                                        self.metric, self.device, self.feature_dim)
         if self.early_stopping:
             test_score = self.finetuner.tune(self.train_loader, self.test_loader,
-                                             self.best_params['lr'], self.best_params['wd'], 
+                                             self.best_params['lr'], self.best_params['wd'],
                                              self.early_stopping, self.val_loader,
                                              self.patience)
         else:
             test_score = self.finetuner.tune(self.trainval_loader, self.test_loader,
-                                             self.best_params['lr'], self.best_params['wd'], 
+                                             self.best_params['lr'], self.best_params['wd'],
                                              self.early_stopping)
         print(f'Finetuned test accuracy {test_score:.2f}%')
         logging.info(f'Finetuned test accuracy {test_score:.2f}%')
         return test_score
 
 
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("num parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("num parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.train()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-        logging.info("num parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
-
-
-
-
-
-
-
 # Data classes and functions
 
 def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
 
 
 def get_train_valid_loader(dset,
@@ -413,8 +315,7 @@ def get_train_valid_loader(dset,
                            data_augmentation=True):
     """
     Utility function for loading and returning train and valid
-    multi-process iterators over the CIFAR-10 dataset. A sample
-    9x9 grid of the images can be optionally displayed.
+    multi-process iterators.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -439,8 +340,6 @@ def get_train_valid_loader(dset,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Train normaliser:", normalize)
-
 
     # define transforms with augmentations
     if hist_norm:
@@ -526,7 +425,7 @@ def get_test_loader(dset,
                     pin_memory=True):
     """
     Utility function for loading and returning a multi-process
-    test iterator over the CIFAR-10 dataset.
+    test iterator.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -545,10 +444,9 @@ def get_test_loader(dset,
     """
 
     normalize = transforms.Normalize(**normalise_dict)
-    print("Test normaliser:", normalize)
 
     # define transform
-    if hist_norm:              
+    if hist_norm:
         transform = transforms.Compose([
             transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(image_size),
@@ -588,15 +486,6 @@ def prepare_data(dset, data_dir, batch_size, image_size, normalisation, hist_nor
     test_loader = get_test_loader(dset, data_dir, normalise_dict, hist_norm, batch_size, image_size, num_workers=num_workers,
                                                 pin_memory=False)
     return train_loader, val_loader, trainval_loader, test_loader
-
-
-
-
-
-
-
-
-
 
 
 # name: {class, root, num_classes, metric}
@@ -656,7 +545,7 @@ if __name__ == "__main__":
     train_loader, val_loader, trainval_loader, test_loader = prepare_data(
         dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm,
         hist_norm=hist_norm, num_workers=args.workers, data_augmentation=args.da)
-    
+
     # set up learning rate and weight decay ranges
     lr = torch.logspace(-4, -1, args.grid_size).flip(dims=(0,))
     wd = torch.cat([torch.zeros(1), torch.logspace(-6, -3, args.grid_size)])
@@ -665,9 +554,9 @@ if __name__ == "__main__":
 
     # evaluate model on dataset by finetuning
     tester = FinetuneTester(args.model, train_loader, val_loader, trainval_loader, test_loader,
-                            metric, args.device, num_classes, grid=grid, steps=args.steps, 
+                            metric, args.device, num_classes, grid=grid, steps=args.steps,
                             early_stopping=args.early_stopping, patience=args.patience)
-    
+
     if args.search:
         print('Performing hyperparameter search for lr and wd')
         # tune hyperparameters

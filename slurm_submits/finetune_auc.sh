@@ -13,5 +13,5 @@ uptime
 cd /vol/bitbucket/g21mscprj03/SSL
 
 dset=chexpert
-model=mimic-cxr_d121_lr_1e-4
-python finetune_auc.py -d $dset -m $model --early-stopping
+model=mimic-cxr_r18_lr_1e-4
+python finetune_auc.py -d $dset -m $model --lr 3e-5 --early-stopping

@@ -1,3 +1,5 @@
+# This code is modified from: https://github.com/linusericsson/ssl-transfer/blob/main/linear.py
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -27,14 +29,11 @@ from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopat
 from datasets.custom_montgomery_cxr_dataset import CustomMontgomeryCXRDataset
 from datasets.custom_shenzhen_cxr_dataset import CustomShenzhenCXRDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
-
 from datasets.transforms import HistogramNormalize
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 
-
-
-# Testing classes and functions
-
+# Lostic Regression class
 class LogisticRegression(nn.Module):
     def __init__(self, input_dim, num_classes, metric):
         super().__init__()
@@ -64,7 +63,7 @@ class LogisticRegression(nn.Module):
 
             #Get the confusion matrix
             cm = confusion_matrix(y_test, pred_test)
-            cm = cm.diagonal() / cm.sum(axis=1) 
+            cm = cm.diagonal() / cm.sum(axis=1)
             test_score = 100. * cm.mean()
 
             return test_score
@@ -73,6 +72,7 @@ class LogisticRegression(nn.Module):
             raise Exception(f'Metric {self.metric} not implemented')
 
 
+# Class to extract frozen features from pretrained backbone and then fit logistic regression
 class LinearTester():
     def __init__(self, model, train_loader, val_loader, trainval_loader, test_loader, batch_size, metric,
                  device, num_classes, feature_dim=2048, wd_range=None):
@@ -96,6 +96,7 @@ class LinearTester():
         self.classifier = LogisticRegression(self.feature_dim, self.num_classes, self.metric).to(self.device)
 
     def get_features(self, train_loader, test_loader, model, test=True):
+        """Extract features from pretrained backbone."""
         X_train_feature, y_train = self._inference(train_loader, model, 'train')
         X_test_feature, y_test = self._inference(test_loader, model, 'test' if test else 'val')
         return X_train_feature, y_train, X_test_feature, y_test
@@ -118,6 +119,7 @@ class LinearTester():
         return feature_vector, labels_vector
 
     def validate(self):
+        """ Perform cross-validation to select value for l2 regularization constant C."""
         X_train_feature, y_train, X_val_feature, y_val = self.get_features(
             self.train_loader, self.val_loader, self.model, test=False
         )
@@ -134,6 +136,7 @@ class LinearTester():
                 self.best_params['C'] = C
 
     def evaluate(self):
+        """ Fit train+val set with found (/specified) l2 regularization and evaluate on test set."""
         print(f"Best hyperparameters {self.best_params}")
         X_trainval_feature, y_trainval, X_test_feature, y_test = self.get_features(
             self.trainval_loader, self.test_loader, self.model
@@ -144,101 +147,10 @@ class LinearTester():
         return test_score, self.best_params['C']
 
 
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
-
-
-
 # Data classes and functions
 
 def get_dataset(dset, root, split, transform):
     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # try:
-    #     return dset(root, train=(split == 'train'), transform=transform, download=True)
-    # except:
-    #     return dset(root, split=split, transform=transform, download=True)
 
 
 def get_train_valid_loader(dset,
@@ -254,7 +166,7 @@ def get_train_valid_loader(dset,
                            pin_memory=True):
     """
     Utility function for loading and returning train and valid
-    multi-process iterators over the CIFAR-10 dataset.
+    multi-process iterators.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -280,7 +192,6 @@ def get_train_valid_loader(dset,
     assert ((valid_size >= 0) and (valid_size <= 1)), error_msg
 
     normalize = transforms.Normalize(**normalise_dict)
-    # print("Train normaliser:", normalize)
 
     # define transforms
     if hist_norm:
@@ -342,7 +253,7 @@ def get_test_loader(dset,
                     pin_memory=True):
     """
     Utility function for loading and returning a multi-process
-    test iterator over the CIFAR-10 dataset.
+    test iterator.
     If using CUDA, num_workers should be set to 1 and pin_memory to True.
     Params
     ------
@@ -361,7 +272,6 @@ def get_test_loader(dset,
     """
 
     normalize = transforms.Normalize(**normalise_dict)
-    # print("Test normaliser:", normalize)
 
     # define transforms
     if hist_norm:
@@ -418,7 +328,7 @@ LINEAR_DATASETS = {
 
 
 if __name__ == "__main__":
-    
+
 
     parser = argparse.ArgumentParser(description='Evaluate pretrained self-supervised model via logistic regression.')
     parser.add_argument('-m', '--model', type=str, default='byol',
@@ -435,7 +345,7 @@ if __name__ == "__main__":
     args.norm = not args.no_norm
     print(args)
 
-    # histogram normalization
+    # histogram normalization (mimic-chexpert)
     hist_norm = False
     if 'mimic-chexpert' in args.model:
         hist_norm = True
@@ -453,7 +363,7 @@ if __name__ == "__main__":
     dset, data_dir, num_classes, metric = LINEAR_DATASETS[args.dataset]
     # prepare data loaders
     train_loader, val_loader, trainval_loader, test_loader = prepare_data(
-        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm, 
+        dset, data_dir, args.batch_size, args.image_size, normalisation=args.norm,
         hist_norm=hist_norm)
 
 
@@ -474,7 +384,7 @@ if __name__ == "__main__":
     else:
         model = ResNetBackbone(args.model)
         feature_dim = 2048
-    
+
     model = model.to(args.device)
 
 

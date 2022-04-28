@@ -1,15 +1,16 @@
+# This code is modified from: https://github.com/nanxuanzhao/Good_transfer
+
+#!/usr/bin/env python
+# coding: utf-8
+
 import torch
 import torch.nn as nn
 import numpy as np
-from reconstruction.downsampler import Downsampler
-
 
 def add_module(self, module):
     self.add_module(str(len(self) + 1), module)
 
-
 torch.nn.Module.add = add_module
-
 
 class Concat(nn.Module):
     def __init__(self, dim, *args):
@@ -46,37 +47,6 @@ class Concat(nn.Module):
         return len(self._modules)
 
 
-class GenNoise(nn.Module):
-    def __init__(self, dim2):
-        super(GenNoise, self).__init__()
-        self.dim2 = dim2
-
-    def forward(self, input):
-        a = list(input.size())
-        a[1] = self.dim2
-        # print (input.data.type())
-
-        b = torch.zeros(a).type_as(input.data)
-        b.normal_()
-
-        x = torch.autograd.Variable(b)
-
-        return x
-
-
-class Swish(nn.Module):
-    """
-        https://arxiv.org/abs/1710.05941
-    """
-
-    def __init__(self):
-        super(Swish, self).__init__()
-        self.s = nn.Sigmoid()
-
-    def forward(self, x):
-        return x * self.s(x)
-
-
 def act(act_fun='LeakyReLU'):
     '''
         Either string defining an activation function or module (e.g. nn.ReLU)
@@ -84,12 +54,6 @@ def act(act_fun='LeakyReLU'):
     if isinstance(act_fun, str):
         if act_fun == 'LeakyReLU':
             return nn.LeakyReLU(0.2, inplace=True)
-        elif act_fun == 'Swish':
-            return Swish()
-        elif act_fun == 'ELU':
-            return nn.ELU()
-        elif act_fun == 'none':
-            return nn.Sequential()
         else:
             assert False
     else:
@@ -108,9 +72,6 @@ def conv(in_f, out_f, kernel_size, stride=1, bias=True, pad='zero', downsample_m
             downsampler = nn.AvgPool2d(stride, stride)
         elif downsample_mode == 'max':
             downsampler = nn.MaxPool2d(stride, stride)
-        elif downsample_mode in ['lanczos2', 'lanczos3']:
-            downsampler = Downsampler(n_planes=out_f, factor=stride, kernel_type=downsample_mode, phase=0.5,
-                                      preserve_size=True)
         else:
             assert False
 
