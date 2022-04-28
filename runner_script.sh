@@ -160,23 +160,34 @@ python finetune_auc.py -d chexpert -m mimic-cxr_r18_lr_1e-4 --lr 3e-5 --early-st
 ### finetune ###
 python finetune.py -d chexpert -m byol --early-stopping
 python finetune.py -d diabetic_retinopathy -m byol --early-stopping
+
 python finetune.py -d chexpert -m mimic-chexpert_lr_0.1 --early-stopping
 python finetune.py -d chexpert -m mimic-chexpert_lr_1.0 --early-stopping
+
 python finetune.py -d chexpert -m mimic-cxr_d121_lr_1e-4 --early-stopping
+
 python finetune.py -d chexpert -m mimic-cxr_r18 --early-stopping
+
 python finetune.py -d chexpert -m mimic-cxr_r18_lr_1e-4 --early-stopping
+
 python finetune.py -d chexpert -m moco-v2 --early-stopping
 python finetune.py -d diabetic_retinopathy -m moco-v2 --early-stopping
+
 python finetune.py -d chexpert -m pirl --early-stopping
 python finetune.py -d diabetic_retinopathy -m pirl --early-stopping
+
 python finetune.py -d chexpert -m simclr-v1 --early-stopping
 python finetune.py -d diabetic_retinopathy -m simclr-v1 --early-stopping
+
 python finetune.py -d chexpert -m supervised_d121 --early-stopping
 python finetune.py -d diabetic_retinopathy -m supervised_d121 --early-stopping
+
 python finetune.py -d chexpert -m supervised_r18 --early-stopping
 python finetune.py -d diabetic_retinopathy -m supervised_r18 --early-stopping
+
 python finetune.py -d chexpert -m supervised_r50 --early-stopping
 python finetune.py -d diabeteic_retinopathy -m supervised_r50 --early-stopping
+
 python finetune.py -d chexpert -m swav --early-stopping
 python finetune.py -d diabetic_retinopathy -m swav --early-stopping
 
@@ -284,43 +295,53 @@ python -m invariances.invariances --dataset diabetic_retinopathy --model supervi
 
 python -m invariances.invariances --dataset montgomerycxr --model mimic-chexpert_lr_0.01 --transform translation --k None
 python -m invariances.invariances --dataset shenzhencxr --model mimic-chexpert_lr_0.01 --transform translation --k None
+
 python -m invariances.invariances --dataset montgomerycxr --model mimic-chexpert_lr_0.01 --transform rotation --k None
 python -m invariances.invariances --dataset shenzhencxr --model mimic-chexpert_lr_0.01 --transform rotation --k None
 
 python -m invariances.invariances --dataset montgomerycxr --model mimic-cxr_d121_lr_1e-4 --transform translation --k None
 python -m invariances.invariances --dataset shenzhencxr --model mimic-cxr_d121_lr_1e-4 --transform translation --k None
+
 python -m invariances.invariances --dataset montgomerycxr --model mimic-cxr_d121_lr_1e-4 --transform rotation --k None
 python -m invariances.invariances --dataset shenzhencxr --model mimic-cxr_d121_lr_1e-4 --transform rotation --k None
 
 ### linear ###
 python linear.py -d chexpert -m byol --no-norm
 python linear.py -d diabetic_retinopathy -m byol --no-norm
+
 python linear.py -d chexpert -m mimic-chexpert_lr_0.1 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m mimic-chexpert_lr_0.1 --no-norm -b 16
-python linear.py -d chexpert -m mimic-chexpert_lr_0.01 --no-norm -b 16
 
+python linear.py -d chexpert -m mimic-chexpert_lr_0.01 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m mimic-chexpert_lr_0.01 --no-norm -b 16
+
 python linear.py -d chexpert -m mimic-chexpert_lr_1.0 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m mimic-chexpert_lr_1.0 --no-norm -b 16
+
 python linear.py -d chexpert -m mimic-cxr_d121_lr_1e-4 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m mimic-cxr_d121_lr_1e-4 --no-norm -b 16
 
 python linear.py -d chexpert -m mimic-cxr_r18_lr_1e-4 --no-norm
 python linear.py -d diabetic_retinopathy -m mimic-cxr_r18_lr_1e-4 --no-norm
+
 python linear.py -d chexpert -m moco-v2 --no-norm
 python linear.py -d diabetic_retinopathy -m moco-v2 --no-norm
-python linear.py -d chexpert -m pirl --no-norm
 
+python linear.py -d chexpert -m pirl --no-norm
 python linear.py -d diabetic_retinopathy -m pirl --no-norm
+
 python linear.py -d chexpert -m simclr-v1 --no-norm
 python linear.py -d diabetic_retinopathy -m simclr-v1 --no-norm
+
 python linear.py -d chexpert -m supervised_d121 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m supervised_d121 --no-norm -b 16
 
 python linear.py -d chexpert -m supervised_r18 --no-norm -b 16
 python linear.py -d diabetic_retinopathy -m supervised_r18 --no-norm
+
 python linear.py -d chexpert -m supervised_r50 --no-norm
 python linear.py -d diabetic_retinopathy -m supervised_r50 --no-norm
+
 python linear.py -d chexpert -m swav --no-norm
 python linear.py -d diabetic_retinopathy -m swav --no-norm
 
@@ -553,7 +574,6 @@ python saliency.py -d shenzhencxe -m supervised_r18
 python saliency.py -d imagenet -m supervised_r18
 
 python saliency.py -d imagenet -m supervised_r50
-
 
 python saliency.py -d bach -m swav
 python saliency.py -d chestx -m swav
