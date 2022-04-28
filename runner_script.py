@@ -1,4 +1,7 @@
 ### fewshot ###
+from multiprocessing.reduction import DupFd
+
+
 python few_shot.py -d bach -m simclr-v1 --no-norm --n-way 2 --n-support 20
 python few_shot.py -d bach -m swav --n-way 2 --n-support 20
 python few_shot.py -d bach -m byol --n-way 2 --n-support 20
