@@ -1,5 +1,6 @@
 ### fewshot ###
 from multiprocessing.reduction import DupFd
+from socket import send_fds
 
 
 python few_shot.py -d bach -m simclr-v1 --no-norm --n-way 2 --n-support 20
