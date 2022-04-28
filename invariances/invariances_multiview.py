@@ -1,8 +1,5 @@
 # This code is modified from: https://github.com/linusericsson/ssl-invariances/blob/main/eval_synthetic_invariance.py
 
-#!/usr/bin/env python
-# coding: utf-8
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,6 +24,8 @@ from scipy.spatial.distance import mahalanobis
 from datasets.transforms import HistogramNormalize
 from datasets.custom_chexpert_dataset import CustomChexpertDataset
 from datasets.custom_diabetic_retinopathy_dataset import CustomDiabeticRetinopathyDataset 
+
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 
 def D(a, b): # cosine similarity
@@ -77,93 +76,6 @@ def get_train_valid_test_dset(dset,
 
 
 
-# Testing classes and functions
-
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
-
 
 
 
@@ -181,7 +93,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='chexpert', type=str,
                         help='name of the dataset to evaluate on')
-    parser.add_argument('--model', default='default', type=str,
+    parser.add_argument('--model', default='moco-v2', type=str,
                         help='model to evaluate invariance of')
     parser.add_argument('--transform', default='multi_view', type=str,
                         help='transform to evaluate invariance of')
@@ -249,7 +161,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
 
 
-    if os.path.exists(f'./mics/invariances/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
+    if os.path.exists(f'./misc/invariances/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
         print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
         logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
     else:

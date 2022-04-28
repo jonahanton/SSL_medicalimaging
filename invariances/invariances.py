@@ -1,8 +1,5 @@
 # This code is modified from: https://github.com/linusericsson/ssl-invariances/blob/main/eval_synthetic_invariance.py
 
-#!/usr/bin/env python
-# coding: utf-8
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -35,6 +32,8 @@ from datasets.custom_ichallenge_amd_dataset import CustomiChallengeAMDDataset
 from datasets.custom_ichallenge_pm_dataset import CustomiChallengePMDataset
 from datasets.custom_stoic_dataset import CustomStoicDataset
 from datasets.custom_chestx_dataset import CustomChestXDataset
+
+from models.backbones import ResNetBackbone, ResNet18Backbone, DenseNetBackbone
 
 
 
@@ -261,92 +260,6 @@ def get_train_valid_test_dset(dset,
 
 
 
-# Testing classes and functions
-
-class ResNet18Backbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet18(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class ResNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.resnet50(pretrained=False)
-        del self.model.fc
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-
-    def forward(self, x):
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-
-        x = self.model.layer1(x)
-        x = self.model.layer2(x)
-        x = self.model.layer3(x)
-        x = self.model.layer4(x)
-
-        x = self.model.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        return x
-
-
-class DenseNetBackbone(nn.Module):
-    def __init__(self, model_name):
-        super().__init__()
-        self.model_name = model_name
-
-        self.model = models.densenet121(pretrained=False)
-        del self.model.classifier
-
-        state_dict = torch.load(os.path.join('models', self.model_name + '.pth'))
-        self.model.load_state_dict(state_dict)
-
-        self.model.eval()
-        print("Number of model parameters:", sum(p.numel() for p in self.model.parameters()))
-    
-    def forward(self, x):
-        features = self.model.features(x)
-        out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        return out
-
-
 
 
 
@@ -365,8 +278,8 @@ DATASETS = {
     'bach' : [CustomBachDataset, './data/bach'],
     'ichallenge_amd' : [CustomiChallengeAMDDataset, './data/ichallenge_amd'],
     'ichallenge_pm' : [CustomiChallengePMDataset, './data/ichallenge_pm'],
-    'stoic': [CustomStoicDataset, './data/stoic', 2, 'accuracy'],
-    'chestx' : [CustomChestXDataset, './data/chestx', 7, 'accuracy'],
+    'stoic': [CustomStoicDataset, './data/stoic'],
+    'chestx' : [CustomChestXDataset, './data/chestx'],
 }
 
 
@@ -456,7 +369,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
 
 
-    if os.path.exists(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
+    if os.path.exists(f'./misc/invariances/covmatrices/{args.model}_{args.dataset}_feature_cov_matrix.pth'):
         print(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
         logging.info(f'Found precomputed covariance matrix for {args.model} on {args.dataset}, skipping it')
     else:
@@ -485,16 +398,15 @@ if __name__ == "__main__":
         mean_feature = all_features.mean(dim=0)
         cov_matrix = np.cov(all_features, rowvar=False)
 
-        torch.save(mean_feature, f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
-        torch.save(cov_matrix, f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
-
+        torch.save(mean_feature, f'./misc/invariances/covmatrices/{args.model}_{args.dataset}_mean_feature.pth')
+        torch.save(cov_matrix, f'./misc/invariances/covmatrices/{args.model}_{args.dataset}_feature_cov_matrix.pth')
 
     # Calculate invariances
     L = torch.zeros((args.num_images, k))
     S = torch.zeros((args.num_images, k))
 
-    mean_feature = torch.load(f'./invariances/results/{args.model}_{args.dataset}_mean_feature.pth')
-    cov_matrix = torch.load(f'./invariances/results/{args.model}_{args.dataset}_feature_cov_matrix.pth')
+    mean_feature = torch.load(f'./misc/invariances/covmatrices/{args.model}_{args.dataset}_mean_feature.pth')
+    cov_matrix = torch.load(f'./misc/invariances/covmatrices/{args.model}_{args.dataset}_feature_cov_matrix.pth')
     
     epsilon = 1e-6
     cov_matrix = cov_matrix + epsilon * np.eye(cov_matrix.shape[0])
