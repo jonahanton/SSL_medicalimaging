@@ -27,6 +27,9 @@ def plot_dset_acc_vs_attentive_diffusion(transfer_setting, dset):
     '''
     
     setting_dset = transfer_setting + ' ' + dset
+    if dset == 'diabetic retinopathy' or dset == 'chestx':
+        setting_dset += ' (5way)'
+        
     try:
         dset_acc_dict = dict_full_data[setting_dset]
     
