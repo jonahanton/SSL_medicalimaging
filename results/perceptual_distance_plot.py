@@ -72,7 +72,7 @@ def plot_perceptual_distance(dataset):
     colors = ['cornflowerblue', 'royalblue', 'lightskyblue', 'deepskyblue', 'steelblue',
             'orangered', 'lightcoral', 'firebrick',
             'limegreen', 'forestgreen', 'darkgreen', 'springgreen', 'seagreen']
-    g = sns.catplot(x='architecture', y="perceptual_distance", data=new_df, hue='Model', palette=colors)
+    g = sns.catplot(x='architecture', y="perceptual_distance", data=new_df, hue='Model', palette=colors, height = 3)
     plt.ylabel(f"Perceptual Distance")
     plt.title(f'{dataset.capitalize()} reconstruction')
     #plt.show()
