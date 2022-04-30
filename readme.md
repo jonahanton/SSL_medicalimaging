@@ -151,7 +151,7 @@ The data directory should be set up with the following structure:
     
 Links for where to download each dataset are given here:
 [BACH](https://zenodo.org/record/3632035),
-[ChestX](https://www.kaggle.com/nih-chest-xrays/data),
+[ChestX-ray14](https://www.kaggle.com/nih-chest-xrays/data),
 [CheXpert](https://stanfordmlgroup.github.io/competitions/chexpert/),
 [CIFAR10](https://pytorch.org/vision/stable/datasets.html),
 [EyePACS (Diabetic Retinopathy)](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/data),

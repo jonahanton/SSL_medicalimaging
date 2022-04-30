@@ -2,17 +2,40 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from math import isnan
+import scipy
 
 fpath = './full_data.csv'
 df_full_data = pd.read_csv(fpath, index_col = False)
 dict_full_data = df_full_data.set_index('Models').to_dict()
 
-# TO DO:
-# 1. add stoic and imagenet PD to full_data.csv
-# 2. plot for transfer_setting in ['few shot', 'finetune', 'linear'] - DONE
-# 3. plot for transfer_setting == 'average' (i.e average across settings)
-# 4. save plots in relevant directory
-# 5. boxplot ? average over SSL models or datasets?
+dset_names = {'shenzhencxr': 'Shenzhen-CXR',
+            'montgomerycxr': 'Montgomery-CXR',
+            'bach': 'BACH',
+            'iChallengeAMD': 'iChallenge-AMD', 
+            'iChallengePM': 'iChallenge-PM',
+            'chexpert': 'CheXpert', 
+            'stoic': 'STOIC',
+            'diabetic retinopathy': 'Diabetic Retinopathy', 
+            'chestx': 'ChestX'}
+
+models = ["simclrv1","mocov2","swav","byol","pirl","supervised r50",
+            "supervised r18","supervised d121","mimic-chexpert lr=0.01",
+            "mimic-chexpert lr=0.1","mimic-chexpert lr=1.0","mimic-cxr r18",
+            "mimic-cxr d121"] 
+
+ssl_models = ["simclrv1","mocov2","swav","byol","pirl", "mimic-chexpert lr=1.0","mimic-chexpert lr=0.1","mimic-chexpert lr=0.01","mimic-cxr r18","mimic-cxr d121"] 
+supervised_models = ["supervised r50", "supervised r18","supervised d121"]
+
+# Plotting conventions we use across our work
+
+# markers=['o', 'h', 'p','s', 'H', 'X', '*', 'P', '>', 'v', '^', '<', 'd'] 
+markers = {model: 'P' for model in ssl_models}
+markers.update({model: 'H' for model in supervised_models})
+colors = {"simclrv1":'cornflowerblue', "mocov2":'royalblue', "swav":'lightskyblue', "byol":'deepskyblue', "pirl":'steelblue',
+        "supervised r50":'orangered', "supervised r18":'lightcoral', "supervised d121":'firebrick',
+        "mimic-chexpert lr=0.01":'limegreen', "mimic-chexpert lr=0.1":'forestgreen', "mimic-chexpert lr=1.0":'darkgreen', 
+        "mimic-cxr r18":'springgreen', "mimic-cxr d121":'seagreen'}
 
 def mkdir_p(new_path):
     from errno import EEXIST
@@ -25,69 +48,48 @@ def mkdir_p(new_path):
             pass
         else: raise
 
-def plot_dset_acc_vs_pd(transfer_setting, dset_name):
-    '''
-    transfer_setting in ['few shot', 'finetune', 'linear', 'average']
-    dset_name in ['shenzhencxr','montgomerycxr','bach',
-                  'iChallengeAMD', 'iChallengePM','chexpert',
-                  'stoic','diabetic retinopathy (5way)', 
-                  'chestx (5way)', 'cifar10 (2way)']
-    '''
-    if transfer_setting == 'average':
-        try:
-            few_shot_acc_column_name = 'few shot ' + dset_name
-            few_shot_dset_acc_dict = dict_full_data[few_shot_acc_column_name]
+def plot_dset_acc_vs_pd(transfer_setting, dset):
 
-            finetune_acc_column_name = 'finetune ' + dset_name
-            finetune_dset_acc_dict = dict_full_data[finetune_acc_column_name]
+    setting_dset = transfer_setting + ' ' + dset
+    if dset == 'diabetic retinopathy' or dset == 'chestx':
+        setting_dset += ' (5way)'
 
-            linear_acc_column_name = 'linear ' + dset_name
-            linear_dset_acc_dict = dict_full_data[linear_acc_column_name]
-
-            shared_dsets = few_shot_dset_acc_dict.keys() and finetune_dset_acc_dict.keys() and linear_dset_acc_dict.keys()
-            dset_acc_dict = {k: (few_shot_dset_acc_dict[k]+finetune_dset_acc_dict[k]+linear_dset_acc_dict[k])/3 for k in shared_dsets}
-        except KeyError:
-            print('This dataset does not have data for all linear, few-shot and finetune settings.')
-            raise
-
-    else:
-        acc_column_name = transfer_setting + ' ' + dset_name
-        if dset_name in ['diabetic retinopathy','chestx']:
-            acc_column_name += ' (5way)'
+    try:
+        dset_acc_dict = dict_full_data[setting_dset]
         
-        dset_acc_dict = dict_full_data[acc_column_name]
+        for architecture in ['AlexNet', 'VGG', 'SqueezeNet', 'Average']:
 
-    for architecture in ['AlexNet', 'VGG', 'SqueezeNet', 'Average']:
+            PD_column_name = f'perceptual distance {architecture.lower()} {dset}'
+            try:
+                architecture_dict = dict_full_data[PD_column_name]
 
-        PD_column_name = f'perceptual distance {architecture.lower()} {dset_name}'
-        architecture_dict = dict_full_data[PD_column_name]
+                shared_models = dset_acc_dict.keys() and architecture_dict.keys()
+                dict_intersection = {k: (dset_acc_dict[k], architecture_dict[k]) for k in shared_models if not isnan(dset_acc_dict[k]) and not isnan(architecture_dict[k])}
+                new_df = pd.DataFrame.from_dict(dict_intersection, orient='index')
+                new_df = new_df.reset_index(level=0)
+                new_df.columns = ['Models', 'acc', 'perceptual_distance']
 
-        shared_models = dset_acc_dict.keys() and architecture_dict.keys()
-        dict_intersection = {k: (dset_acc_dict[k], architecture_dict[k]) for k in shared_models}
-        new_df = pd.DataFrame.from_dict(dict_intersection, orient='index')
-        new_df = new_df.reset_index(level=0)
-        new_df.columns = ['Models', f'{transfer_setting}', 'perceptual_distance']
-
-        sns.set_style("whitegrid")
-        markers=['P', 'P', 'P','P', 'P', 'H', 'H', 'H', 'P', 'P', 'P', 'P', 'P']  
-        colors = ['cornflowerblue', 'royalblue', 'lightskyblue', 'deepskyblue', 'steelblue',
-                'orangered', 'lightcoral', 'firebrick',
-                'limegreen', 'forestgreen', 'darkgreen', 'springgreen', 'seagreen']
-        g = sns.lmplot(x=f'{transfer_setting}', y="perceptual_distance", hue="Models", data=new_df, fit_reg=False, markers=markers, palette=colors, scatter_kws={"s": 150})
-        sns.regplot(x=f'{transfer_setting}', y="perceptual_distance", data=new_df, scatter=False, ax=g.axes[0, 0])
-        if architecture == 'Average':
-            plt.ylabel("Perceptual Distance")
-        else:
-            plt.ylabel(f"Perceptual Distance ({architecture})")
-        plt.xlabel(f"{transfer_setting.title()} Accuracy")
-        plt.title(dset_name)
-        #plt.show()
-        save_results_to = f'acc_vs_perceptual_dist/{dset_name}/{transfer_setting}/'
-        mkdir_p(save_results_to)
-        plt.savefig(save_results_to + f'acc_vs_PD_{architecture}.jpg', bbox_inches = "tight")
-
+                sns.set_style("darkgrid")
+                markers_style = [markers[model] for model in dict_intersection.keys()]
+                g = sns.lmplot(x='acc', y="perceptual_distance", hue="Models", data=new_df, fit_reg=False, markers=markers_style, palette=colors, scatter_kws={"s": 100}, height=4)
+                sns.regplot(x='acc', y="perceptual_distance", data=new_df, scatter=False, ax=g.axes[0, 0])
+                r, p = scipy.stats.pearsonr(new_df['acc'], new_df['perceptual_distance'])
+                ax = plt.gca()
+                ax.text(.05, .9, 'r={:.2f} \np={:.2g}'.format(r, p), transform=ax.transAxes)
+                plt.ylabel(f"Perceptual Distance ({architecture})")
+                plt.xlabel(f"{transfer_setting.title()} Accuracy")
+                plt.title(dset_names[dset])
+                #plt.show()
+                save_results_to = f'acc_vs_perceptual_dist/{dset}/{transfer_setting}/'
+                mkdir_p(save_results_to)
+                plt.savefig(save_results_to + f'acc_vs_PD_{architecture}.jpg', bbox_inches = "tight")
+            except KeyError:
+                print(f'No data for {architecture} perceptual distance on {dset} dataset.')
+    except KeyError:
+        print(f'No transfer performance data for {setting_dset}.')
 
 
 for dset_name in ['shenzhencxr','montgomerycxr', 'diabetic retinopathy', 'chestx','bach',
                   'iChallengeAMD', 'iChallengePM','chexpert','stoic']:
-    plot_dset_acc_vs_pd('few shot', dset_name)
+    for transfer_setting in ['few shot', 'finetune', 'linear']:
+        plot_dset_acc_vs_pd(transfer_setting, dset_name)
