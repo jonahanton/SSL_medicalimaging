@@ -60,7 +60,7 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
     try:
         dset_acc_dict = dict_full_data[setting_dset]
 
-        for invariance_type in ["multiview"]:   # "rotation", "hflip", "hue", "translation",
+        for invariance_type in ["rotation", "hflip", "hue", "translation","multiview"]:
     
             invariance_type_dset = f'invariance {invariance_type} {dset}'
             try:
@@ -93,11 +93,11 @@ def plot_dset_acc_vs_invariance(transfer_setting, dset):
             except KeyError:
                 print(f'No data for {invariance_type} invariance on {dset} dataset.')
     except KeyError:
-        print(f'No data for {setting_dset}.')
+        print(f'No transfer performance data for {setting_dset}.')
 
-# for dset_name in ['shenzhencxr','montgomerycxr','bach','iChallengeAMD', 'iChallengePM','chexpert',
-#                   'stoic','diabetic retinopathy', 'chestx']:
-#     for transfer_setting in ['few shot', 'finetune', 'linear']:
-#         plot_dset_acc_vs_invariance(transfer_setting, dset_name)
+for dset_name in ['shenzhencxr','montgomerycxr','bach','iChallengeAMD', 'iChallengePM','chexpert',
+                  'stoic','diabetic retinopathy', 'chestx']:
+    for transfer_setting in ['few shot', 'finetune', 'linear']:
+        plot_dset_acc_vs_invariance(transfer_setting, dset_name)
 
-plot_dset_acc_vs_invariance('few shot', 'chexpert')
+#plot_dset_acc_vs_invariance('few shot', 'chexpert')
