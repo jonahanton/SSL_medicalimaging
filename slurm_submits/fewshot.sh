@@ -11,6 +11,8 @@ uptime
 
 cd /vol/bitbucket/g21mscprj03/SSL
 
+
+python few_shot.py -d stoic -m random_r50 --n-way 2 --n-support 20
 # dset=ichallenge_pm
 # n=2
 # python few_shot.py -d $dset -m simclr-v1 --no-norm --n-way $n --n-support 20
@@ -26,14 +28,3 @@ cd /vol/bitbucket/g21mscprj03/SSL
 # python few_shot.py -d $dset -m supervised_r50 --n-way $n --n-support 20
 # python few_shot.py -d $dset -m supervised_r18 --n-way $n --n-support 20
 # python few_shot.py -d $dset -m supervised_d121 --n-way $n --n-support 20
-
-
-dset=chexpert
-n=2
-python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20
-dset=diabetic_retinopathy
-n=5
-python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20
-dset=chestx
-n=5
-python few_shot.py -d $dset -m random_r50 --n-way $n --n-support 20

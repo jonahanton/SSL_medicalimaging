@@ -11,6 +11,7 @@ test.ipynb
 test_dataloading.py
 sample_images
 logs
+tester.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__
