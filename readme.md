@@ -3,9 +3,9 @@ This repository contains the codebase for all experiments for the Software Engin
 Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), [Wan Hee Tang](https://github.com/wh-tang), Venus Cheung, [Mathilde Outters](https://github.com/outters), [Mun Fai Chan](https://github.com/ChanMunFai)
 
 Abstract:
-```
+`
 Self-supervised learning approaches have seen success transferring within domain for medical imaging, however there has been no large scale attempt to compare the transferability of self-supervised models against each other on medical images. In this study, we compare the generalisability of seven self-supervised models, two of which were trained in-domain, against supervised baselines across nine different medical datasets. We find that ImageNet pretrained self-supervised models are more generalisable, and benefit significantly from in-domain training for in-domain downstream tasks. However, this training drastically reduces performance for out-of-domain downstream tasks. Our investigation of the feature representations suggests that this trend may be due to the models learning to focus too heavily on specific areas.
-```
+`
 
 Much of the code is adapted from the codebase for the CVPR 2021 paper [How Well Do Self-Supervised Models Transfer?](https://arxiv.org/abs/2011.13377)
 
