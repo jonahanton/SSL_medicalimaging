@@ -1,5 +1,5 @@
 # How Well Do Self-Supervised Models Transfer to Medical Imaging?
-This repository contains the codebase for all experiments for the Software Engineering Group Project `How Well Do Self-Supervised Models Transfer to Medical Imaging?` (Imperial MSc AI 2022). <br />
+This repository contains the codebase for all experiments for the paper `How Well Do Self-Supervised Models Transfer to Medical Imaging?` published in the Journal of Imaging (avaiable here: https://doi.org/10.3390/jimaging8120320). This paper is based on work performed as part of the MSc Software Engineering Group Project (Imperial MSc AI 2022). <br />
 Authors: [Jonah Anton](https://github.com/jonahanton), [Liam Castelli](https://github.com/mailingliam02), [Wan Hee Tang](https://github.com/WanHeeTang), Venus Cheung, [Mathilde Outters](https://github.com/mathildeoutters), [Mun Fai Chan](https://github.com/ChanMunFai)
 
 Abstract:
