@@ -56,6 +56,7 @@ The code for the deep prior image reconstruction is adapted from the codebase (h
   * [Deep Image Prior](#Deep-Image-Prior)
       * [Perceptual Distance](#Perceptual-Distance)
   * [Invariances](#Invariances)
+  * [Citation](#Citation)
       
 
 # Directory Structure
