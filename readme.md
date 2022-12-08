@@ -282,3 +282,15 @@ B. Compute invariances to different views of the same patient. This is only comp
 python -m invariances.invariances_multiview --dataset diabetic_retinopathy --model swav
 ```
 This will save a log of the run in the filepath `logs/invariances/swav/multi_view/diabetic_retinopathy.log`, containing the cosine similarity and Mahalonobis distance. Note that the files do not already exist (from previous ones), this will compute the covariance matrix and mean feature for the dataset CheXpert with MoCo-v2 and save it to the filepaths `misc/invariances/covmatrices/swav_diabetic_retinopathy_feature_cov_matrix.pth`, `misc/invariances/covmatrices/swav_diabetic_retinopathy_mean_feature.pth` respectively. 
+
+# Citation
+@article{anton2022well,
+  title={How Well Do Self-Supervised Models Transfer to Medical Imaging?},
+  author={Anton, Jonah and Castelli, Liam and Chan, Mun Fai and Outters, Mathilde and Tang, Wan Hee and Cheung, Venus and Shukla, Pancham and Walambe, Rahee and Kotecha, Ketan},
+  journal={Journal of Imaging},
+  volume={8},
+  number={12},
+  pages={320},
+  year={2022},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
